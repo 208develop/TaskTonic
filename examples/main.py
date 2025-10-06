@@ -36,4 +36,6 @@ class myMixDrink(ttFormula):
     def creating_starting_tonics(self):
         MyTonic(-1, dup_at=3)
 
-myMixDrink()
+
+if __name__ == "__main__":
+    myMixDrink()

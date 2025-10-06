@@ -1,10 +1,12 @@
+from TaskTonic import ttCatalyst
 from TaskTonic.ttLedger import ttLedger
-from TaskTonic.ttTonic import ttTonic, ttEssence
+from TaskTonic.ttTonic import ttTonic
+from TaskTonic.ttCatalyst import ttCatalyst
 import pytest, time, queue
 
 
 
-class TonicTester(ttEssence):
+class TonicTester(ttCatalyst):
     """A test harness for ttTonic instances."""
 
     def __init__(self, tonic_class, *args, **kwargs):
@@ -15,10 +17,18 @@ class TonicTester(ttEssence):
         :param args: Positional arguments for the tonic's constructor.
         :param kwargs: Keyword arguments for the tonic's constructor.
         """
-        super().__init__(context=None, name="TonicTester")
-        self.catalyst_queue = queue.Queue()
+        l=ttLedger()
+        l.update_formula({
+            'tasktonic/fixed-id[]/name': 'main_catalyst',  # main_catalyst has always id 0
+            'tasktonic/log/to': 'test',
+        })
+        super().__init__(context=None, name="TonicTester", fixed_id=0)
+
         self.logs = []
         self.tonic = self.bind(tonic_class, *args, **kwargs)
+
+    def start_sparkling(self):
+        pass  # disabled standard sparkling
 
     def log_callback(self, log):
         self.logs.append(log.copy())
@@ -90,7 +100,6 @@ class TonicTester(ttEssence):
 class MyTestTonic(ttTonic):
     def __init__(self, context):
         super().__init__(context, name="TestTonic")
-        # self.ttsc__initialize()
 
     # reroute logger to test context
     def log_push(self):
@@ -153,7 +162,7 @@ def test_initial_log_exists(tester):
 def test_dynamic_initialization_flow(tester):
     """Tests the execution of sparkles queued during __init__."""
     # The queue should contain on_start
-    assert tester.catalyst_queue.qsize() == 1
+    assert tester.catalyst_queue.qsize() == 5
 
     tester.step_till_empty()
 

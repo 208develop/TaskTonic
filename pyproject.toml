@@ -1,0 +1,18 @@
+[project]
+name = "TaskTonic"
+version = "0.0.0"
+authors = [
+    { name = "Peter", email = "208develop@gmail.com" },
+]
+description = "The TaskTonic framework provides powerful, built-in support for concurrency. While it doesn't require you to manage threads, full multi-threading support is available if you need it. Tonics (where a task gets done) are equipped with built-in timers and state machines to help you build complex logic quickly and reliably."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/208develop/TaskTonicc"
+Issues = "https://github.com/208develop/TaskTonic/issues"
