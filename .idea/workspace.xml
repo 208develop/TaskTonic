@@ -4,30 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/TaskTonic.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttEssence.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttFormula.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttLedger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttTonic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_documents/ttDataShare.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_documents/ttTonic.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/test_ttLedger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/test_ttTonic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/test_utils_ttDataShare.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/ttDataShare.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/ttRWLock.py" afterDir="false" />
+    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="minor changes">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttEssence.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttEssence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/ttCatalyst.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/ttCatalyst.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_ttLedger.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +38,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python tests.PyTest all tests.executor": "Run",
     "Python tests.pytest for test_ttTonic.test_static_interface_discovered.executor": "Run",
@@ -77,7 +62,7 @@
       <recent name="G:\Mijn Drive\python projects\TaskTonic" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python tests.PyTest all tests">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TaskTonic" />
       <option name="ENV_FILES" value="" />
@@ -157,6 +142,23 @@
       <option name="presentableId" value="Default" />
       <updated>1758622850626</updated>
     </task>
+    <task id="LOCAL-00001" summary="Bare bone TaskTonic setup, with basic functionality&#10;&#10;U can run main.py in examples or run pytest">
+      <option name="closed" value="true" />
+      <created>1759765620315</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759765620315</updated>
+    </task>
+    <task id="LOCAL-00002" summary="minor changes">
+      <option name="closed" value="true" />
+      <created>1759774241741</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759774241741</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -170,12 +172,17 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Bare bone TaskTonic setup, with basic functionality&#10;&#10;U can run main.py in examples or run pytest" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/examples/main.py</url>
-          <line>38</line>
+          <line>67</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>

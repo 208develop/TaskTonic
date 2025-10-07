@@ -28,15 +28,16 @@ class ttCatalyst(ttTonic):
         """
         # The master queue that all Tonics managed by this Catalyst will use.
         self.catalyst_queue = queue.Queue()
+        self.catalyst = self  # Tonics have to have a catalyst
+        # internals
+        self.sparkling = False
+        self.tonics_sparkling = []
+        self.thread_id = -1
 
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
         super().__init__(context, name, fixed_id)
 
-        # A flag to control the main execution loop in the `sparkle` method.
-        self.sparkling = False
 
-        # A list to keep track of all active Tonics managed by this Catalyst.
-        self.tonics_sparkling = []
 
     def start_sparkling(self):
         """
@@ -61,6 +62,7 @@ class ttCatalyst(ttTonic):
         from the queue and executes them. It runs until the `self.sparkling` flag
         is set to False.
         """
+        self.thread_id = threading.get_ident()
         self.sparkling = True
         timeout = 5  # seconds
 
@@ -79,17 +81,17 @@ class ttCatalyst(ttTonic):
                 # do nothing and let the loop continue. This is normal.
                 pass
 
-    def _ttss__startup_tonic(self, tonic):
+    def _ttss__startup_tonic(self, tonic_id):
         """
         A system-level sparkle called by a Tonic during its initialization
         to register itself with the Catalyst.
 
-        :param tonic: The Tonic instance that is starting up.
+        :param tonic_id: The Tonic id that is starting up.
         """
-        if tonic not in self.tonics_sparkling:
-            self.tonics_sparkling.append(tonic)
+        if tonic_id not in self.tonics_sparkling:
+            self.tonics_sparkling.append(tonic_id)
 
-    def _ttss__tonic_finished(self, tonic):
+    def _ttss__tonic_finished(self, tonic_id):
         """
         A system-level sparkle called by a Tonic when it has completed its
         lifecycle and is shutting down.
@@ -97,10 +99,10 @@ class ttCatalyst(ttTonic):
         If this is the last active Tonic, the Catalyst will initiate its own
         shutdown sequence.
 
-        :param tonic: The Tonic instance that has finished.
+        :param tonic_id: The Tonic instance that has finished.
         """
-        if tonic in self.tonics_sparkling:
-            self.tonics_sparkling.remove(tonic)
+        if tonic_id in self.tonics_sparkling:
+            self.tonics_sparkling.remove(tonic_id)
 
         # If there are no more active tonics, the catalyst's job is done.
         if not self.tonics_sparkling:

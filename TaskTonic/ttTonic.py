@@ -1,10 +1,5 @@
-import inspect
-import re
-import time
-from queue import Queue
-
-# This import should point to your actual ttEssence location
 from TaskTonic.ttEssence import ttEssence
+import re, time, threading, copy
 
 
 class ttTonic(ttEssence):
@@ -34,8 +29,10 @@ class ttTonic(ttEssence):
             self.catalyst = context.catalyst if hasattr(context, 'catalyst') \
                 else self.ledger.get_essence_by_id(0)  # main catalyst
             self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
-            self.catalyst._ttss__startup_tonic(self)
-            self.log(f'Using catalyst {self.catalyst.name}')
+
+            self.log(None, {'catalyst': self.catalyst.name})
+            self.catalyst._ttss__startup_tonic(self.id)
+
 
         # Init internals
         self.finishing = False
@@ -68,7 +65,7 @@ class ttTonic(ttEssence):
 
         # --- Phase 1: Discover all implementations from the class hierarchy (MRO) ---
         specific_impls, generic_impls = {}, {}
-        states, command_names = set(), set()
+        states, sparkle_names = set(), set()
         prefixes_by_cmd = {}
 
         # Iterate through the MRO (Method Resolution Order) in reverse to ensure
@@ -81,21 +78,21 @@ class ttTonic(ttEssence):
                 g_match = general_pattern.match(name)
                 if s_match:
                     # Found a state-specific sparkle (e.g., 'ttsc_waiting__process')
-                    prefix, state_name, cmd_name = s_match.groups()
-                    specific_impls[(prefix, state_name, cmd_name)] = method
+                    prefix, state_name, sp_name = s_match.groups()
+                    specific_impls[(prefix, state_name, sp_name)] = method
                     states.add(state_name)
-                    command_names.add(cmd_name)
-                    prefixes_by_cmd.setdefault(cmd_name, set()).add(prefix)
+                    sparkle_names.add(sp_name)
+                    prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
                 elif g_match:
                     # Found a generic sparkle (e.g., 'ttsc__initialize')
-                    prefix, cmd_name = g_match.groups()
-                    generic_impls[(prefix, cmd_name)] = method
-                    command_names.add(cmd_name)
-                    prefixes_by_cmd.setdefault(cmd_name, set()).add(prefix)
+                    prefix, sp_name = g_match.groups()
+                    generic_impls[(prefix, sp_name)] = method
+                    sparkle_names.add(sp_name)
+                    prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
                     # Specifically find and assign the global handlers
-                    if f"{prefix}__{cmd_name}" == 'ttse__on_enter':
+                    if f"{prefix}__{sp_name}" == 'ttse__on_enter':
                         self._on_enter_handler = method
-                    elif f"{prefix}__{cmd_name}" == 'ttse__on_exit':
+                    elif f"{prefix}__{sp_name}" == 'ttse__on_exit':
                         self._on_exit_handler = method
 
         # --- Phase 2: Build fast lookup tables for states ---
@@ -105,48 +102,62 @@ class ttTonic(ttEssence):
 
         # --- Phase 3: Create and bind all public-facing dispatcher methods ---
         sparkle_list = []
-        for cmd_name in command_names:
-            is_state_aware = any(cmd_name == key[2] for key in specific_impls.keys())
-            for prefix in prefixes_by_cmd[cmd_name]:
-                interface_name = f"{prefix}__{cmd_name}"
+        for sp_name in sparkle_names:
+            is_state_aware = any(sp_name == key[2] for key in specific_impls.keys())
+            for prefix in prefixes_by_cmd[sp_name]:
+                interface_name = f"{prefix}__{sp_name}"
                 sparkle_list.append(interface_name)
 
                 # --- Path A: This is a state-aware command ---
                 if is_state_aware:
                     # For state-aware commands, we build a list of methods, one for each state.
                     handler_list = [self._noop] * num_states
-                    generic_handler = generic_impls.get((prefix, cmd_name))
+                    generic_handler = generic_impls.get((prefix, sp_name))
                     if generic_handler:
                         handler_list = [generic_handler] * num_states
                     for state_idx, state_name in enumerate(self._index_to_state):
-                        specific_handler = specific_impls.get((prefix, state_name, cmd_name))
+                        specific_handler = specific_impls.get((prefix, state_name, sp_name))
                         if specific_handler:
                             handler_list[state_idx] = specific_handler
 
-                    def make_state_dispatcher(_list):
-                        # This dispatcher will select the correct method from the list at runtime.
-                        def dispatcher(self, *args, **kwargs):
-                            handler_method = _list[self.state]
-                            self.catalyst_queue.put((self, handler_method, args, kwargs))
+                    def create_put_state_sparkle(_list, _name):
+                        # Create a state execution that will select the correct method by state from the list at
+                        #  runtime and create the put_state_sparkle to put if on the queue
+                        def create_executer():
+                            def execute_state_sparkle(self, *args, **kwargs):
+                                state_sparkle = _list[self.state]
+                                self.log(None, {'state': self.state})
+                                state_sparkle(self, *args, **kwargs)
+                            execute_state_sparkle.__name__ = _name
+                            return execute_state_sparkle
 
-                        return dispatcher
+                        def put_state_sparkle(self, *args, **kwargs):
+                            if threading.get_ident() != self.catalyst.thread_id:
+                                args = tuple((arg if callable(arg) else copy.deepcopy(arg)) for arg in args)
+                                kwargs = {key: (value if callable(value) else copy.deepcopy(value))
+                                             for key, value in kwargs.items()}
+                            self.catalyst_queue.put((self, create_executer(), args, kwargs))
+                        return put_state_sparkle
 
-                    # Bind the new dispatcher function to the instance, making it a method.
-                    setattr(self, interface_name, make_state_dispatcher(handler_list).__get__(self))
+                    # Bind the new put_state_sparkle function to the instance, making it a method.
+                    setattr(self, interface_name, create_put_state_sparkle(handler_list, interface_name).__get__(self))
 
                 # --- Path B: This is a generic-only command ---
                 else:
-                    handler_method = generic_impls[(prefix, cmd_name)]
+                    handler_method = generic_impls[(prefix, sp_name)]
 
-                    def make_simple_dispatcher(_method):
-                        # This dispatcher always uses the one generic method.
-                        def dispatcher(self, *args, **kwargs):
+                    def create_put_sparkle(_method):
+                        # This put_sparkle always uses the one generic method.
+                        def put_sparkle(self, *args, **kwargs):
+                            if threading.get_ident() != self.catalyst.thread_id:
+                                args = tuple((arg if callable(arg) else copy.deepcopy(arg)) for arg in args)
+                                kwargs = {key: (value if callable(value) else copy.deepcopy(value))
+                                          for key, value in kwargs.items()}
                             self.catalyst_queue.put((self, _method, args, kwargs))
+                        return put_sparkle
 
-                        return dispatcher
-
-                    # Bind the new dispatcher function to the instance, making it a method.
-                    setattr(self, interface_name, make_simple_dispatcher(handler_method).__get__(self))
+                    # Bind the new put_sparkle function to the instance, making it a method.
+                    setattr(self, interface_name, create_put_sparkle(handler_method).__get__(self))
 
         # --- Phase 4: Build fast lookup tables for sparkles ---
         self.sparkles = sorted(sparkle_list)
@@ -194,10 +205,10 @@ class ttTonic(ttEssence):
 
     def __exec_sparkle(self, sparkle_method, *args, **kwargs):
         """
-        sparkle execution in normal mode
+        sparkle execution in running mode
         """
         interface_name = sparkle_method.__name__
-        self.log(None, {'sparkle': interface_name, 'state': self.state})
+        self.log(None, {'sparkle': interface_name})
 
         # Execute the user's actual sparkle code, passing self to bind it.
         sparkle_method(self, *args, **kwargs)
@@ -301,8 +312,8 @@ class ttTonic(ttEssence):
         if not self.bindings:
             self.finished()
         else:
-            for s in self.bindings:
-                s.finish()
+            for ess_id in self.bindings:
+                self.ledger.get_essence_by_id(ess_id).finish()
 
     def _ttss__finish(self):
         if self.finishing: return
@@ -313,20 +324,20 @@ class ttTonic(ttEssence):
         self.ttse__on_finished()  # stop tonic
         self._ttss__on_finished()  # cleanup tonic
 
-    def _ttss__on_binding_finished(self, essence):
-        self.unbind(essence)
+    def _ttss__on_binding_finished(self, ess_id):
+        self.unbind(ess_id)
         if not self.bindings: self.finished()
 
     # convert the static essence to a sparkling tonic
     def finished(self):
         if hasattr(self, 'catalyst'):
-            self.catalyst._ttss__tonic_finished(self)
+            self.catalyst._ttss__tonic_finished(self.id)
         super().finished()
 
     def finish(self):
         if self.finishing: return
         self._ttss__finish()
 
-    def binding_finished(self, essence):
-        self._ttss__on_binding_finished(essence)
+    def binding_finished(self, ess_id):
+        self._ttss__on_binding_finished(ess_id)
 

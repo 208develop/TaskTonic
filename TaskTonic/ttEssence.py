@@ -61,10 +61,10 @@ class ttEssence:
         if not issubclass(essence, ttEssence):
             raise TypeError('Expected an instance of a ttEssence')
         e = essence(self, *args, **kwargs)
-        self.bindings.append(e)
+        self.bindings.append(e.id)
         return e
 
-    def unbind(self, essence):
+    def unbind(self, ess_id):
         """Unbind a child essence (subject) from this essence.
 
         This is typically called when a child essence is finished or destroyed,
@@ -73,11 +73,11 @@ class ttEssence:
         :param essence: The child ttEssence instance to unbind.
         :type essence: ttEssence
         """
-        if essence in self.bindings:
-            self.bindings.remove(essence)
+        if ess_id in self.bindings:
+            self.bindings.remove(ess_id)
 
-    def binding_finished(self, essence):
-        self.unbind(essence)
+    def binding_finished(self, ess_id):
+        self.unbind(ess_id)
 
     def main_essence(self, essence, *args, **kwargs):
         if not issubclass(essence, ttEssence):
@@ -91,8 +91,8 @@ class ttEssence:
         if not self.bindings:
             self.finished()
         else:
-            for s in self.bindings:
-                s.finish()
+            for ess_id in self.bindings:
+                self.ledger.get_essence_by_id(ess_id).finish()
 
     def finished(self):
         """Signals that this essence has completed its lifecycle.
@@ -100,5 +100,5 @@ class ttEssence:
         This method should be called when the essence is finished with its work.
         It notifies its parent context to unregister it as an active subject.
         """
-        if self.context: self.context.binding_finished(self)
+        if self.context: self.context.binding_finished(self.id)
         self.ledger.unregister(self)

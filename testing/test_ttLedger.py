@@ -67,7 +67,7 @@ class TestEssenceLedger:
             'name': '02.ttEssence',
             'type': 'ttEssence',
         }
-        assert ledger.essences[1].bindings[0] == e1
+        assert ledger.essences[1].bindings[0] == e1.id
 
         e1.finished()
         assert len(e.bindings) == 0
