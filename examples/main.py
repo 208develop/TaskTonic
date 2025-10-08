@@ -26,29 +26,23 @@ class MyTonic(ttTonic):
 class MyMachine(ttTonic):
     def ttse__on_start(self):
         self.to_state('init')
-        self.ttsc__stepping()
-
-    def ttsc__stepping(self):
-        self.log('stepping')
-        self.ttsc__step()
-        self.ttsc__step()
-        self.ttsc__step()
-        self.ttsc__step()
-        self.ttsc__step()
-        self.ttsc__step1()
-        self.ttsc__step()
+        self.tmr = self.bind(ttTimerRepeat, 1, name='stepper', sparkle_back=self.ttsc__step)
+        self.log(f'Timer: {self.tmr}')
 
 
     def ttse__on_enter(self):
         self.log(f'Entering state {self.get_current_state_name()}')
 
-    def ttsc_init__step(self):
+
+
+    def ttsc_init__step(self, timer_info):
+        self.log(f'{timer_info}')
         self.to_state('s1')
 
-    def ttsc_s1__step(self): self.to_state('s2')
-    def ttsc_s2__step(self): self.to_state('s3')
-    def ttsc_s3__step1(self): self.to_state('s4')
-    def ttsc_s4__step(self): self.finish()
+    def ttsc_s1__step(self, timer_info): self.to_state('s2')
+    def ttsc_s2__step(self, timer_info): self.to_state('s3')
+    def ttsc_s3__step(self, timer_info): self.to_state('s4')
+    def ttsc_s4__step(self, timer_info): self.finish()
 
 
 class myMixDrink(ttFormula):

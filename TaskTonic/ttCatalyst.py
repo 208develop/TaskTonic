@@ -1,6 +1,5 @@
 from TaskTonic.ttTonic import ttTonic
-import queue
-import threading
+import queue, threading, time
 
 
 class ttCatalyst(ttTonic):
@@ -33,6 +32,7 @@ class ttCatalyst(ttTonic):
         self.sparkling = False
         self.tonics_sparkling = []
         self.thread_id = -1
+        self.timers = []
 
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
         super().__init__(context, name, fixed_id)
@@ -68,6 +68,13 @@ class ttCatalyst(ttTonic):
 
         # The loop continues as long as the Catalyst is in a sparkling state.
         while self.sparkling:
+            if self.timers:
+                reference = time.time()
+                timeout = self.timers[0].check_on_expiration(reference)
+                while  timeout == 0.0:
+                    timeout = self.timers[0].check_on_expiration(reference)
+            else:
+                timeout = 60
             try:
                 # Wait for a work order to appear on the queue.
                 # A timeout is used to prevent blocking forever, allowing the

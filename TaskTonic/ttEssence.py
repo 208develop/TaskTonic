@@ -49,6 +49,15 @@ class ttEssence:
                 'fixed_id': True
             })
 
+    def __str__(self):
+        return f'{self.name} in context {self.context if self.context else -1}'
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __deepcopy__(self, memodict={}):
+        return self
+
     # ledger functionality
     def bind(self, essence, *args, **kwargs):
         """Bind a child essence (subject) to this essence.
@@ -102,3 +111,4 @@ class ttEssence:
         """
         if self.context: self.context.binding_finished(self.id)
         self.ledger.unregister(self)
+        self.id = -1  # finished

@@ -276,7 +276,6 @@ class ttTonic(ttEssence):
         if self._log is None:
             return
 
-        duration = time.time() - self._log['start@']
         sparkle_name = self._log.get('sparkle', '__unknown__')
 
         sparkle_state_idx = self._log.get('state', -1)
@@ -287,7 +286,7 @@ class ttTonic(ttEssence):
 
         flags_to_print = {k: v for k, v in self._log.items() if k not in ['id', 'start@', 'log', 'sparkle', 'state']}
 
-        print(f"[{duration: >7.3f}s] {header} {flags_to_print}")
+        print(f"[{self._log['start@']: >7.3f}s] {header} {flags_to_print}")
         if self._log.get('log'):
             for line in self._log['log']:
                 print(f"    - {line}")
