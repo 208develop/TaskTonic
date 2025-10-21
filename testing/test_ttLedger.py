@@ -31,7 +31,7 @@ class TestEssenceLedger:
 
     def test_ledger_register_essence_fixed_id(self, ledger):
         assert ledger.essences[0].__class__.__name__ == '__FIXED_ID'
-        e = ttEssence(-1, name='Essence0', fixed_id=0)
+        e = ttEssence(name='Essence0', fixed_id=0)
         assert ledger.essences[0] == e
 
         assert ledger.records[0] == {
@@ -43,7 +43,7 @@ class TestEssenceLedger:
         }
 
     def test_ledger_register_essence_fixed_id_str(self, ledger):
-        e = ttEssence(-1, name='Essence1', fixed_id='Essence1')
+        e = ttEssence(name='Essence1', fixed_id='Essence1')
         assert ledger.records[1] == {
             'context_id': -1,
             'fixed_id': True,
@@ -69,7 +69,7 @@ class TestEssenceLedger:
         }
         assert ledger.essences[1].bindings[0] == e1.id
 
-        e1.finished()
+        e1.finish()
         assert len(e.bindings) == 0
         assert ledger.essences[2] is None
         assert ledger.records[2] is None
@@ -78,7 +78,8 @@ class TestEssenceLedger:
 class TestEssence:
     @pytest.fixture(scope='class')
     def essence(self):
-        e = ttEssence(-1)
+        reset_ledger_singleton()
+        e = ttEssence()
         yield e
         reset_ledger_singleton()
 

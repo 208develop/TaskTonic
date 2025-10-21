@@ -1,5 +1,7 @@
+from TaskTonic.ttEssence import ttLog
 from TaskTonic.ttCatalyst import ttCatalyst
 from TaskTonic.ttLedger import ttLedger
+
 import time
 
 class ttFormula():
@@ -8,6 +10,7 @@ class ttFormula():
         self.ledger.update_formula({
             'tasktonic/fixed-id[]/name': 'main_catalyst',  # main_catalyst has always id 0
             'tasktonic/log/to': 'screen',
+            'tasktonic/log/default': ttLog.QUIET,
         })
         self.starting_at = time.time()
 
@@ -28,7 +31,7 @@ class ttFormula():
         return None
 
     def creating_main_catalyst(self):
-        ttCatalyst(-1,'main_catalyst', fixed_id=0)
+        ttCatalyst('main_catalyst', fixed_id=0)
 
     def creating_starting_tonics(self):
         pass

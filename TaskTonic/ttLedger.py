@@ -102,7 +102,7 @@ class ttLedger:
                 raise TypeError('fixed_id must be int or str')
 
             if not isinstance(self.essences[ess_id], self.__FIXED_ID):
-                raise RuntimeError(f'Fixed id {ess_id} has ben taken bij record {self.essences[ess_id].ledger_record}')
+                raise RuntimeError(f'Fixed id {ess_id} has ben taken bij record {self.essences[ess_id].my_record}')
             with self._lock.write_access():
                 self.essences[ess_id] = essence
                 self.records[ess_id] = essence.my_record
@@ -125,11 +125,20 @@ class ttLedger:
         :param essence: The ttEssence instance to unregister.
         :type essence: ttEssence
         """
-        ess_id = essence.id
+        from TaskTonic import ttEssence
+        if isinstance(essence, ttEssence):
+            ess_id = essence.id
+        elif isinstance(essence, int):
+            ess_id = essence
+        elif isinstance(essence, str):
+            ess_id = self.get_id_by_name(essence)
+        else:
+            raise TypeError('essence must be of type ttEssence or int or str')
+
         if ess_id == -1 or ess_id >= len(self.essences) or self.essences[ess_id] is None:
             raise RuntimeError(f"Id '{ess_id}' not found to unregister")
-        essence.id = -1
         with self._lock.write_access():
+            self.essences[ess_id].id = -1
             self.essences[ess_id] = None
             self.records[ess_id] = None
 

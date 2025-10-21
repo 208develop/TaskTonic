@@ -1,8 +1,8 @@
 from TaskTonic import *
 
-class MyTonic(ttTonic):
-    def __init__(self, context, dup_at=0):
-        super().__init__(context)
+class MyProcess(ttTonic):
+    def __init__(self, context=None, dup_at=0):
+        super().__init__(context=context)
         self.dup_at = dup_at
 
     def ttse__on_start(self):
@@ -17,7 +17,7 @@ class MyTonic(ttTonic):
         else:
             if count == self.dup_at:
                 self.log('duplicate')
-                self.bind(MyTonic, dup_at=0)
+                self.bind(MyProcess, dup_at=0)
             self._tts__process(count)
 
     def ttse__on_finished(self):
@@ -26,37 +26,42 @@ class MyTonic(ttTonic):
 class MyMachine(ttTonic):
     def ttse__on_start(self):
         self.to_state('init')
-        self.tmr = self.bind(ttTimerRepeat, 1, name='stepper', sparkle_back=self.ttsc__step)
+        self.tmr = self.bind(ttTimerRepeat, .5, name='stepper', sparkle_back=self.ttsc__step)
         self.log(f'Timer: {self.tmr}')
 
 
     def ttse__on_enter(self):
-        self.log(f'Entering state {self.get_current_state_name()}')
-
-
+        # self.log(f'Entering state {self.get_current_state_name()}')
+        pass
 
     def ttsc_init__step(self, timer_info):
-        self.log(f'{timer_info}')
+        self.log(f'timer info: {timer_info}')
         self.to_state('s1')
 
-    def ttsc_s1__step(self, timer_info): self.to_state('s2')
-    def ttsc_s2__step(self, timer_info): self.to_state('s3')
-    def ttsc_s3__step(self, timer_info): self.to_state('s4')
-    def ttsc_s4__step(self, timer_info): self.finish()
+    def ttsc_s1__step(self, timer_info):
+        self.to_state('s2')
+    def ttsc_s2__step(self, timer_info):
+        self.to_state('s3')
+    def ttsc_s3__step(self, timer_info):
+        self.log('Logging in state 4')
+        self.to_state('s4')
+    def ttsc_s4__step(self, timer_info):
+        self.finish()
 
 
 class myMixDrink(ttFormula):
     def creating_formula(self):
         return {
-
+            'tasktonic/log/to': 'screen',
+            'tasktonic/log/default': 'full',
         }
 
     # def creating_main_catalyst(self):
     #     pass
 
     def creating_starting_tonics(self):
-        # MyTonic(-1, dup_at=3)
-        MyMachine(-1)
+        # MyProcess(dup_at=3)
+        MyMachine()#log_mode='quiet')
 
 if __name__ == "__main__":
     myMixDrink()

@@ -16,7 +16,7 @@ class ttCatalyst(ttTonic):
     'sparkles' from the queue and executes them for the correct tonics
     """
 
-    def __init__(self, context, name=None, fixed_id=None):
+    def __init__(self, name=None, context=None, log_mode=None, fixed_id=None):
         """
         Initializes the Catalyst and its master queue.
 
@@ -35,7 +35,7 @@ class ttCatalyst(ttTonic):
         self.timers = []
 
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
-        super().__init__(context, name, fixed_id)
+        super().__init__(name=name, context=context, log_mode=log_mode, fixed_id=fixed_id)
 
 
 
@@ -68,13 +68,10 @@ class ttCatalyst(ttTonic):
 
         # The loop continues as long as the Catalyst is in a sparkling state.
         while self.sparkling:
-            if self.timers:
-                reference = time.time()
-                timeout = self.timers[0].check_on_expiration(reference)
-                while  timeout == 0.0:
-                    timeout = self.timers[0].check_on_expiration(reference)
-            else:
-                timeout = 60
+            reference = time.time()
+            timeout = 0.0
+            while  timeout == 0.0:
+                timeout = self.timers[0].check_on_expiration(reference) if self.timers else 60
             try:
                 # Wait for a work order to appear on the queue.
                 # A timeout is used to prevent blocking forever, allowing the

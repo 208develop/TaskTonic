@@ -12,7 +12,7 @@ class ttTonic(ttEssence):
     on a queue, which is then processed by an external execution loop.
     """
 
-    def __init__(self, context, name=None, fixed_id=None):
+    def __init__(self, name=None, context=None, log_mode=None, fixed_id=None):
         """
         Initializes the Tonic instance, discovers sparkles, and calls startup methods.
 
@@ -20,9 +20,7 @@ class ttTonic(ttEssence):
         :param name: An optional name for the tonic. Defaults to the class name.
         :param fixed_id: An optional fixed ID for the tonic.
         """
-        super().__init__(context, name, fixed_id)
-        # first, enable logging
-        self._log = None
+        super().__init__(name=name, context=context, log_mode=log_mode, fixed_id=fixed_id)
 
         # bind to catalyst
         if not hasattr(self, 'catalyst_queue'):
@@ -33,7 +31,6 @@ class ttTonic(ttEssence):
             self.log(None, {'catalyst': self.catalyst.name})
             self.catalyst._ttss__startup_tonic(self.id)
 
-
         # Init internals
         self.finishing = False
 
@@ -43,9 +40,11 @@ class ttTonic(ttEssence):
         self._on_enter_handler = self._noop
         self._on_exit_handler = self._noop
         self._sparkle_init()
-        self.log_push()
 
-        # After initialization is complete, queue the synchronous startup sparkles.
+    def _post_init_action(self):
+        super()._post_init_action()
+
+        # After initialization is completed, queue the synchronous startup sparkles.
         if hasattr(self, '_ttss__on_start'):
             self._ttss__on_start()
         if hasattr(self, 'ttse__on_start'):
@@ -57,7 +56,6 @@ class ttTonic(ttEssence):
         the dispatch system, and create the public-facing callable methods. This
         is the core of the Tonic's introspection and setup logic.
         """
-        self.log(None, {'sparkle': '__init__', 'new': True, 'name': self.name})
 
         # Define the regular expressions used to identify different sparkle types.
         state_pattern = re.compile(r'^(ttsc|ttse|tts|_tts|_ttss)_([a-zA-Z0-9_]+)__([a-zA-Z0-9_]+)$')
@@ -166,7 +164,7 @@ class ttTonic(ttEssence):
         self._execute_sparkle = self.__exec_sparkle
 
         # Log the results of the discovery process.
-        self.log(None, {'states': self._index_to_state, 'sparkles': self.sparkles})
+        self.log(system_flags={'states': self._index_to_state, 'sparkles': self.sparkles})
 
     def _noop(self, *args, **kwargs):
         """A do-nothing method used as a default for unbound sparkles."""
@@ -212,29 +210,32 @@ class ttTonic(ttEssence):
 
         # Execute the user's actual sparkle code, passing self to bind it.
         sparkle_method(self, *args, **kwargs)
-        self.log_push()
+        self.log(close_log=True)
 
         # After the sparkle runs, check if a state transition was requested.
         if self._pending_state == -1: return
 
         if self.state != -1:
             # Call the global on_exit handler.
-            self.log(None, {'sparkle': 'ttse__on_exit', 'state': self.state, 'new_state': self._pending_state})
+            self.log(None, {'sparkle': 'ttse__on_exit', 'state': self.state})
             self._on_exit_handler(self)
-            self.log_push()
+            self.log(close_log=True)
 
         if self._pending_state == -99:
+            self.log(system_flags={'state': self.state, 'new_state': None}, close_log=True)
             # stop state machine
             self.state = -1
+            self._pending_state = -1
         else:
             # Officially change the state.
+            self.log(system_flags={'state': self.state, 'new_state': self._pending_state}, close_log=True)
             self.state = self._pending_state
             self._pending_state = -1
 
             # Call the global on_enter handler.
             self.log(None, {'sparkle': 'ttse__on_enter', 'state': self.state})
             self._on_enter_handler(self)
-            self.log_push()
+            self.log(close_log=True)
 
     def __exec_system_sparkle(self, sparkle_method, *args, **kwargs):
         """
@@ -254,43 +255,6 @@ class ttTonic(ttEssence):
         if self.state == -1:
             return "None"
         return self._index_to_state[self.state]
-
-    def log(self, line, flags=None):
-        """
-        Adds a text line and optional flags to the current log entry.
-
-        :param line: The string message to log, or None.
-        :param flags: A dictionary of flags to add to the log entry.
-        """
-        if self._log is None:
-            self._log = {'start@': time.time(), 'log': []}
-        if line:
-            self._log['log'].append(line)
-        if isinstance(flags, dict):
-            self._log.update(flags)
-
-    def log_push(self):
-        """
-        Formats and prints the collected log entry for an event, then resets it.
-        """
-        if self._log is None:
-            return
-
-        sparkle_name = self._log.get('sparkle', '__unknown__')
-
-        sparkle_state_idx = self._log.get('state', -1)
-        header = f"{self.name}"
-        if sparkle_state_idx >= 0:
-            header += f"[{self._index_to_state[sparkle_state_idx]}]"
-        header += f".{sparkle_name}"
-
-        flags_to_print = {k: v for k, v in self._log.items() if k not in ['id', 'start@', 'log', 'sparkle', 'state']}
-
-        print(f"[{self._log['start@']: >7.3f}s] {header} {flags_to_print}")
-        if self._log.get('log'):
-            for line in self._log['log']:
-                print(f"    - {line}")
-        self._log = None
 
     # standard tonic sparkle
     def ttse__on_start(self):
@@ -325,6 +289,7 @@ class ttTonic(ttEssence):
 
     def _ttss__on_binding_finished(self, ess_id):
         self.unbind(ess_id)
+        self.ledger.unregister(ess_id)
         if not self.bindings: self.finished()
 
     # convert the static essence to a sparkling tonic

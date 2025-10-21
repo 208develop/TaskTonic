@@ -17,12 +17,16 @@ class TonicTester(ttCatalyst):
         :param args: Positional arguments for the tonic's constructor.
         :param kwargs: Keyword arguments for the tonic's constructor.
         """
+
+        # replaces code in ttFormula, to init the catalyst for testing
         l=ttLedger()
         l.update_formula({
             'tasktonic/fixed-id[]/name': 'main_catalyst',  # main_catalyst has always id 0
+            'tasktonic/log/default': 'full',
             'tasktonic/log/to': 'test',
         })
-        super().__init__(context=None, name="TonicTester", fixed_id=0)
+
+        super().__init__(name="TonicTester", fixed_id=0)
 
         self.logs = []
         self.tonic = self.bind(tonic_class, *args, **kwargs)
@@ -98,14 +102,15 @@ class TonicTester(ttCatalyst):
 # --- Example Tonic to be Tested ---
 
 class MyTestTonic(ttTonic):
-    def __init__(self, context):
-        super().__init__(context, name="TestTonic")
+    def __init__(self, context=None):
+        super().__init__(name="TestTonic", context=context)
+        self.log_push = self._log_push # overwrite log push for testing
 
     # reroute logger to test context
-    def log_push(self):
-        if self._log is None: return
-        self.context.log_callback(self._log)
-        self._log = None
+    def _log_push(self, log):
+        if log is None: return
+        self.context.log_callback(log)
+
 
     def ttse__on_start(self):
         self.log("MyTonic has started!")
@@ -154,8 +159,17 @@ def test_initial_log_exists(tester):
     """Tests if the initialization log was captured."""
     init_log = tester.get_log(0)  # Get the first log
     assert init_log is not None
-    assert init_log.get('sparkle') == '__init__'
-    assert init_log.get('name') == 'TestTonic'
+    sys = init_log.get('sys')
+    assert sys is not None
+    assert sys.get('created') == True
+    assert sys.get('name') == 'TestTonic'
+    assert sys.get('type') == 'MyTestTonic'
+    assert sys.get('states') == ['finished', 'processing', 'waiting']
+    assert 'tts__step1' in sys.get('sparkles')
+    assert 'ttsc__process' in sys.get('sparkles')
+    assert 'ttsc__reset' in sys.get('sparkles')
+    assert 'ttse__on_finished' in sys.get('sparkles')
+    assert 'ttse__on_start' in sys.get('sparkles')
 
 
 # --- Dynamic Tests ---

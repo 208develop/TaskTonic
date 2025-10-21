@@ -4,14 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="minor changes">
+    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="feat(ttTonic, ttCatalyst): added deepcopy dat sparkle args en kwargs when called from another tread. Also changed to binding with ID to avoid sending instances with deep copy issues&#10;&#10;fix(ttTonic): For a state denpending sparkle the state was check when de sparkle was put in the queue. Now it is checked when state is executing">
+      <change afterPath="$PROJECT_DIR$/TaskTonic/ttLoggers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TaskTonic/ttLoggers/ttScreenLogger.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_documents/on_start.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/TrafficLigthSimulationByGemini.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttEssence.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttEssence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttFormula.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttFormula.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLedger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTimer.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTimer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_documents/ttCatalyst.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/ttCatalyst.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testing/test_ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_ttLedger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_ttTonic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,9 +51,11 @@
     "Python tests.PyTest all tests.executor": "Run",
     "Python tests.pytest for test_ttTonic.test_static_interface_discovered.executor": "Run",
     "Python tests.pytest in testLedger.py.executor": "Run",
+    "Python tests.pytest in test_stuf_to_trow_away.py.executor": "Run",
     "Python tests.pytest in test_ttTonic.py.executor": "Run",
     "Python tests.pytest in test_utils_ttDataShare.py.executor": "Run",
     "Python.main.executor": "Run",
+    "Python.py_to_test_stuf_and_trow_away.executor": "Run",
     "Python.testLedger.executor": "Run",
     "Python.ttDataShare.executor": "Run",
     "Python.ttLedger.executor": "Run",
@@ -158,7 +168,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759774241741</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="feat(ttTonic, ttCatalyst): added deepcopy dat sparkle args en kwargs when called from another tread. Also changed to binding with ID to avoid sending instances with deep copy issues&#10;&#10;fix(ttTonic): For a state denpending sparkle the state was check when de sparkle was put in the queue. Now it is checked when state is executing">
+      <option name="closed" value="true" />
+      <created>1759854696389</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1759854696389</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -175,17 +193,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Bare bone TaskTonic setup, with basic functionality&#10;&#10;U can run main.py in examples or run pytest" />
     <MESSAGE value="minor changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
+    <MESSAGE value="feat(ttTonic, ttCatalyst): added deepcopy dat sparkle args en kwargs when called from another tread. Also changed to binding with ID to avoid sending instances with deep copy issues&#10;&#10;fix(ttTonic): For a state denpending sparkle the state was check when de sparkle was put in the queue. Now it is checked when state is executing" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(ttTonic, ttCatalyst): added deepcopy dat sparkle args en kwargs when called from another tread. Also changed to binding with ID to avoid sending instances with deep copy issues&#10;&#10;fix(ttTonic): For a state denpending sparkle the state was check when de sparkle was put in the queue. Now it is checked when state is executing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/examples/main.py</url>
-          <line>67</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint suspend="NONE" type="python-exception">
           <properties exception="BaseException" />
