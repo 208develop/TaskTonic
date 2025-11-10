@@ -78,5 +78,5 @@ self.catalyst = context.catalyst if hasattr(context, 'catalyst') else ...
 self.catalyst_queue = self.catalyst.catalyst_queue
 
 # It then registers itself with the catalyst as an active component.
-self.catalyst._ttss__startup_tonic(self.id)
+self.catalyst._ttss__bind_tonic_to_catalyst(self.id)
 ```

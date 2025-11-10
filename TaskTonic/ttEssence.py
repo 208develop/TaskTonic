@@ -1,17 +1,73 @@
-from TaskTonic.ttLedger import ttLedger
+from .ttLedger import ttLedger
 import time, enum
 
-class __PostInitMeta(type):
+
+class __ttEssenceMeta(type):
     """
-        A metaclass that runs a post_init_action hook after the
-        instance's __init__ (of the most derived class) has completed.
+    Metaclass for the ttEssence framework.
+
+    This metaclass intercepts the creation of all ttEssence subclasses
+    to provide two key functionalities:
+
+    1.  Post-Initialization Hook: It calls an `_init_post_action` method
+        on the instance *after* its `__init__` has successfully completed.
+    2.  Service (Singleton) Management: It checks for a `service` kwarg
+        or a `_tt_is_service` class attribute. If found, it ensures
+        that only one instance of that service (identified by its name)
+        is ever created. It guarantees that `__init__` and `_init_post_action`
+        run only once for the service, but calls `_init_service` on *every* access.
+        *BE AWARE*: when creating a new instance of the service in the context of another service,
+        the service wil be finished (for everyone) when that context is deleted. It's better to create
+        a new instance of the service from your formula.
     """
+
     def __call__(cls, *args, **kwargs):
-        instance = super().__call__(*args, **kwargs)
-        instance._post_init_action()
+        """
+        Called when an instance of a class (e.g., ttEssence()) is created.
+
+        This method contains the core logic for routing between standard
+        instance creation and service/singleton retrieval.
+        """
+        service_name = kwargs.pop('service', None)
+        if service_name is None:
+            service_name = getattr(cls, '_tt_is_service', None)
+        is_service = service_name is not None
+
+        if not is_service:
+            # --- STANDARD PATH (NON-SINGLETON) ---
+            instance = super().__call__(*args, **kwargs)
+            instance._init_post_action()
+            return instance
+
+        # --- SERVICE PATH (SINGLETON) ---
+        ledger = ttLedger()
+
+        existing_instance = ledger.get_service_essence(service_name)
+        kwargs['name'] = service_name
+
+        if existing_instance is None:
+            # --- CREATE NEW SERVICE (RUNS ONCE) ---
+            instance = super().__call__(*args, **kwargs)
+            ledger.update_record(instance.id, {'service': service_name})
+            instance.service_context = []
+            instance._init_post_action()
+        else:
+            # --- RETURN EXISTING SERVICE  and add context to service_context list ---
+            instance = existing_instance
+            context = kwargs.pop('context', None)
+            context = context if isinstance(context, ttEssence) \
+                else ledger.get_essence_by_id(context) if isinstance(context, int) \
+                else None
+            instance.service_context.append(context)
+
+        # Call _init_service EVERY TIME (if it exists)
+        if hasattr(instance, '_init_service'):
+            instance._init_service(*args, **kwargs)
+
         return instance
 
-class ttEssence(metaclass=__PostInitMeta):
+
+class ttEssence(metaclass=__ttEssenceMeta):
     """A base class for all active components within the TaskTonic framework.
 
     Each 'Essence' represents a distinct, addressable entity with its own
@@ -19,26 +75,30 @@ class ttEssence(metaclass=__PostInitMeta):
     registers itself with the central ttLedger upon creation to receive a unique ID.
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, fixed_id=None):
-        """Initializes a new ttEssence instance.
+    def __init__(self, name=None, context=None, log_mode=None, **kwargs):
+        """
+        Initializes a new ttEssence instance.
 
         This constructor establishes the essence's context, registers it with the
         ledger to obtain a unique ID, determines its name, and registers itself
         as a subject of its parent context.
 
+        :param name: An optional name for this essence. If not provided, a name
+                     will be generated based on its ID and class name.
+        :type name: str, optional
         :param context: The parent context for this essence. Can be another
                         ttEssence instance, an ID of an existing essence (integer),
                         or None or -1 for a top-level essence.
         :type context: ttEssence or int or None
-        :param name: An optional name for this essence. If not provided, a name
-                     will be generated based on its ID and class name.
-        :type name: str, optional
-        :param fixed_id: An optional fixed ID (integer or string name) to assign
-                         to this essence. This is used for essences that need a
-                         predictable, static identifier.
-        :type fixed_id: int or str, optional
+        :param log_mode: The initial logging mode for this essence.
+        :type log_mode: ttLog, str, or int, optional
+        :param kwargs: Catches any additional keyword arguments, allowing
+                       subclasses to accept their own parameters
+                       (e.g., `srv_api_key`) without breaking this
+                       base class `__init__`.
         """
-        self.ledger = ttLedger()  # is singleton class, so the ledger is shared within the whole project
+
+        self.ledger = ttLedger()  # is singleton class, so the ledger is shared
         self.my_record = {}  # record to add to ledger
 
         self.context = context if isinstance(context, ttEssence) \
@@ -46,39 +106,70 @@ class ttEssence(metaclass=__PostInitMeta):
             else None
 
         self.bindings = []
-        self.id = self.ledger.register(self, fixed_id)
+        self.id = self.ledger.register(self)
         self.name = name if isinstance(name, str) else f'{self.id:02d}.{self.__class__.__name__}'
+        self.finishing = False
         self.my_record.update({
             'id': self.id,
             'name': self.name,
             'type': self.__class__.__name__,
             'context_id': self.context.id if self.context else -1,
         })
-        if fixed_id is not None:
-            self.my_record.update({
-                'fixed_id': True,
-            })
 
         # first, enable logging
         self._logger = None
-        self._log_mode = None
-        self._log = None
-        if log_mode is None:
-            log_mode = self.context._log_mode if self.context else \
-                       self.ledger.formula.get('tasktonic/log/default', ttLog.STEALTH) if self.ledger.formula else \
-                       ttLog.STEALTH
-        log_mode = ttLog.from_any(log_mode)
-        self.set_log_mode(log_mode)
+        log_to = self.ledger.formula.get('tasktonic/log/to', None)
+        if getattr(self, '_tt_force_stealth_logging', False) or log_to is None:
+            # Essence is forcing stealth mode or nog log_to set, so also no logservice needed
+            self.set_log_mode(ttLog.STEALTH)
+            self._log_mode = ttLog.STEALTH
+        else:
+            services = self.ledger.formula.get('tasktonic/log/services', [])
+            for service in services:
+                if service.get('name', '') == log_to:
+                    s_kwargs = service.get('arguments', {})
+                    self._logger = self.bind(service.get('service'), *(), **s_kwargs)
+                    break
+
+            if self._logger is None:
+                raise RuntimeError(f'Log to service "{log_to}" not supported.')
+
+            self._log = None
+            if log_mode is None:
+                log_mode = self.context._log_mode if self.context \
+                    else self.ledger.formula.get('tasktonic/log/default', ttLog.STEALTH) if self.ledger.formula \
+                    else ttLog.STEALTH
+            self.set_log_mode(ttLog.from_any(log_mode))
+            self._log_mode = log_mode
+
         self.log(system_flags={'created': True})
         self.log(system_flags=self.my_record)
 
-    def _post_init_action(self):
+    def _init_post_action(self):
+        """
+        A post-initialization hook called by the metaclass.
+
+        This method is guaranteed to run *after* __init__ has completed.
+        It is used to init your process (ie. start statemachine) if everything
+        is ready.
+        """
         # these parameter may be changed, so update
         self.my_record.update({
             'name': self.name,
             'context_id': self.context.id if self.context else -1,
         })
         self.log(system_flags=self.my_record, close_log=True)
+
+    def _init_service(self, *args, **kwargs):
+        """
+        A hook called by the metaclass *every time* a service is accessed.
+
+        Subclasses can override this method to capture context-specific
+        parameters (from kwargs) each time they are requested.
+
+        This method is intentionally a pass-through in the base class.
+        """
+        pass
 
     def __str__(self):
         return f'TaskTonic {self.name} in context {self.context.name if self.context else -1}'
@@ -93,14 +184,25 @@ class ttEssence(metaclass=__PostInitMeta):
     def bind(self, essence, *args, **kwargs):
         """Bind a child essence (subject) to this essence.
 
-        Called to bind create, start and bind an essence.
+        Called to create, start, and bind an essence as a child
+        of the current context.
 
-        :param essence: The child ttEssence instance to register.
-        :type essence: ttEssence
+        :param essence: The ttEssence *class* to instantiate.
+        :type essence: type
+        :param args: Positional arguments for the new essence's __init__.
+        :param kwargs: Keyword arguments for the new essence's __init__.
+        :return: The newly created and bound essence instance.
+        :rtype: ttEssence
         """
-        if not issubclass(essence, ttEssence):
-            raise TypeError('Expected an instance of a ttEssence')
-        e = essence(*args, context=self, **kwargs)
+        if isinstance(essence, ttEssence):
+            e = essence
+            if e.context != self:
+                raise RuntimeError(f"Cannot bind essence where context is not self (but {e.context})")
+        elif issubclass(essence, ttEssence):
+            e = essence(*args, context=self, **kwargs)
+        else:
+            raise TypeError('Expected a class reference or an instance of a ttEssence')
+
         self.bindings.append(e.id)
         return e
 
@@ -110,58 +212,116 @@ class ttEssence(metaclass=__PostInitMeta):
         This is typically called when a child essence is finished or destroyed,
         allowing the parent to remove it from its list of active bindings.
 
-        :param essence: The child ttEssence instance to unbind.
-        :type essence: ttEssence
+        :param ess_id: The ID of the child ttEssence instance to unbind.
+        :type ess_id: int
         """
         if ess_id in self.bindings:
             self.bindings.remove(ess_id)
 
     def binding_finished(self, ess_id):
-        self.unbind(ess_id)
+        """
+        Callback method for when a bound child essence has finished.
 
-    def main_essence(self, essence, *args, **kwargs):
-        if not issubclass(essence, ttEssence):
-            raise TypeError('Expected an instance of a ttEssence')
-        e = essence(None, *args, **kwargs)
-        return e
+        Args:
+            ess_id (int): The ID of the child essence that has finished.
+        """
+        self.unbind(ess_id)
+        if self.finishing and not self.bindings:
+            self._finished()  # finished, when finishing and no bindings left
 
     # standard essence functionality
-    def finish(self):
-        if not self.bindings:
-            self.finished()
-        else:
-            for ess_id in self.bindings:
-                self.ledger.get_essence_by_id(ess_id).finish()
+    def finish(self, from_context=None):
+        """
+        Starts the shutdown process for this essence.
 
-    def finished(self):
+        If the essence has active bindings (children), it will
+        instruct them to finish first. If not, it will call
+        `self.finished()` immediately.
+        """
+        if self.finishing: return  # essence is already finishing
+        from_context = from_context if from_context else self
+
+        if self._finish_service_context(from_context):
+            #TODO: Now a service is stopped when no service context is left.
+            #  Consider implementing the possibility to maintain te service, wait for new service context
+            if len(self.service_context) > 0:
+                return
+
+        self.finishing = True
+        self._finish()
+
+    def _finish_service_context(self, from_context=None):
+        if from_context is not None and hasattr(self, 'service_context') and from_context in self.service_context:
+            # Finishing service connection
+            self.service_context.remove(from_context)
+            try:
+                event = getattr(self, 'ttse__on_service_context_finished')
+                event(from_context.id, len(self.service_context))
+            except AttributeError: pass
+            try:
+                event = getattr(from_context, f'ttse__on_{self.name}_finished')
+                event()
+            except AttributeError: pass
+            try:
+                event = getattr(from_context, 'binding_finished')
+                event(self.id)
+            except AttributeError: pass
+            return True
+        return False
+
+    def _finish(self):
+        # finish the essence (or Tonic)
+        if not self.bindings:
+            self._finished()
+        else:
+            for ess_id in self.bindings.copy():
+                ess = self.ledger.get_essence_by_id(ess_id)
+                ess.finish(from_context=self)
+
+    def _finished(self):
         """Signals that this essence has completed its lifecycle.
 
         This method should be called when the essence is finished with its work.
-        It notifies its parent context to unregister it as an active subject.
+        It notifies its parent context (if it has one) to unbind it.
+        It then unregisters itself from the ledger.
         """
         self.log(system_flags={'finished': True})
-        if self.context:
-            self.context.binding_finished(self.id)
-            self.ledger.unregister(self.id)
-        else:
-            self.ledger.unregister(self.id)
-        self.id = -1  # finished
 
+        service_context = self.service_context if hasattr(self, 'service_context') else []
+        for sc in service_context:
+            try:
+                event = getattr(sc, f'ttse__on_{self.name}_finished')
+                event()
+            except AttributeError: pass
+            try:
+                event = getattr(sc, f'binding_finished')
+                event(self.id)
+            except AttributeError:
+                pass
+
+        if self.context: self.context.binding_finished(self.id)
+
+        self.ledger.unregister(self.id)
+        self.id = -1  # finished
 
     # create logger functions for ttLog to overwrite
     def log(self, line=None, flags=None, system_flags=None, close_log=False):
         """
         Adds a text line and/or (system) flags to the current log entry.
-        A log entry is created when empty en sent and closed when close_log is active.
-        This is a placeholder and will be altered to the current log_mode
+
+        A log entry is created on the first call and sent/closed when
+        `close_log` is true. This method is a placeholder and will be
+        dynamically replaced by `set_log_mode` to point to the correct
+        log handler (e.g., `_log_full`, `_log_stealth`).
 
         :param line: The string message to log.
         :param flags: A dictionary of flags to add to the log entry.
-        :param system_flags: A dictionary of system flags to add to the log entry.
-        :param close_log: When true, this log entry will be sent for display and then closed
+        :param system_flags: A dictionary of system flags to add.
+        :param close_log: When true, send the log entry and clear it.
         """
 
     def _log_full(self, line=None, flags=None, system_flags=None, close_log=False):
+        """Internal log handler for the FULL log mode."""
         if self._log is None: self._log = {'id': self.id, 'start@': time.time(), 'log': []}
         if system_flags: self._log.setdefault('sys', {}).update(system_flags)
         if flags: self._log.update(flags)
@@ -171,6 +331,7 @@ class ttEssence(metaclass=__PostInitMeta):
             self._log = None
 
     def _log_quiet(self, line=None, flags=None, system_flags=None, close_log=False):
+        """Internal log handler for the QUIET log mode."""
         if self._log is None: self._log = {'id': self.id, 'start@': time.time(), 'log': []}
         if system_flags: self._log.setdefault('sys', {}).update(system_flags)
         if flags: self._log.update(flags)
@@ -181,6 +342,7 @@ class ttEssence(metaclass=__PostInitMeta):
             self._log = None
 
     def _log_off(self, line=None, flags=None, system_flags=None, close_log=False):
+        """Internal log handler for the OFF log mode (lifecycle only)."""
         if system_flags:
             if self._log is None: self._log = {'id': self.id, 'start@': time.time()}
             self._log.setdefault('sys', {}).update(system_flags)
@@ -189,56 +351,49 @@ class ttEssence(metaclass=__PostInitMeta):
             self._log = None
 
     def _log_stealth(self, line=None, flags=None, system_flags=None, close_log=False):
+        """Internal log handler for the STEALTH log mode (does nothing)."""
         pass
 
     def set_log_mode(self, log_mode):
+        """
+        Sets the logging function for this essence instance.
+
+        This method "patches" `self.log` to point directly to the
+        correct internal log handler (e.g., `_log_full`, `_log_stealth`)
+        based on the selected mode for maximum performance.
+
+        Args:
+            log_mode (ttLog or str or int): The desired log mode.
+        """
         log_mode = ttLog.from_any(log_mode)
-        self._log_mode = log_mode
-        if log_mode == ttLog.STEALTH:   self.log = self._log_stealth
-        elif log_mode == ttLog.OFF:     self.log = self._log_off
-        elif log_mode == ttLog.QUIET:   self.log = self._log_quiet
-        elif log_mode == ttLog.FULL:    self.log = self._log_full
-        else:raise NotImplementedError(f"Log mode '{log_mode.name}' is not implemented in ttEssence.set_log_mode.")
+        if log_mode == ttLog.STEALTH:
+            self.log = self._log_stealth
+        elif log_mode == ttLog.OFF:
+            self.log = self._log_off
+        elif log_mode == ttLog.QUIET:
+            self.log = self._log_quiet
+        elif log_mode == ttLog.FULL:
+            self.log = self._log_full
+        else:
+            raise NotImplementedError(f"Log mode '{log_mode.name}' is not implemented in ttEssence.set_log_mode.")
 
     def _log_push(self, log):
         """
-        Formats and prints the collected log entry for an event, then resets it.
+        Internal helper to push the completed log dictionary to the logger.
+        Includes a safeguard against a non-existent logger.
+
+        Args:
+            log (dict): The log entry to push.
         """
-        if log.get('new'):
-            pass
-        sparkle_name = self._log.get('sparkle', '')
-        sparkle_state_idx = self._log.get('state', -1)
-
-        l_id = log.get('id', -1)
-        ts = log['start@']
-        lt = time.localtime(ts)
-        l_time_start = f'{time.strftime("%H%M%S", lt)}.{int((ts - int(ts)) * 1000):03d}'
-
-        header = f"{self.name}"
-        if sparkle_state_idx >= 0:
-            header += f"[{self._index_to_state[sparkle_state_idx]}]"
-        header += f".{sparkle_name}"
-
-        dont_print_flags = []#'id', 'start@', 'log', 'sparkle', 'state', 'sparkles', 'states']
-        flags_to_print = {k: v for k, v in self._log.items() if k not in dont_print_flags}
-
-        print(f"[{l_time_start}] {l_id:02d} - {header:.<45} {flags_to_print}")
-        if l_states := log.get('states'):
-            print(f"{16 * ' '}== STATES: |", end='')
-            for state in l_states: print(f" {state} |", end='')
-            print()
-        if l_sparkles := log.get('sparkles'):
-            print(f"{16 * ' '}== SPARKLES: |", end='')
-            for sparkle in l_sparkles:
-                if not sparkle.startswith('_ttss'): print(f" {sparkle} |", end='')
-            print()
-
-        if log.get('log'):
-            for line in log['log']:
-                print(f"{16 * ' '}- {line}")
+        # Safeguard: Do nothing if no logger is attached
+        if self._logger:
+            self._logger.put_log(log)
 
 
 class ttLog(enum.IntEnum):
+    """
+    Defines the available logging verbosity levels for an essence.
+    """
     STEALTH = enum.auto()  # No logging at all
     OFF = enum.auto()  # Logs lifecycle, creating and finishing of Essence
     QUIET = enum.auto()  # + Logs sparkles, only if log line is given
@@ -247,7 +402,18 @@ class ttLog(enum.IntEnum):
     @classmethod
     def from_any(cls, value):
         """
-        Converts a string, int, or existing ttLog instance into a ttLog member.
+        Converts a string, int, or existing ttLog instance
+        into a ttLog member.
+
+        Args:
+            value (any): The input to convert (e.g., "QUIET", 2).
+
+        Returns:
+            ttLog: The corresponding enum member.
+
+        Raises:
+            ValueError: If the string or int does not match a valid member.
+            TypeError: If the input type is not convertible.
         """
         if isinstance(value, cls):
             return value

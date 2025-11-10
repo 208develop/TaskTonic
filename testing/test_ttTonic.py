@@ -1,5 +1,6 @@
 from TaskTonic import ttCatalyst
 from TaskTonic.ttLedger import ttLedger
+from TaskTonic.ttEssence import ttEssence
 from TaskTonic.ttTonic import ttTonic
 from TaskTonic.ttCatalyst import ttCatalyst
 import pytest, time, queue
@@ -17,25 +18,36 @@ class TonicTester(ttCatalyst):
         :param args: Positional arguments for the tonic's constructor.
         :param kwargs: Keyword arguments for the tonic's constructor.
         """
+        # make sure logs exits before starting framework
+        self.logs = []
 
         # replaces code in ttFormula, to init the catalyst for testing
         l=ttLedger()
-        l.update_formula({
-            'tasktonic/fixed-id[]/name': 'main_catalyst',  # main_catalyst has always id 0
-            'tasktonic/log/default': 'full',
-            'tasktonic/log/to': 'test',
-        })
+        l.update_formula((
+            ('tasktonic/log/to', 'test'),
+            ('tasktonic/log/default', 'full'),
+            ('tasktonic/log/services[]/name', 'test'),
+            ('tasktonic/log/services[-1]/service', self.ttTestLogger),
+            ('tasktonic/log/services[-1]/arguments', {}),
+        ))
 
-        super().__init__(name="TonicTester", fixed_id=0)
-
-        self.logs = []
+        super().__init__(name="TonicTester")
         self.tonic = self.bind(tonic_class, *args, **kwargs)
+
+    class ttTestLogger:
+
+        # def __init__(self, name=None, context=None, log_mode=None, **kwargs):
+        #     super().__init__(name, context, log_mode, **kwargs)
+
+        def __init__(self, *args, **kwargs):
+            l = ttLedger()
+            self.tester = l.get_essence_by_name('TonicTester')
+
+        def put_log(self, log):
+            self.tester.logs.append(log.copy())
 
     def start_sparkling(self):
         pass  # disabled standard sparkling
-
-    def log_callback(self, log):
-        self.logs.append(log.copy())
 
     def get_sparkles(self):
         """Returns the discovered interface of the tonic."""
@@ -49,9 +61,12 @@ class TonicTester(ttCatalyst):
         """Returns the name of the tonic under test."""
         return self.tonic.name
 
-    def get_log(self, index=-1):
+    def get_log(self, index=-1, filter_id=-1):
         """Returns a captured log entry by index."""
         if self.logs:
+            if filter_id >=0:
+                filtered_list = [d for d in self.logs if d['id'] == filter_id]
+                return filtered_list[index]
             return self.logs[index]
         return None
 
@@ -105,12 +120,6 @@ class MyTestTonic(ttTonic):
     def __init__(self, context=None):
         super().__init__(name="TestTonic", context=context)
         self.log_push = self._log_push # overwrite log push for testing
-
-    # reroute logger to test context
-    def _log_push(self, log):
-        if log is None: return
-        self.context.log_callback(log)
-
 
     def ttse__on_start(self):
         self.log("MyTonic has started!")
@@ -184,7 +193,7 @@ def test_dynamic_initialization_flow(tester):
     assert tester.tonic.get_current_state_name() == 'waiting'
 
     # Check the last log entry, which should be the on_enter for 'waiting'
-    last_log = tester.get_log(-1)
+    last_log = tester.get_log(-1, filter_id=tester.tonic.id)
     assert last_log.get('sparkle') == 'ttse__on_enter'
     assert last_log.get('state') == tester.tonic.state
 

@@ -1,5 +1,5 @@
-from utils.ttRWLock import RWLock
-from utils.ttDataShare import DataShare
+from TaskTonic.utils.ttRWLock import RWLock
+from TaskTonic.utils.ttDataShare import DataShare
 
 
 class ttLedger:
@@ -12,9 +12,6 @@ class ttLedger:
     _lock = RWLock()
     _instance = None
     _singleton_init_done = False
-
-    class __FIXED_ID(object):  # used to temperately fill up fixed id instance
-        pass
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -31,12 +28,10 @@ class ttLedger:
             self.records = [] # ledger records by id
             self.essences = [] # direct acces to essence instance by id
             self.formula = None
-            self.logger = None
             self._singleton_init_done = True
 
     def update_formula(self, formula, val=None):
-        """Updates the application's formula and pre-allocates fixed ID slots.
-
+        """Updates the application's formula
 
         :param formula: The application definition object, typically a DataShare
                         instance containing configuration.
@@ -50,71 +45,34 @@ class ttLedger:
                 self.formula = DataShare()
             self.formula.set(formula, val)
 
-            for i, fixed_id in enumerate(self.formula.get('tasktonic/fixed-id')):
-                l = len(self.records)
-                if l > i:
-                    fixed_essence = self.records[i]
-                    if not isinstance(fixed_essence, self.__FIXED_ID) \
-                            and not (
-                            isinstance(fixed_essence, ttEssence) and fixed_essence.my_record.get('fixed_id', False)):
-                        raise RuntimeError(f'Ledger record {i}, is already occupied by none fixed id essence')
-                elif l == i:
-                    self.records.append(None)
-                    self.essences.append(self.__FIXED_ID())  # fill temperately with empty FixedId object)
-                    self.records[i] = {
-                        'id': i,
-                        'fixed_id': True,
-                        'name': self.formula.get(f'tasktonic/fixed-id[{i}]/name'),
-                        'type': 'TEMP_OBJECT',
-                        'context_id': -1,
-                    }
+    def update_record(self, ess_id, data):
+        if 0 > ess_id >= len(self.records) or self.essences[ess_id] is None:
+            raise RuntimeError(f"Essence ID {ess_id} does not exist")
+        with self._lock.write_access():
+            self.records[ess_id].update(data)
 
-    def register(self, essence, fixed_id=None):
+    def register(self, essence):
         from TaskTonic.ttEssence import ttEssence
         """Registers a ttEssence instance and assigns it a unique ID.
 
-        This method handles both dynamic ID assignment (finding the next available
-        slot) and fixed ID assignment based on the provided `fixed_id`.
-
         :param essence: The ttEssence instance to be registered.
         :type essence: ttEssence
-        :param fixed_id: An optional fixed identifier. Can be an integer for a
-                         specific ID slot or a string name defined in the formula.
-        :type fixed_id: int or str, optional
-        :raises TypeError: If `essence` is not a ttEssence instance or `fixed_id`
-                           is of an invalid type.
-        :raises RuntimeError: If a fixed ID is requested that is already taken by
-                              a non-fixed ID essence, or if a named fixed ID is not found.
+
+        :raises TypeError: If `essence` is not a ttEssence instance 
         :return: The unique integer ID assigned to the essence.
         :rtype: int
         """
         if not isinstance(essence, ttEssence):
             raise TypeError('essence must be of type ttEssence')
 
-        if fixed_id is not None:
-            if isinstance(fixed_id, int):
-                ess_id = fixed_id
-            elif isinstance(fixed_id, str):
-                ess_id = self.get_id_by_name(fixed_id)
-                if ess_id == -1:
-                    raise RuntimeError(f"Fixed id '{fixed_id}' not found")
-            else:
-                raise TypeError('fixed_id must be int or str')
-
-            if not isinstance(self.essences[ess_id], self.__FIXED_ID):
-                raise RuntimeError(f'Fixed id {ess_id} has ben taken bij record {self.essences[ess_id].my_record}')
-            with self._lock.write_access():
+        with self._lock.write_access():
+            try:
+                ess_id = self.essences.index(None)
                 self.essences[ess_id] = essence
-                self.records[ess_id] = essence.my_record
-        else:
-            with self._lock.write_access():
-                try:
-                    ess_id = self.essences.index(None)
-                    self.essences[ess_id] = essence
-                except ValueError:
-                    ess_id = len(self.essences)
-                    self.essences.append(essence)
-                    self.records.append(essence.my_record)
+            except ValueError:
+                ess_id = len(self.essences)
+                self.essences.append(essence)
+                self.records.append(essence.my_record)
         return ess_id
 
     def unregister(self, essence):
@@ -134,7 +92,6 @@ class ttLedger:
             ess_id = self.get_id_by_name(essence)
         else:
             raise TypeError('essence must be of type ttEssence or int or str')
-
         if ess_id == -1 or ess_id >= len(self.essences) or self.essences[ess_id] is None:
             raise RuntimeError(f"Id '{ess_id}' not found to unregister")
         with self._lock.write_access():
@@ -152,7 +109,7 @@ class ttLedger:
         """
         with self._lock.read_access():
             for record in self.records:
-                if record['name'] == name:
+                if record and record.get('name', '') == name:
                     return record['id']
         return -1
 
@@ -166,7 +123,7 @@ class ttLedger:
         """
         with self._lock.read_access():
             for record in self.records:
-                if record['name'] == name:
+                if record and record.get('name', '') == name:
                     return self.essences[record['id']]
         return None
 
@@ -179,5 +136,19 @@ class ttLedger:
         :rtype: ttEssence or None
         """
         with self._lock.read_access():
-            if id >= len(self.essences): return None
+            if id < 0 or id >= len(self.essences): return None
             return self.essences[id]
+
+    def get_service_essence(self, service):
+        """Retrieves a ttEssence instance by its service name.
+
+        :param service: The name of the service of the essence to retrieve.
+        :type service: str
+        :return: The ttEssence instance, or None if not found.
+        :rtype: ttEssence or None
+        """
+        with self._lock.read_access():
+            for record in self.records:
+                if record and record.get('service', '') == service:
+                    return self.essences[record['id']]
+        return None

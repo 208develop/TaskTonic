@@ -16,7 +16,7 @@ class ttCatalyst(ttTonic):
     'sparkles' from the queue and executes them for the correct tonics
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, fixed_id=None):
+    def __init__(self, name=None, context=None, log_mode=None):
         """
         Initializes the Catalyst and its master queue.
 
@@ -35,8 +35,10 @@ class ttCatalyst(ttTonic):
         self.timers = []
 
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
-        super().__init__(name=name, context=context, log_mode=log_mode, fixed_id=fixed_id)
+        super().__init__(name=name, context=context, log_mode=log_mode)
 
+        if self.id > 0: # id 0 (main catalyst) will be started in formula
+            self.start_sparkling()
 
 
     def start_sparkling(self):
@@ -50,8 +52,9 @@ class ttCatalyst(ttTonic):
             # If this is the main Catalyst, run its loop in the current thread.
             self.sparkle()
         else:
-            # For other Catalysts, spawn a new background thread for the loop.
-            # todo, TESTING of threaded mode is required.
+            # For other Catalysts, spawn a new background thread for the loop or wait when application is starting up
+            if self.ledger.formula.get('tasktonic/project/status', 'starting') == 'starting':
+                return  # dont startup jet, will be done just before main_catalyst starts sparkling
             threading.Thread(target=self.sparkle).start()
 
     def sparkle(self):
@@ -71,7 +74,7 @@ class ttCatalyst(ttTonic):
             reference = time.time()
             timeout = 0.0
             while  timeout == 0.0:
-                timeout = self.timers[0].check_on_expiration(reference) if self.timers else 60
+                timeout = self.timers[0].check_on_expiration(reference) if self.timers else 2
             try:
                 # Wait for a work order to appear on the queue.
                 # A timeout is used to prevent blocking forever, allowing the
@@ -85,7 +88,7 @@ class ttCatalyst(ttTonic):
                 # do nothing and let the loop continue. This is normal.
                 pass
 
-    def _ttss__startup_tonic(self, tonic_id):
+    def _ttss__bind_tonic_to_catalyst(self, tonic_id):
         """
         A system-level sparkle called by a Tonic during its initialization
         to register itself with the Catalyst.
@@ -95,7 +98,7 @@ class ttCatalyst(ttTonic):
         if tonic_id not in self.tonics_sparkling:
             self.tonics_sparkling.append(tonic_id)
 
-    def _ttss__tonic_finished(self, tonic_id):
+    def _ttss__remove_tonic_from_catalyst(self, tonic_id):
         """
         A system-level sparkle called by a Tonic when it has completed its
         lifecycle and is shutting down.
@@ -112,12 +115,17 @@ class ttCatalyst(ttTonic):
         if not self.tonics_sparkling:
             self.finish()
 
-    def finished(self):
+    def _ttss__main_catalyst_finished(self):
+        # Default: Stop when main catalyst is finished. You can override this method for other behavior
+        self.finish()
+
+    def _finished(self):
         """
         Overrides the base method to stop the Catalyst's execution loop
         after the standard shutdown procedure is complete.
         """
-        super().finished()
+        super()._finished()
         # Setting this flag to False will cause the `sparkle` loop to terminate.
         self.sparkling = False
+
 

@@ -12,7 +12,7 @@ class ttTonic(ttEssence):
     on a queue, which is then processed by an external execution loop.
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, fixed_id=None):
+    def __init__(self, name=None, context=None, log_mode=None):
         """
         Initializes the Tonic instance, discovers sparkles, and calls startup methods.
 
@@ -20,7 +20,7 @@ class ttTonic(ttEssence):
         :param name: An optional name for the tonic. Defaults to the class name.
         :param fixed_id: An optional fixed ID for the tonic.
         """
-        super().__init__(name=name, context=context, log_mode=log_mode, fixed_id=fixed_id)
+        super().__init__(name=name, context=context, log_mode=log_mode)
 
         # bind to catalyst
         if not hasattr(self, 'catalyst_queue'):
@@ -29,10 +29,7 @@ class ttTonic(ttEssence):
             self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
 
             self.log(None, {'catalyst': self.catalyst.name})
-            self.catalyst._ttss__startup_tonic(self.id)
-
-        # Init internals
-        self.finishing = False
+            self.catalyst._ttss__bind_tonic_to_catalyst(self.id)
 
         # Discover all sparkles and build the execution system.
         self.state = -1  # Start with no state (-1)
@@ -41,8 +38,8 @@ class ttTonic(ttEssence):
         self._on_exit_handler = self._noop
         self._sparkle_init()
 
-    def _post_init_action(self):
-        super()._post_init_action()
+    def _init_post_action(self):
+        super()._init_post_action()
 
         # After initialization is completed, queue the synchronous startup sparkles.
         if hasattr(self, '_ttss__on_start'):
@@ -243,7 +240,7 @@ class ttTonic(ttEssence):
         """
         interface_name = sparkle_method.__name__
         if interface_name.startswith('_ttss') \
-        or interface_name in ['ttse__on_finished', 'ttse__on_exit']:
+        or interface_name in ['ttse__on_finished', 'ttse__on_exit', 'ttse__on_service_context_finished']:
             self.__exec_sparkle(sparkle_method, *args, **kwargs)
 
     def get_current_state_name(self):
@@ -265,43 +262,49 @@ class ttTonic(ttEssence):
         """Event sparkle for user-defined cleanup logic (conceptual)."""
         pass
 
+
     # --- System Lifecycle Sparkles ---
     def _ttss__on_start(self):
         """System-level sparkle for internal framework setup."""
         pass
 
-    def _ttss__on_finished(self):
-        """System-level sparkle for final cleanup (conceptual)."""
-        if not self.bindings:
-            self.finished()
-        else:
-            for ess_id in self.bindings:
-                self.ledger.get_essence_by_id(ess_id).finish()
+    # convert the static essence to a sparkling tonic
+    def _finished(self):
+        if hasattr(self, 'catalyst'):
+            self.catalyst._ttss__remove_tonic_from_catalyst(self.id)
+        super()._finished()
 
-    def _ttss__finish(self):
+    def finish(self, from_context=None):
+        # Finish on tonic level, will first stop the tonic, and after that finish admin in the essence
         if self.finishing: return
+        self._ttss__finish(from_context if from_context else self)
+
+    def _ttss__finish(self, from_context=None):
+        if self.finishing: return
+
+        if self._finish_service_context(from_context):
+            # TODO: Now a service is stopped when no service context is left.
+            #  Consider implementing the possibility to maintain te service, wait for new service context
+            if len(self.service_context) > 0:
+                return
+
         self.finishing = True
-        # --- patch the _execute_sparkle function to finish mode, only exec system sparkles ---
+
+        # --- patch the _execute_sparkle function to finish mode, only executing system sparkles ---
         self._execute_sparkle = self.__exec_system_sparkle
+
+        # stop the tonic
         if self.state != -1: self.to_state(-99)  # stop state machine if active
         self.ttse__on_finished()  # stop tonic
-        self._ttss__on_finished()  # cleanup tonic
+        self._ttss__on_finished(from_context)  # cleanup tonic
 
-    def _ttss__on_binding_finished(self, ess_id):
-        self.unbind(ess_id)
-        self.ledger.unregister(ess_id)
-        if not self.bindings: self.finished()
-
-    # convert the static essence to a sparkling tonic
-    def finished(self):
-        if hasattr(self, 'catalyst'):
-            self.catalyst._ttss__tonic_finished(self.id)
-        super().finished()
-
-    def finish(self):
-        if self.finishing: return
-        self._ttss__finish()
+    def _ttss__on_finished(self, from_context=None):
+        """System-level sparkle for final cleanup."""
+        super()._finish()  # finish at essence level
 
     def binding_finished(self, ess_id):
         self._ttss__on_binding_finished(ess_id)
+
+    def _ttss__on_binding_finished(self, ess_id):
+        super().binding_finished(ess_id) # call the static admin method
 

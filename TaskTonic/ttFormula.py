@@ -1,17 +1,26 @@
-from TaskTonic.ttEssence import ttLog
-from TaskTonic.ttCatalyst import ttCatalyst
-from TaskTonic.ttLedger import ttLedger
+from .ttEssence import ttLog
+from .ttCatalyst import ttCatalyst
+from .ttLedger import ttLedger
 
 import time
 
 class ttFormula():
     def __init__(self):
         self.ledger = ttLedger()
-        self.ledger.update_formula({
-            'tasktonic/fixed-id[]/name': 'main_catalyst',  # main_catalyst has always id 0
-            'tasktonic/log/to': 'screen',
-            'tasktonic/log/default': ttLog.QUIET,
-        })
+
+        from .ttLoggers.ttScreenLogger import ttLogService, ttScreenLogService
+        self.ledger.update_formula((
+            ('tasktonic/project/name', 'tasktonic app'),
+            ('tasktonic/project/started@', time.time()),
+            ('tasktonic/project/status', 'starting'),
+            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/default', ttLog.QUIET),
+            ('tasktonic/log/services[]/name', 'off'),
+            ('tasktonic/log/services[-1]/service', ttLogService), # base class, without logging
+            ('tasktonic/log/services[]/name', 'screen'),
+            ('tasktonic/log/services[-1]/service', ttScreenLogService),
+            ('tasktonic/log/services[-1]/arguments', {}),
+        ))
         self.starting_at = time.time()
 
         self.update_formula(self.creating_formula())
@@ -22,7 +31,19 @@ class ttFormula():
 
         self.creating_starting_tonics()
 
+        self.ledger.update_formula('tasktonic/project/status', 'start_catalysts')
+        for essence in self.ledger.essences[1:].copy(): # must be copied, because threads get started and ledger can be changed
+            if isinstance(essence, ttCatalyst):
+                essence.start_sparkling()
+
+        self.ledger.update_formula('tasktonic/project/status', 'main_running')
         main_catalyst.start_sparkling()
+        self.ledger.update_formula('tasktonic/project/status', 'main_finished')
+
+        # notify unfinished catalysts in ledger records
+        for essence in self.ledger.essences[1:].copy():
+            if hasattr(essence, '_ttss__main_catalyst_finished'):
+                essence._ttss__main_catalyst_finished()
 
     def update_formula(self, formula):
         self.ledger.update_formula(formula)
@@ -31,7 +52,7 @@ class ttFormula():
         return None
 
     def creating_main_catalyst(self):
-        ttCatalyst('main_catalyst', fixed_id=0)
+        ttCatalyst(name='main_catalyst')
 
     def creating_starting_tonics(self):
         pass

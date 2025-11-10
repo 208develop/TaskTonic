@@ -27,12 +27,12 @@ class ttTimer(ttEssence):
     def __str__(self):
         return super().__str__() + f', expires in {self.expire - time.time():3.3f}sec'
 
-    def finished(self):
+    def _finished(self):
         """
         Overrides the base method to stop the timer
         """
         self.stop()
-        super().finished()
+        super()._finished()
         self.log(close_log=True)  # force log close, needed because of special (not Tonic) flow
 
     def start(self):

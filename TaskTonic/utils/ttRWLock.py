@@ -23,7 +23,7 @@ class RWLock:
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             self._rw_lock._release_read()
-            return True
+            return False
 
     # noinspection PyProtectedMember
     class WriteAccessContext:
@@ -35,7 +35,7 @@ class RWLock:
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             self._rw_lock._release_write()
-            return True
+            return False
 
     def __init__(self):
         self.version = 0

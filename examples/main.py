@@ -1,4 +1,5 @@
 from TaskTonic import *
+from TaskTonic.ttLoggers import ttScreenLogService
 
 class MyProcess(ttTonic):
     def __init__(self, context=None, dup_at=0):
@@ -23,12 +24,14 @@ class MyProcess(ttTonic):
     def ttse__on_finished(self):
         self.log('Finished')
 
-class MyMachine(ttTonic):
+class MyMachine(ttCatalyst):
     def ttse__on_start(self):
         self.to_state('init')
         self.tmr = self.bind(ttTimerRepeat, .5, name='stepper', sparkle_back=self.ttsc__step)
         self.log(f'Timer: {self.tmr}')
 
+    def _ttss__main_catalyst_finished(self):
+        pass # compleets catalyst after main catalyst stopped
 
     def ttse__on_enter(self):
         # self.log(f'Entering state {self.get_current_state_name()}')
@@ -60,7 +63,7 @@ class myMixDrink(ttFormula):
     #     pass
 
     def creating_starting_tonics(self):
-        # MyProcess(dup_at=3)
+        MyProcess(dup_at=3)
         MyMachine()#log_mode='quiet')
 
 if __name__ == "__main__":
