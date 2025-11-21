@@ -1,5 +1,5 @@
-from .ttLedger import ttLedger
-import time, enum
+
+import time
 
 
 class __ttEssenceMeta(type):
@@ -28,6 +28,7 @@ class __ttEssenceMeta(type):
         This method contains the core logic for routing between standard
         instance creation and service/singleton retrieval.
         """
+        from .ttLedger import ttLedger
         service_name = kwargs.pop('service', None)
         if service_name is None:
             service_name = getattr(cls, '_tt_is_service', None)
@@ -58,6 +59,8 @@ class __ttEssenceMeta(type):
             context = context if isinstance(context, ttEssence) \
                 else ledger.get_essence_by_id(context) if isinstance(context, int) \
                 else None
+            if context is None:
+                raise RuntimeError(f"Context can't be None in service_context")
             instance.service_context.append(context)
 
         # Call _init_service EVERY TIME (if it exists)
@@ -97,7 +100,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
                        (e.g., `srv_api_key`) without breaking this
                        base class `__init__`.
         """
-
+        from .ttLedger import ttLedger
         self.ledger = ttLedger()  # is singleton class, so the ledger is shared
         self.my_record = {}  # record to add to ledger
 
@@ -118,29 +121,34 @@ class ttEssence(metaclass=__ttEssenceMeta):
 
         # first, enable logging
         self._logger = None
-        log_to = self.ledger.formula.get('tasktonic/log/to', None)
-        if getattr(self, '_tt_force_stealth_logging', False) or log_to is None:
-            # Essence is forcing stealth mode or nog log_to set, so also no logservice needed
-            self.set_log_mode(ttLog.STEALTH)
-            self._log_mode = ttLog.STEALTH
-        else:
+        self._log_mode = None
+        self._log = None
+        log_to = self.ledger.formula.get('tasktonic/log/to', 'off')
+
+        # Main Catalyst has to start logging service
+        from .ttLogger import ttLogService, ttLog
+        if self.id == 0 and log_to != 'off':
+            log_service = None
             services = self.ledger.formula.get('tasktonic/log/services', [])
             for service in services:
                 if service.get('name', '') == log_to:
                     s_kwargs = service.get('arguments', {})
-                    self._logger = self.bind(service.get('service'), *(), **s_kwargs)
+                    log_service = service.get('service')(*(), **s_kwargs)  ## startup logger service
                     break
+            if log_service is None: raise RuntimeError(f'Log to service "{log_to}" not supported.')
 
-            if self._logger is None:
-                raise RuntimeError(f'Log to service "{log_to}" not supported.')
+        # Set logger service and log_mode
+        if getattr(self, '_tt_force_stealth_logging', False) or log_to == 'off':
+            # Essence is forcing stealth mode or no log_to set, so also no logservice needed
+            self.set_log_mode(ttLog.STEALTH)
+        else:
+            self._logger = self.bind(ttLogService)
 
-            self._log = None
             if log_mode is None:
                 log_mode = self.context._log_mode if self.context \
                     else self.ledger.formula.get('tasktonic/log/default', ttLog.STEALTH) if self.ledger.formula \
                     else ttLog.STEALTH
-            self.set_log_mode(ttLog.from_any(log_mode))
-            self._log_mode = log_mode
+            self.set_log_mode(log_mode)
 
         self.log(system_flags={'created': True})
         self.log(system_flags=self.my_record)
@@ -196,8 +204,10 @@ class ttEssence(metaclass=__ttEssenceMeta):
         """
         if isinstance(essence, ttEssence):
             e = essence
-            if e.context != self:
-                raise RuntimeError(f"Cannot bind essence where context is not self (but {e.context})")
+            service_context = e.service_context if hasattr(e, 'service_context') else []
+            if e.context != self and self not in service_context:
+                raise RuntimeError(f"Add context to essence to bind! "
+                                   f"({e.__class__.__name__} context: {e.context} / service_context: {service_context})")
         elif issubclass(essence, ttEssence):
             e = essence(*args, context=self, **kwargs)
         else:
@@ -365,17 +375,15 @@ class ttEssence(metaclass=__ttEssenceMeta):
         Args:
             log_mode (ttLog or str or int): The desired log mode.
         """
+        from .ttLogger import ttLog
+        log_implementations = [self._log_stealth, self._log_off, self._log_quiet, self._log_full]
         log_mode = ttLog.from_any(log_mode)
-        if log_mode == ttLog.STEALTH:
-            self.log = self._log_stealth
-        elif log_mode == ttLog.OFF:
-            self.log = self._log_off
-        elif log_mode == ttLog.QUIET:
-            self.log = self._log_quiet
-        elif log_mode == ttLog.FULL:
-            self.log = self._log_full
-        else:
+        self._log_mode = log_mode
+        try:
+            self.log = log_implementations[log_mode]
+        except IndexError:
             raise NotImplementedError(f"Log mode '{log_mode.name}' is not implemented in ttEssence.set_log_mode.")
+
 
     def _log_push(self, log):
         """
@@ -388,46 +396,3 @@ class ttEssence(metaclass=__ttEssenceMeta):
         # Safeguard: Do nothing if no logger is attached
         if self._logger:
             self._logger.put_log(log)
-
-
-class ttLog(enum.IntEnum):
-    """
-    Defines the available logging verbosity levels for an essence.
-    """
-    STEALTH = enum.auto()  # No logging at all
-    OFF = enum.auto()  # Logs lifecycle, creating and finishing of Essence
-    QUIET = enum.auto()  # + Logs sparkles, only if log line is given
-    FULL = enum.auto()  # + Logs sparkles, always
-
-    @classmethod
-    def from_any(cls, value):
-        """
-        Converts a string, int, or existing ttLog instance
-        into a ttLog member.
-
-        Args:
-            value (any): The input to convert (e.g., "QUIET", 2).
-
-        Returns:
-            ttLog: The corresponding enum member.
-
-        Raises:
-            ValueError: If the string or int does not match a valid member.
-            TypeError: If the input type is not convertible.
-        """
-        if isinstance(value, cls):
-            return value
-
-        if isinstance(value, str):
-            try:
-                return cls[value.upper()]
-            except KeyError:
-                raise ValueError(f"'{value}' is not a valid name for {cls.__name__}")
-
-        if isinstance(value, int):
-            try:
-                return cls(value)
-            except ValueError:
-                raise ValueError(f"'{value}' is not a valid value for {cls.__name__}")
-
-        raise TypeError(f"Cannot convert type '{type(value).__name__}' to {cls.__name__}")

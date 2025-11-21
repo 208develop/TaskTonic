@@ -1,4 +1,4 @@
-from TaskTonic.ttTonic import ttTonic
+from .ttTonic import ttTonic
 import queue, threading, time
 
 
@@ -27,6 +27,7 @@ class ttCatalyst(ttTonic):
         """
         # The master queue that all Tonics managed by this Catalyst will use.
         self.catalyst_queue = queue.Queue()
+        self.extra_sparkles = []
         self.catalyst = self  # Tonics have to have a catalyst
         # internals
         self.sparkling = False
@@ -72,21 +73,20 @@ class ttCatalyst(ttTonic):
         # The loop continues as long as the Catalyst is in a sparkling state.
         while self.sparkling:
             reference = time.time()
-            timeout = 0.0
-            while  timeout == 0.0:
-                timeout = self.timers[0].check_on_expiration(reference) if self.timers else 2
+            next_timer_expire = 0.0
+            while next_timer_expire == 0.0:
+                next_timer_expire = self.timers[0].check_on_expiration(reference) if self.timers else 60
             try:
-                # Wait for a work order to appear on the queue.
-                # A timeout is used to prevent blocking forever, allowing the
-                # loop to periodically check the `self.sparkling` flag.
-                instance, sparkle, args, kwargs = self.catalyst_queue.get(timeout=timeout)
-
-                # Call the central executor on the target tonic instance.
+                instance, sparkle, args, kwargs = self.catalyst_queue.get(timeout=next_timer_expire)
                 instance._execute_sparkle(sparkle, *args, **kwargs)
-            except queue.Empty:
-                # If the queue is empty for the duration of the timeout,
-                # do nothing and let the loop continue. This is normal.
-                pass
+                while self.extra_sparkles:
+                    instance, sparkle, args, kwargs = self.extra_sparkles.pop(0)
+                    instance._execute_sparkle(sparkle, *args, **kwargs)
+            except queue.Empty: pass
+
+    def _execute_extra_sparkle(self, instance, sparkle, *args, **kwargs):
+        if hasattr(sparkle, '__func__'): sparkle = sparkle.__func__ # make an unbound method (without self)
+        self.extra_sparkles.append((instance, sparkle, args, kwargs))
 
     def _ttss__bind_tonic_to_catalyst(self, tonic_id):
         """

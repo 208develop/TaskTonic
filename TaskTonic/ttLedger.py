@@ -1,5 +1,5 @@
-from TaskTonic.utils.ttRWLock import RWLock
-from TaskTonic.utils.ttDataShare import DataShare
+from .utils.ttRWLock import RWLock
+from .utils.ttDataShare import DataShare
 
 
 class ttLedger:

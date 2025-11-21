@@ -4,28 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="feat(ttEssence): added log modes -&gt; stealth, off, quiet and full&#10;note(ttScreenLogger): first step to implement task for pushing and showing log items. Not used yet">
-      <change afterPath="$PROJECT_DIR$/_documents/Tonic Services.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_documents/finisching flow.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/binding_demo.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/test_ttEssence.py" afterDir="false" />
+    <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="feat(ttDistiller) New class, the distiller, a test bench to test tonics (with or without pytest)">
+      <change afterPath="$PROJECT_DIR$/TaskTonic/ttLogger.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TaskTonic/utils/ttDistiller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/dut_in_distiller.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testing/conftest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testing/test_core.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testing/test_distiller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttEssence.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttEssence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttFormula.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttFormula.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLedger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/ttLoggers/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLoggers/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttLoggers/ttScreenLogger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLoggers/ttScreenLogger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttTimer.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTimer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_documents/ttCatalyst.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/ttCatalyst.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/test_ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_ttLedger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/test_ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_ttTonic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing/test_utils_ttDataShare.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_utils_ttDataShare.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/ttDataShare.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/utils/ttDataShare.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/ttRWLock.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/utils/ttRWLock.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/Tonic Services.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/Tonic Services.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/finisching flow.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/finisching flow.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/on_start.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/on_start.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/ttTonic.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/ttTonic.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_ttEssence.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_ttLedger.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_ttTonic.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_utils_ttDataShare.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,34 +65,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python tests.PyTest all tests.executor": "Run",
-    "Python tests.pytest for test_ttTonic.test_static_interface_discovered.executor": "Run",
-    "Python tests.pytest in testLedger.py.executor": "Run",
-    "Python tests.pytest in test_stuf_to_trow_away.py.executor": "Run",
-    "Python tests.pytest in test_ttTonic.py.executor": "Run",
-    "Python tests.pytest in test_utils_ttDataShare.py.executor": "Run",
-    "Python.binding_demo.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.py_to_test_stuf_and_trow_away.executor": "Run",
-    "Python.testLedger.executor": "Run",
-    "Python.ttCatalyst.executor": "Run",
-    "Python.ttDataShare.executor": "Run",
-    "Python.ttEssence.executor": "Debug",
-    "Python.ttLedger.executor": "Debug",
-    "Python.ttScreenLogger.executor": "Run",
-    "Python.ttTimer.executor": "Run",
-    "Python.ttTonic.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python tests.PyTest all tests.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_core.test_ledger_registration.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_core.test_parent_child_binding.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_core.test_service_singleton.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_ttTonic.test_static_interface_discovered.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in testLedger.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_distiller.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_stuf_to_trow_away.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_ttTonic.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_utils_ttDataShare.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.binding_demo.executor&quot;: &quot;Run&quot;,
+    &quot;Python.dut_in_distiller.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.py_to_test_stuf_and_trow_away.executor&quot;: &quot;Run&quot;,
+    &quot;Python.testLedger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttCatalyst.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttDataShare.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttDistiller.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttEssence.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.ttLedger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttScreenLogger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttTimer.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ttTonic.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="G:\Mijn Drive\python projects\TaskTonic\TaskTonic" />
@@ -97,6 +107,28 @@
     </key>
   </component>
   <component name="RunManager" selected="Python tests.PyTest all tests">
+    <configuration name="dut_in_distiller" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="TaskTonic" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/examples" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/examples/dut_in_distiller.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TaskTonic" />
       <option name="ENV_FILES" value="" />
@@ -137,27 +169,10 @@
       <option name="_new_targetType" value="&quot;CUSTOM&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_ttTonic.test_static_interface_discovered" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="TaskTonic" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/testing" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_ttTonic.test_static_interface_discovered&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python tests.pytest for test_ttTonic.test_static_interface_discovered" />
+        <item itemvalue="Python.dut_in_distiller" />
       </list>
     </recent_temporary>
   </component>
@@ -208,7 +223,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761057648366</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat(ttEssence, ttTonic): added service functionality (singleton essence)&#10;note(ttScreenLogger): working as service">
+      <option name="closed" value="true" />
+      <created>1762785598144</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1762785598144</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -227,25 +250,27 @@
     <MESSAGE value="minor changes" />
     <MESSAGE value="feat(ttTonic, ttCatalyst): added deepcopy dat sparkle args en kwargs when called from another tread. Also changed to binding with ID to avoid sending instances with deep copy issues&#10;&#10;fix(ttTonic): For a state denpending sparkle the state was check when de sparkle was put in the queue. Now it is checked when state is executing" />
     <MESSAGE value="feat(ttEssence): added log modes -&gt; stealth, off, quiet and full&#10;note(ttScreenLogger): first step to implement task for pushing and showing log items. Not used yet" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(ttEssence): added log modes -&gt; stealth, off, quiet and full&#10;note(ttScreenLogger): first step to implement task for pushing and showing log items. Not used yet" />
+    <MESSAGE value="feat(ttEssence, ttTonic): added service functionality (singleton essence)&#10;note(ttScreenLogger): working as service" />
+    <MESSAGE value="feat(ttDistiller) New class, the distiller, a test bench to test tonics (with or without pytest)" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(ttDistiller) New class, the distiller, a test bench to test tonics (with or without pytest)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/testing/test_ttTonic.py</url>
-          <line>195</line>
-          <option name="timeStamp" value="6" />
+          <url>file://$PROJECT_DIR$/TaskTonic/ttTonic.py</url>
+          <line>218</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/TaskTonic/ttTimer.py</url>
-          <line>33</line>
-          <option name="timeStamp" value="29" />
+          <url>file://$PROJECT_DIR$/TaskTonic/ttTonic.py</url>
+          <line>210</line>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/TaskTonic/ttCatalyst.py</url>
-          <line>128</line>
-          <option name="timeStamp" value="51" />
+          <url>file://$PROJECT_DIR$/testing/test_distiller.py</url>
+          <line>47</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

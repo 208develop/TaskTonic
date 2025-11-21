@@ -16,7 +16,7 @@ class ttTimer(ttEssence):
         self.period = 10  # 10 sec if not initialed
         self.catalyst = context.catalyst
         if sparkle_back is None:
-            self.sparkle_back = self.context._on_timer
+            self.sparkle_back = self.context.ttse__on_timer
         else:
             self.sparkle_back = sparkle_back
 

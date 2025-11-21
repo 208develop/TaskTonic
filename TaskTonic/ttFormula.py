@@ -1,4 +1,4 @@
-from .ttEssence import ttLog
+from .ttLogger import ttLog
 from .ttCatalyst import ttCatalyst
 from .ttLedger import ttLedger
 
@@ -31,19 +31,20 @@ class ttFormula():
 
         self.creating_starting_tonics()
 
-        self.ledger.update_formula('tasktonic/project/status', 'start_catalysts')
-        for essence in self.ledger.essences[1:].copy(): # must be copied, because threads get started and ledger can be changed
-            if isinstance(essence, ttCatalyst):
-                essence.start_sparkling()
+        if not self.ledger.formula.get('tasktonic/testing/dont_start_catalysts', False):
+            self.ledger.update_formula('tasktonic/project/status', 'start_catalysts')
+            for essence in self.ledger.essences[1:].copy(): # must be copied, because threads get started and ledger can be changed
+                if isinstance(essence, ttCatalyst):
+                    essence.start_sparkling()
 
-        self.ledger.update_formula('tasktonic/project/status', 'main_running')
-        main_catalyst.start_sparkling()
-        self.ledger.update_formula('tasktonic/project/status', 'main_finished')
+            self.ledger.update_formula('tasktonic/project/status', 'main_running')
+            main_catalyst.start_sparkling()
+            self.ledger.update_formula('tasktonic/project/status', 'main_finished')
 
-        # notify unfinished catalysts in ledger records
-        for essence in self.ledger.essences[1:].copy():
-            if hasattr(essence, '_ttss__main_catalyst_finished'):
-                essence._ttss__main_catalyst_finished()
+            # notify unfinished catalysts in ledger records
+            for essence in self.ledger.essences[1:].copy():
+                if hasattr(essence, '_ttss__main_catalyst_finished'):
+                    essence._ttss__main_catalyst_finished()
 
     def update_formula(self, formula):
         self.ledger.update_formula(formula)

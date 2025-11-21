@@ -1,160 +1,326 @@
-# Introduction to TaskTonic
+# TaskTonic Framework: Developer Manual
 
-Welcome to TaskTonic! TaskTonic is a Python framework for building asynchronous, event-driven applications. It provides
-a structured way to manage parallel processes, state machines, and timed events, allowing you to focus on your
-application's logic instead of boilerplate concurrency code.
+## 1. Introduction
 
-The core philosophy is "Don't call us, we'll call you." Instead of methods being executed immediately, they are queued
-as "sparkles" and processed sequentially by an engine called a Catalyst. This ensures thread safety and a predictable,
-orderly execution flow.
+**TaskTonic** is a Python framework designed to manage complex, asynchronous applications with ease. It abstracts away
+the complexity of threading by using an event-driven, actor-like model.
 
-## Core Concepts
+### The "Alchemist" Philosophy
 
-The framework is built on a few key components:
+The framework uses unique terminology to describe its components:
 
-* **Tonic**: The main building block of your application. A Tonic is a stateful worker object that contains logic for a
-  specific task.
-* **Sparkle**: A specially named method inside a Tonic that represents a single unit of work. Calling a sparkle does *
-  *not** run it immediately; it places it on a queue to be executed later.
-* **Catalyst**: The engine of the framework. It pulls sparkles from the queue one by one and executes them. It's what
-  makes the Tonics "sparkle."
-* **Formula**: The entry point of your application. It's the "recipe" that defines which Tonics to create and how to
-  start the Catalyst.
+* **Tonic:** The "worker" or agent (your code).
+* **Sparkle:** An atomic unit of work (a method).
+* **Catalyst:** The engine that makes the Tonics "sparkle" (executes the work).
+* **Formula:** The recipe that defines the application structure.
 
-## Getting Started: Your First Tonic
+---
 
-Let's create a simple Tonic that prints a message when it starts and then finishes.
+## 2. Core Concepts & Architecture
 
-A **Tonic's** behavior is defined by its **sparkles**. Sparkles are identified by a special naming convention. For
-example, `ttse__on_start` is an event sparkle that the framework runs automatically when the Tonic is first activated.
+| Component | Class | Description |
+| :--- | :--- | :--- |
+| **Formula** | `ttFormula` | The entry point. Initializes the `Ledger` and starts the main `Catalyst`. |
+| **Tonic** | `ttTonic` | The primary base class for your logic. It is a state machine that emits Sparkles. |
+| **Catalyst** | `ttCatalyst` | The execution engine. It owns a thread and a queue. It pulls sparkles and executes them sequentially. |
+| **Ledger** | `ttLedger` | A thread-safe Singleton registry that tracks all active Essences (Tonics/Catalysts). |
+| **Essence** | `ttEssence` | The base class for both Tonics and Catalysts, handling identity (ID) and hierarchy. |
 
-**1. Create your Tonic:**
+### Architecture Flow
+
+1. A **Sparkle** (method call) is placed on the `CatalystQueue`.
+2. The **Catalyst** pulls the Sparkle from the queue.
+3. The Catalyst executes the method on the target **Tonic**.
+4. The Tonic may change its internal **State** or bind new child Tonics.
+
+---
+
+## 3. Getting Started
+
+### 3.1 Minimum Application Structure
+
+You need at least one `ttTonic` (your logic) and one `ttFormula` (to start the app).
 
 ```python
-# my_app.py
 from TaskTonic import ttTonic, ttFormula
 
+# 1. Define a Tonic
 class HelloWorldTonic(ttTonic):
-    """A simple Tonic to demonstrate the basics."""
-
     def ttse__on_start(self):
-        """
-        This is an event sparkle that runs automatically on startup.
-        'ttse' stands for 'Tonic Task Sparkle Event'.
-        """
-        self.log("Hello from the TaskTonic world!")
-        # After our work is done, we tell the framework we are finished.
+        """Called automatically after initialization."""
+        self.log("Hello World!")
         self.finish()
 
     def ttse__on_finished(self):
-        """This event sparkle runs automatically just before the Tonic shuts down."""
         self.log("Goodbye!")
-```
 
-**2. Create the Formula to launch it:**
-
-The **Formula** tells the framework how to build and start your application. You override `creating_starting_tonics` to
-create your initial components.
-
-```python
-# my_app.py (continued)
-
-class MySimulation(ttFormula):
-    """The application launcher."""
+# 2. Define the Formula
+class MyApp(ttFormula):
     def creating_starting_tonics(self):
-        # Create one instance of our HelloWorldTonic.
-        # context=-1 means it has no parent.
+        # context=-1 means "Top Level" (no parent)
         HelloWorldTonic(context=-1)
 
-# --- Main execution block ---
+# 3. Run
 if __name__ == "__main__":
-    # This single line sets up and starts the entire application.
-    MySimulation()
+    MyApp()
 ```
 
-When you run `python my_app.py`, the `MySimulation` formula will create a Catalyst, create your `HelloWorldTonic`, and
-the Catalyst will execute its `ttse__on_start` sparkle.
+---
 
-## State Machines Made Easy
+## 4. The Tonic (`ttTonic`)
 
-Tonics are inherently state machines. You don't need to write complex logic to manage states; it's built into the
-sparkle naming convention.
+[cite_start]The `ttTonic` class uses **introspection** to discover its behavior[cite: 115]. You do not register
+callbacks manually; you simply name your methods according to the Sparkle convention.
 
-* To define a state, add it to your sparkle's name: `ttsc_state_name__sparkle_name`.
-* To change state, use the `self.to_state('new_state_name')` method.
-* You can use the `ttse__on_enter` and `ttse__on_exit` event sparkles to run code whenever you enter or leave *any*
-  state.
+### 4.1 Sparkle Naming Convention
 
-Here is a simple example of a light switch:
+The naming structure is: `prefix[_state]__name`.
 
-```python
-from TaskTonic import ttTonic
+* **`ttsc__<name>` (Command):** Public command to *request* action (e.g., `ttsc__process`). Puts a job on the queue.
+* **`ttse__<name>` (Event):** Public event handler (e.g., `ttse__on_timer`).
+* **`tts__<name>` (Internal):** Internal logic, but still executed via the queue.
+* **`_ttss__<name>` (System):** Reserved for framework lifecycle (e.g., `_ttss__finish`).
 
-class LightSwitch(ttTonic):
+### 4.2 Built-in State Machine
 
-    def ttse__on_start(self):
-        self.to_state('off') # Start in the 'off' state
+Every Tonic is a state machine. [cite_start]You can transition states using `self.to_state('new_state')`[cite: 144].
 
-    def ttse__on_enter(self):
-        self.log(f"The light is now {self.get_current_state_name().upper()}")
+**State Routing:**
+If you call `ttsc__next()`, the framework looks for a handler in this order:
 
-    # Public command to flip the switch
-    def ttsc__flip(self):
-        """This is a generic command sparkle, not tied to a state."""
-        pass # The state-specific versions below will be used instead.
+1. `ttsc_<current_state>__next` (Specific to current state)
+2. `ttsc__next` (Generic fallback)
+3. `_noop` (Do nothing)
 
-    def ttsc_off__flip(self):
-        """When in the 'off' state, 'flip' moves it to 'on'."""
-        self.to_state('on')
+**Hooks:**
 
-    def ttsc_on__flip(self):
-        """When in the 'on' state, 'flip' moves it to 'off'."""
-        self.to_state('off')
-```
+* `ttse__on_enter`: Called when entering *any* state.
+* `ttse__on_exit`: Called when leaving *any* state.
+* `ttse_<state>__on_enter`: Specific handler for entering `<state>`.
 
-## Scheduling Events with Timers
-
-You can easily schedule a sparkle to run after a delay or at a regular interval using Timers.
-
-To create a timer, you `bind` it to your Tonic. When the timer expires, it calls a `sparkle_back` function you provide.
-
-```python
-from TaskTonic import ttTonic, ttTimerRepeat
-
-class Heartbeat(ttTonic):
-    def ttse__on_start(self):
-        self.log("Starting heartbeat...")
-        # Create a timer that fires every 2 seconds and calls our 'ttsc__beat' sparkle.
-        self.bind(ttTimerRepeat, seconds=2, sparkle_back=self.ttsc__beat)
-
-    def ttsc__beat(self, timer_info):
-        """This sparkle is called by the timer."""
-        self.log("Lub-dub...")
-```
-
-## Parent-Child Context
-
-Tonics exist in a hierarchy. A Tonic can create child Tonics using `self.bind()`.
-
-This creates a powerful relationship: if a parent Tonic is finished, it automatically ensures all of its child Tonics
-are also finished. This prevents orphaned processes and makes cleanup automatic.
+**Example: A Traffic Light**
+This example demonstrates how to use `on_enter` and `on_exit` to manage resources (turning lamps on/off) and how to use
+timers to drive state transitions automatically.
 
 ```python
 from TaskTonic import ttTonic, ttTimerSingleShot
 
-class Manager(ttTonic):
+class TrafficLight(ttTonic):
     def ttse__on_start(self):
-        self.log("Manager starting. Hiring a worker...")
-        # Create a WorkerTonic as a child of this Manager.
-        self.worker = self.bind(WorkerTonic)
+        self.log("Traffic Light System Started")
+        self.to_state('red')
 
-        # After 5 seconds, the manager's job is done.
-        self.bind(ttTimerSingleShot, seconds=5, sparkle_back=self.finish)
+    # --- Generic Event: Timer Callback ---
+    def ttse__next(self, timer_info):
+        """
+        This event is triggered by the timer. 
+        It doesn't need logic; the state-specific overrides handle the routing.
+        """
+        pass
 
-    def ttse__on_finished(self):
-        # When the Manager finishes, its child WorkerTonic will also be stopped automatically.
-        self.log("Manager finished. The worker is automatically dismissed.")
+    # ================= RED STATE =================
+    def ttse_red__on_enter(self):
+        self.log("(O) RED LAMP ON")
+        # Wait 3 seconds, then trigger the 'next' event
+        self.bind(ttTimerSingleShot, 3, sparkle_back=self.ttse__next)
 
-class WorkerTonic(ttTonic):
-    def ttse__on_start(self):
-        self.log("Worker ready for duty!")
+    def ttse_red__on_exit(self):
+        self.log("( ) RED LAMP OFF")
+
+    def ttse_red__next(self, info):
+        self.to_state('green')
+
+    # ================= GREEN STATE =================
+    def ttse_green__on_enter(self):
+        self.log("(O) GREEN LAMP ON")
+        self.bind(ttTimerSingleShot, 3, sparkle_back=self.ttse__next)
+
+    def ttse_green__on_exit(self):
+        self.log("( ) GREEN LAMP OFF")
+
+    def ttse_green__next(self, info):
+        self.to_state('orange')
+
+    # ================= ORANGE STATE ================
+    def ttse_orange__on_enter(self):
+        self.log("(O) ORANGE LAMP ON")
+        self.bind(ttTimerSingleShot, 1, sparkle_back=self.ttse__next)
+
+    def ttse_orange__on_exit(self):
+        self.log("( ) ORANGE LAMP OFF")
+
+    def ttse_orange__next(self, info):
+        self.to_state('red')
+```
+
+### 4.3 Hierarchy & Binding (`bind`)
+
+Tonics should strictly form a hierarchy.
+
+* [cite_start]**Creation:** Use `self.bind(Class, **kwargs)` instead of `Class(...)`[cite: 69].
+* **Effect:** The created Tonic becomes a **child**.
+* **Cleanup:** When a parent calls `finish()`, it automatically finishes all children first.
+
+---
+
+## 5. Services (The Singleton Pattern)
+
+[cite_start]TaskTonic has a built-in Service mechanism handled by the `ttEssence` metaclass[cite: 34].
+
+### 5.1 Defining a Service
+
+Set the `_tt_is_service` attribute to a unique name.
+
+```python
+class DatabaseService(ttTonic):
+    _tt_is_service = 'db_service'  # Unique Service Name
+
+    def __init__(self, srv_conn_str, **kwargs):
+        """Runs ONCE when the FIRST instance is created."""
+        super().__init__(**kwargs)
+        self.conn_str = srv_conn_str
+
+    def _init_service(self, context, ctxt_user, **kwargs):
+        """Runs EVERY TIME the service is bound/requested."""
+        self.log(f"Access by {ctxt_user}")
+```
+
+### 5.2 Using a Service
+
+Use `bind` just like a normal Tonic.
+
+* [cite_start]**First Call:** Creates the instance, runs `__init__`, runs `_init_service`[cite: 44].
+* **Subsequent Calls:** Returns the *existing* instance, runs `_init_service`.
+
+```python
+# In a Worker Tonic
+self.db = self.bind(DatabaseService, 
+                    srv_conn_str="db://...",  # Ignored on subsequent calls
+                    ctxt_user="Worker1")      # Processed every time
+```
+
+---
+
+## 6. DataShare (`ttDataShare`)
+
+A thread-safe, hierarchical data store (like a Registry/Redux).
+
+### Path Syntax
+
+* Standard: `'user/settings/theme'`
+* List Index: `'users/list[0]/name'`
+* List Append: `'users/list[]'` (Appends a new item).
+
+### Usage
+
+```python
+ds = DataShare()
+
+# Set
+ds.set('app/config/version', '1.0')
+ds.set('app/logs[]', 'started') # Append to list
+
+# Get (Views)
+val = ds.get('app/config')                # Clean Dict (View 0, default)
+raw = ds.get('app/config', get_value=1)   # Raw internal dict with {'_value': ...}
+val = ds.get('app/config', get_value=2)   # Only the direct value
+
+# Subscribe
+def callback(path, old, new): print(f"Changed: {path}")
+ds.subscribe('app/config', callback)
+```
+
+---
+
+## 7. Timers (`ttTimer`)
+
+Timers are Essences that trigger a callback (`sparkle_back`) after a duration. [cite_start]They must be bound to a
+Catalyst (which happens automatically when bound to a Tonic)[cite: 187].
+
+### Timer Types
+
+| Class | Description |
+| :--- | :--- |
+| `ttTimerSingleShot` | Fires once, then finishes. |
+| `ttTimerRepeat` | Fires repeatedly every `period` seconds. |
+| `ttTimerPausing` | Repeat timer that can be paused and resumed. |
+
+### Default Callback Behavior
+
+[cite_start]If you do **not** provide the `sparkle_back` argument when binding a timer, the framework automatically
+looks for a method named **`ttse__on_timer`** in your Tonic[cite: 189].
+
+**Example:**
+
+Note that the callback method uses the `ttse__` prefix. A timer expiration is an **event** that happens to the Tonic.
+
+```python
+# Inside a Tonic
+
+# Option A: Explicit callback
+self.bind(ttTimerSingleShot, 2.5, sparkle_back=self.ttse__custom_event)
+
+# Option B: Default callback (calls self.ttse__on_timer)
+self.bind(ttTimerSingleShot, 5.0)
+
+def ttse__on_timer(self, info):
+    """
+    Called automatically by Option B.
+    'info' contains dictionary with timer id and name.
+    """
+    self.log("5 seconds passed (Default Handler)")
+```
+
+---
+
+## 8. Logging (`ttLogger`)
+
+[cite_start]TaskTonic has a built-in logging facility controlled by the Formula or specific Tonic settings[cite: 199].
+
+### Log Modes
+
+1. **STEALTH:** No logging (Fastest).
+2. **OFF:** Logs only lifecycle events (Start/Finish).
+3. **QUIET:** Logs lifecycle + explicit `self.log()` calls.
+4. **FULL:** Logs everything, including every Sparkle execution (Trace).
+
+### Configuration (in Formula)
+
+```python
+return {
+    'tasktonic/log/to': 'screen',           # Output destination
+    'tasktonic/log/default': ttLog.FULL,    # Default mode
+}
+```
+
+---
+
+## 9. Testing: The Distiller (`ttDistiller`)
+
+[cite_start]The `ttDistiller` is a specialized Catalyst designed for testing and debugging[cite: 212]. Instead of
+running indefinitely, it runs strictly controlled steps and captures a trace.
+
+### Using the Distiller
+
+In your test Formula, replace `ttCatalyst` with `ttDistiller`.
+
+```python
+class TestFormula(ttFormula):
+    def creating_main_catalyst(self):
+        ttDistiller()  # Use Distiller instead of default Catalyst
+
+
+# In your test script
+recipe = TestFormula()
+distiller = recipe.ledger.get_essence_by_id(0)
+
+# Run specific test scenarios
+status = distiller.sparkle(
+    timeout=5,
+    till_state_in=['wait_on_timer']  # Run until a specific state is reached
+)
+
+# Analyze the trace
+for trace in status['sparkle_trace']:
+    print(f"{trace['tonic']}.{trace['sparkle']} -> {trace['at_exit']['state']}")
+```

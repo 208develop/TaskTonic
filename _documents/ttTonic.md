@@ -109,7 +109,7 @@ These are special, reserved sparkles called automatically by the framework.
 
 * `__init__(self, context, ...)`: Initializes the `Tonic` and binds it to the `Catalyst` provided in the `context`.
 * `to_state(self, state)`: Requests a state transition. The change is processed after the current sparkle
-  finishes. A special value of `-99` can be passed to immediately stop the state machine.
+  finishes. A special value of `-1` can be passed to immediately stop the state machine.
 * `finish(self)`: Initiates the graceful shutdown sequence for the `Tonic`.
 
 ---

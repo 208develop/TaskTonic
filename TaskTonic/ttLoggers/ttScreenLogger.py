@@ -1,20 +1,5 @@
-from ..ttCatalyst import ttCatalyst
+from ..ttLogger import ttLogService
 import time
-
-class ttLogService(ttCatalyst):
-    _tt_is_service = 'log_service'
-    _tt_force_stealth_logging = True
-
-    def _ttss__main_catalyst_finished(self):
-        if len(self.service_context) == 0:
-            self.finish()
-
-    def ttse__on_service_context_finished(self, ctxt, ctxts_left):
-        if ctxts_left == 0:  # logger is also from essence, so is bound to itself as well
-            self.finish()
-
-    def put_log(self, log):
-        return
 
 class ttScreenLogService(ttLogService):
 

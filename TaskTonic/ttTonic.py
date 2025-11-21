@@ -1,5 +1,5 @@
-from TaskTonic.ttEssence import ttEssence
-import re, time, threading, copy
+from .ttEssence import ttEssence
+import re, threading, copy
 
 
 class ttTonic(ttEssence):
@@ -34,8 +34,6 @@ class ttTonic(ttEssence):
         # Discover all sparkles and build the execution system.
         self.state = -1  # Start with no state (-1)
         self._pending_state = -1
-        self._on_enter_handler = self._noop
-        self._on_exit_handler = self._noop
         self._sparkle_init()
 
     def _init_post_action(self):
@@ -59,7 +57,7 @@ class ttTonic(ttEssence):
         general_pattern = re.compile(r'^(ttsc|ttse|tts|_tts|_ttss)__([a-zA-Z0-9_]+)$')
 
         # --- Phase 1: Discover all implementations from the class hierarchy (MRO) ---
-        specific_impls, generic_impls = {}, {}
+        state_impls, generic_impls = {}, {}
         states, sparkle_names = set(), set()
         prefixes_by_cmd = {}
 
@@ -74,7 +72,7 @@ class ttTonic(ttEssence):
                 if s_match:
                     # Found a state-specific sparkle (e.g., 'ttsc_waiting__process')
                     prefix, state_name, sp_name = s_match.groups()
-                    specific_impls[(prefix, state_name, sp_name)] = method
+                    state_impls[(prefix, state_name, sp_name)] = method
                     states.add(state_name)
                     sparkle_names.add(sp_name)
                     prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
@@ -84,21 +82,20 @@ class ttTonic(ttEssence):
                     generic_impls[(prefix, sp_name)] = method
                     sparkle_names.add(sp_name)
                     prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
-                    # Specifically find and assign the global handlers
-                    if f"{prefix}__{sp_name}" == 'ttse__on_enter':
-                        self._on_enter_handler = method
-                    elif f"{prefix}__{sp_name}" == 'ttse__on_exit':
-                        self._on_exit_handler = method
 
         # --- Phase 2: Build fast lookup tables for states ---
         self._state_to_index = {name: i for i, name in enumerate(sorted(list(states)))}
         self._index_to_state = sorted(list(states))
         num_states = len(self._index_to_state)
 
-        # --- Phase 3: Create and bind all public-facing dispatcher methods ---
+        # --- Phase 3A: Create fallback methods for state on_enter and on_exit
+        if num_states:
+            self._direct_execute_ttse__on_enter = self.ttse__on_enter
+            self._direct_execute_ttse__on_exit = self.ttse__on_exit
+        # --- Phase 3B: Create and bind all public-facing dispatcher methods ---
         sparkle_list = []
         for sp_name in sparkle_names:
-            is_state_aware = any(sp_name == key[2] for key in specific_impls.keys())
+            is_state_aware = any(sp_name == key[2] for key in state_impls.keys())
             for prefix in prefixes_by_cmd[sp_name]:
                 interface_name = f"{prefix}__{sp_name}"
                 sparkle_list.append(interface_name)
@@ -111,9 +108,9 @@ class ttTonic(ttEssence):
                     if generic_handler:
                         handler_list = [generic_handler] * num_states
                     for state_idx, state_name in enumerate(self._index_to_state):
-                        specific_handler = specific_impls.get((prefix, state_name, sp_name))
-                        if specific_handler:
-                            handler_list[state_idx] = specific_handler
+                        state_handler = state_impls.get((prefix, state_name, sp_name))
+                        if state_handler:
+                            handler_list[state_idx] = state_handler
 
                     def create_put_state_sparkle(_list, _name):
                         # Create a state execution that will select the correct method by state from the list at
@@ -130,12 +127,32 @@ class ttTonic(ttEssence):
                             if threading.get_ident() != self.catalyst.thread_id:
                                 args = tuple((arg if callable(arg) else copy.deepcopy(arg)) for arg in args)
                                 kwargs = {key: (value if callable(value) else copy.deepcopy(value))
-                                             for key, value in kwargs.items()}
+                                          for key, value in kwargs.items()}
                             self.catalyst_queue.put((self, create_executer(), args, kwargs))
                         return put_state_sparkle
 
                     # Bind the new put_state_sparkle function to the instance, making it a method.
                     setattr(self, interface_name, create_put_state_sparkle(handler_list, interface_name).__get__(self))
+
+                    # Create direct-execute methods only for 'on_enter' and 'on_exit'
+                    if interface_name in ['ttse__on_enter', 'ttse__on_exit']:
+                        direct_method_name = f"_direct_execute_{interface_name}"
+
+                        # This factory creates the direct execution method
+                        # It needs to capture the handler_list (_list)
+                        def create_direct_executor(_list, _name):
+                            # This is the exact logic copied from 'execute_state_sparkle'
+                            def direct_execute_method(self, *args, **kwargs):
+                                state_sparkle = _list[self.state]
+                                self.log(None, {'state': self.state})
+                                state_sparkle(self, *args, **kwargs)
+                            direct_execute_method.__name__ = _name
+                            return direct_execute_method
+
+                        # Bind the new direct method to the instance
+                        setattr(self,
+                                direct_method_name,
+                                create_direct_executor(handler_list, interface_name).__get__(self))
 
                 # --- Path B: This is a generic-only command ---
                 else:
@@ -172,16 +189,39 @@ class ttTonic(ttEssence):
         Requests a state transition. The change is handled by the _execute_sparkle
         method after the current sparkle finishes.
 
-        :param state: The name (str) or index (int) of the target state. When target = -99, stop machine stops
+        :param state: The name (str) or index (int) of the target state. When target == -1, stop machine stops
         """
+        to_state = -1  # no action
         if isinstance(state, str):
-            self._pending_state = self._state_to_index.get(state, -1)
+            to_state = self._state_to_index.get(state, None)
+            if to_state is None: return
         elif isinstance(state, int) and 0 <= state < len(self._index_to_state):
-            self._pending_state = state
-        elif isinstance(state, int) and state == -99:
-            self._pending_state = -99
+            to_state = state
+        elif isinstance(state, int) and state == -1:
+            to_state = -1
         else:
-            self._pending_state = -1  # no action
+            return
+
+        if self.state != -1:
+            self.catalyst._execute_extra_sparkle(self, self._direct_execute_ttse__on_exit)
+        if to_state >= 0:
+            self.catalyst._execute_extra_sparkle(self, self._ttinternal_state_change_to, to_state)
+            self.catalyst._execute_extra_sparkle(self, self._direct_execute_ttse__on_enter)
+        else:
+            self.catalyst._execute_extra_sparkle(self, self._ttinternal_state_machine_stop)
+
+    def _ttinternal_state_change_to(self, state):
+        self.log(system_flags={'state': self.state, 'new_state': state})
+        self.state = state
+
+    def _ttinternal_state_machine_stop(self):
+        self.log(system_flags={'state': self.state, 'new_state': None})
+        self.state = -1
+        pass
+
+    def get_active_state(self):
+        if self.state == -1: return '--'
+        return self._index_to_state[self.state]
 
     def _execute_sparkle(self, sparkle_method, *args, **kwargs):
         """
@@ -204,35 +244,9 @@ class ttTonic(ttEssence):
         """
         interface_name = sparkle_method.__name__
         self.log(None, {'sparkle': interface_name})
-
         # Execute the user's actual sparkle code, passing self to bind it.
         sparkle_method(self, *args, **kwargs)
         self.log(close_log=True)
-
-        # After the sparkle runs, check if a state transition was requested.
-        if self._pending_state == -1: return
-
-        if self.state != -1:
-            # Call the global on_exit handler.
-            self.log(None, {'sparkle': 'ttse__on_exit', 'state': self.state})
-            self._on_exit_handler(self)
-            self.log(close_log=True)
-
-        if self._pending_state == -99:
-            self.log(system_flags={'state': self.state, 'new_state': None}, close_log=True)
-            # stop state machine
-            self.state = -1
-            self._pending_state = -1
-        else:
-            # Officially change the state.
-            self.log(system_flags={'state': self.state, 'new_state': self._pending_state}, close_log=True)
-            self.state = self._pending_state
-            self._pending_state = -1
-
-            # Call the global on_enter handler.
-            self.log(None, {'sparkle': 'ttse__on_enter', 'state': self.state})
-            self._on_enter_handler(self)
-            self.log(close_log=True)
 
     def __exec_system_sparkle(self, sparkle_method, *args, **kwargs):
         """
@@ -240,7 +254,7 @@ class ttTonic(ttEssence):
         """
         interface_name = sparkle_method.__name__
         if interface_name.startswith('_ttss') \
-        or interface_name in ['ttse__on_finished', 'ttse__on_exit', 'ttse__on_service_context_finished']:
+                or interface_name in ['ttse__on_finished', 'ttse__on_exit', 'ttse__on_service_context_finished', '_ttinternal_state_machine_stop']:
             self.__exec_sparkle(sparkle_method, *args, **kwargs)
 
     def get_current_state_name(self):
@@ -249,19 +263,14 @@ class ttTonic(ttEssence):
 
         :return: The name of the state (str) or "None".
         """
-        if self.state == -1:
-            return "None"
+        if self.state == -1: return "--"
         return self._index_to_state[self.state]
 
     # standard tonic sparkle
-    def ttse__on_start(self):
-        """Event sparkle for user-defined startup logic."""
-        pass
-
-    def ttse__on_finished(self):
-        """Event sparkle for user-defined cleanup logic (conceptual)."""
-        pass
-
+    def ttse__on_start(self): pass
+    def ttse__on_finished(self): pass
+    def ttse__on_enter(self): pass
+    def ttse__on_exit(self): pass
 
     # --- System Lifecycle Sparkles ---
     def _ttss__on_start(self):
@@ -294,7 +303,7 @@ class ttTonic(ttEssence):
         self._execute_sparkle = self.__exec_system_sparkle
 
         # stop the tonic
-        if self.state != -1: self.to_state(-99)  # stop state machine if active
+        if self.state != -1: self.to_state(-1)  # stop state machine if active
         self.ttse__on_finished()  # stop tonic
         self._ttss__on_finished(from_context)  # cleanup tonic
 

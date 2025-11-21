@@ -151,16 +151,116 @@ a single, persistent root task (e.g., your "formula" or main application runner)
 
 ---
 
-## 5. Full Example
+# 5. Using a Service Base Class
+
+Sometimes you want to use a service, without knowing what kind of service implementation is used. For instance when
+you use an `ConnectionService`, that can be een `IpConnectionService` or `BluToothConnectionService`.
+
+## 5.1 How to
+For that create a service base class (or interface) that provides a universal contract for a specific type of 
+functionality (e.g., "connecting" or "logging"). This approach is central to creating a decoupled and 
+maintainable architecture.
+
+In the formula the implementation of a specific service is started. The service name wil be the same for every
+implementation. Tonics that are using the service should depend on the universal base class and use the service name.
+The specific service, with that name, will be used due to the singleton service implementation. 
+
+
+## 5.2 Example: ConnectionService
+
+Let's walk through an example with a universal `ConnectionService` (the base class) and two specific implementations:
+`IpConnectionService` and `BluToothConnectionService`.
+
+### 1. Defining the Services
+
+First, we define the abstract base class and the concrete implementations. The Tonics will only know about
+`ConnectionService`.
+
+```python
+# === services/connection_service.py ===
+from TaskTonic import *
+
+
+class ConnectionService(ttCatalyst):
+  """
+  The universal base class (interface) for all connection services.
+  Tonics will depend on this class.
+  
+  It defines the 'contract' that all connection services must follow.
+  """
+  _tt_is_service = 'connection_service'
+
+  def ttsc__connect(self):
+    pass
+
+  def ttsc__disconnect(self):
+    pass
+
+  def ttsc__transmit(self, data):
+    pass
+
+
+# === services/ip_connection.py ===
+from .connection_service import ConnectionService
+
+
+class IpConnectionService(ConnectionService):
+  """
+  Specific implementation for IP-based connections (e.g., WiFi, Ethernet).
+  """
+
+  def __init__(self, context=None, host: str, port: int):
+    super().__init__(context=context, log_mode='quiet')
+    self.host = host
+    self.port = port
+    self.status = "Disconnected"
+    self.log(f"IpConnectionService: Initialized for {host}:{port}")
+    self.to_state('disconnected')
+
+  def ttsc__disconnected__connect(self):
+    # Specific logic for IP connection
+    self.log(f"Connecting via IP to {self.host}:{self.port}...")
+    # ... implementation details ...
+    self.status = f"Connected (IP to {self.host})"
+    self.log("IpConnectionService: Established.")
+    self.to_state('connected')
+
+  def ttsc__connected__disconnect(self):
+    self.log("Disconnecting IP connection.")
+    self.to_state('disconnected')
+
+  def ttsc__connected__transmit(self, data):
+    self.log(f'Tranmitting: {data}')
+    # ... implementation details ...
+
+  def ttse__connected__on_exit(self):
+# implement disconnection
+
+
+# === same for all other connection services
+
+# === myTonic 
+class MyTonic(ttTonic):
+  def ttse__on_start(self):
+    from services.connection_service import ConnectionService
+    self.conn = self.bind(ConnectionService) # use the service base class
+    self.conn.ttsc__connect()
+
+
+#  == Formula
+class MyFormula(ttFormula):
+  def creating_starting_tonics(self):
+    IpConnectionService(context=-1, 'localhost', 123456) # startup the ip connection service
+    MyTonic(context=-1)
+
+```
+
+## 6. Full Example
 
 Here is a complete example showing how two different tasks (`RootTask` and `WorkerTask`) access the same service.
 
 ```python
-# --- Assume ttTonic, ttEssence, ttMeta, etc. are defined ---
-
-class ttTonic(ttEssence):
-    """Your main framework class."""
-    pass
+from TaskTonic import *
 
 class RootTask(ttTonic):
     """A standard, non-service task."""
@@ -182,7 +282,7 @@ class NetService(ttTonic):
         """
         Runs ONCE to configure the service.
         """
-        print(f"  NetService __init__: CONNECTING to {srv_host_url}...")
+        self.log(f"  NetService __init__: CONNECTING to {srv_host_url}...")
         
         # Pass standard args (name, context) up to ttEssence
         super().__init__(**kwargs) 
@@ -194,11 +294,13 @@ class NetService(ttTonic):
         """
         Runs EVERY time to register context-specific info.
         """
-        if context:
-            print(f"  NetService _init_service__: Context '{context.name}' "
-                  f"registered on port {ctxt_port}.")
-            self.context_ports[context.id] = ctxt_port
-
+        self.ttsc__new_service_entry(context, ctxt_port)
+                
+    def ttsc__new_service_entry(context, ctxt_port):
+        self.log(f"  NetService _init_service__: Context '{context.name}' "
+                 f"registered on port {ctxt_port}.")
+        self.context_ports[context.id] = ctxt_port
+        
 # --- Example Usage ---
 if __name__ == "__main__":
 
