@@ -1,4 +1,4 @@
-from ..ttCatalyst import ttCatalyst
+from TaskTonic.ttCatalyst import ttCatalyst
 import queue, threading, time
 
 
@@ -14,7 +14,7 @@ class ttDistiller(ttCatalyst):
         super().__init__(-1, log_mode='off')
 
     def start_sparkling(self):
-        print('Distiller is setup and ready for testing')
+        # print('Distiller is setup and ready for testing')
         self.thread_id = threading.get_ident()
         self.sparkling = True
 

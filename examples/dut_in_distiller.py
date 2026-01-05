@@ -1,5 +1,5 @@
 from TaskTonic import *
-from TaskTonic.utils import ttDistiller
+from TaskTonic.ttTonicStore import ttDistiller
 import json, time
 
 class DUT(ttTonic):

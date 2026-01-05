@@ -1,4 +1,4 @@
-
+from typing import Type, TypeVar, Union, List
 import time
 
 
@@ -55,7 +55,7 @@ class __ttEssenceMeta(type):
         else:
             # --- RETURN EXISTING SERVICE  and add context to service_context list ---
             instance = existing_instance
-            context = kwargs.pop('context', None)
+            context = kwargs.get('context', None)
             context = context if isinstance(context, ttEssence) \
                 else ledger.get_essence_by_id(context) if isinstance(context, int) \
                 else None
@@ -69,6 +69,8 @@ class __ttEssenceMeta(type):
 
         return instance
 
+
+T = TypeVar('T', bound='ttEssence')
 
 class ttEssence(metaclass=__ttEssenceMeta):
     """A base class for all active components within the TaskTonic framework.
@@ -120,18 +122,19 @@ class ttEssence(metaclass=__ttEssenceMeta):
         })
 
         # first, enable logging
+        log_formula = self.ledger.formula.at('tasktonic/log')
         self._logger = None
         self._log_mode = None
         self._log = None
-        log_to = self.ledger.formula.get('tasktonic/log/to', 'off')
+        log_to = log_formula.get('to', 'off')
 
         # Main Catalyst has to start logging service
         from .ttLogger import ttLogService, ttLog
         if self.id == 0 and log_to != 'off':
             log_service = None
-            services = self.ledger.formula.get('tasktonic/log/services', [])
+            services = log_formula.children(prefix='service')
             for service in services:
-                if service.get('name', '') == log_to:
+                if service.v == log_to:
                     s_kwargs = service.get('arguments', {})
                     log_service = service.get('service')(*(), **s_kwargs)  ## startup logger service
                     break
@@ -146,7 +149,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
 
             if log_mode is None:
                 log_mode = self.context._log_mode if self.context \
-                    else self.ledger.formula.get('tasktonic/log/default', ttLog.STEALTH) if self.ledger.formula \
+                    else log_formula.get('default', ttLog.STEALTH) if self.ledger.formula \
                     else ttLog.STEALTH
             self.set_log_mode(log_mode)
 
@@ -189,7 +192,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
         return self
 
     # ledger functionality
-    def bind(self, essence, *args, **kwargs):
+    def bind(self, essence: Union[Type[T], T], *args, **kwargs) -> T:
         """Bind a child essence (subject) to this essence.
 
         Called to create, start, and bind an essence as a child
@@ -252,7 +255,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
         from_context = from_context if from_context else self
 
         if self._finish_service_context(from_context):
-            #TODO: Now a service is stopped when no service context is left.
+            #TODO: Now a service is stopped after finishing last service_context
             #  Consider implementing the possibility to maintain te service, wait for new service context
             if len(self.service_context) > 0:
                 return
@@ -286,7 +289,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
         else:
             for ess_id in self.bindings.copy():
                 ess = self.ledger.get_essence_by_id(ess_id)
-                ess.finish(from_context=self)
+                if ess: ess.finish(from_context=self)
 
     def _finished(self):
         """Signals that this essence has completed its lifecycle.
@@ -332,11 +335,14 @@ class ttEssence(metaclass=__ttEssenceMeta):
 
     def _log_full(self, line=None, flags=None, system_flags=None, close_log=False):
         """Internal log handler for the FULL log mode."""
+        if self.id == -1:
+            pass
         if self._log is None: self._log = {'id': self.id, 'start@': time.time(), 'log': []}
         if system_flags: self._log.setdefault('sys', {}).update(system_flags)
         if flags: self._log.update(flags)
         if line: self._log['log'].append(line)
         if close_log:
+            self._log['duration'] = time.time() - self._log['start@']
             self._log_push(self._log)
             self._log = None
 

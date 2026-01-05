@@ -1,6 +1,6 @@
 [project]
 name = "TaskTonic"
-version = "0.0.0"
+version = "0.1.0"
 authors = [
     { name = "Peter", email = "208develop@gmail.com" },
 ]

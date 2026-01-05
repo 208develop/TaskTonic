@@ -1,6 +1,6 @@
-from .utils.ttRWLock import RWLock
-from .utils.ttDataShare import DataShare
-
+from .internals.RWLock import RWLock
+# from .internals.DataShare import DataShare
+from .internals.Store import Store
 
 class ttLedger:
     """A thread-safe singleton class that serves as the central registry for all ttEssence instances.
@@ -27,7 +27,7 @@ class ttLedger:
             if self._singleton_init_done: return
             self.records = [] # ledger records by id
             self.essences = [] # direct acces to essence instance by id
-            self.formula = None
+            self.formula = Store()
             self._singleton_init_done = True
 
     def update_formula(self, formula, val=None):
@@ -39,11 +39,8 @@ class ttLedger:
         :param val: used if formula is a string to create a key, val pair
         :type val: any, optional
         """
-        with self._lock.write_access():
-            from TaskTonic.ttEssence import ttEssence
-            if self.formula is None:
-                self.formula = DataShare()
-            self.formula.set(formula, val)
+
+        self.formula.set(formula, val)
 
     def update_record(self, ess_id, data):
         if 0 > ess_id >= len(self.records) or self.essences[ess_id] is None:

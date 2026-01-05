@@ -77,6 +77,15 @@ class TrafficLightSimulation(ttFormula):
     The Formula to set up and launch the traffic light simulation.
     """
 
+    def creating_formula(self):
+        return {
+            'tasktonic/log/to': 'screen',
+            'tasktonic/log/default': 'full',
+        }
+
+    # def creating_main_catalyst(self):
+    #     pass
+
     def creating_starting_tonics(self):
         """
         This method is called by the framework to create the initial Tonics.

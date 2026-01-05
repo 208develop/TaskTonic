@@ -16,7 +16,7 @@ class ttCatalyst(ttTonic):
     'sparkles' from the queue and executes them for the correct tonics
     """
 
-    def __init__(self, name=None, context=None, log_mode=None):
+    def __init__(self, name=None, context=None, log_mode=None, dont_start_yet=False):
         """
         Initializes the Catalyst and its master queue.
 
@@ -26,7 +26,7 @@ class ttCatalyst(ttTonic):
         :param fixed_id: An optional fixed ID for this Catalyst.
         """
         # The master queue that all Tonics managed by this Catalyst will use.
-        self.catalyst_queue = queue.Queue()
+        self.catalyst_queue = self.new_catalyst_queue()
         self.extra_sparkles = []
         self.catalyst = self  # Tonics have to have a catalyst
         # internals
@@ -38,9 +38,11 @@ class ttCatalyst(ttTonic):
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
         super().__init__(name=name, context=context, log_mode=log_mode)
 
-        if self.id > 0: # id 0 (main catalyst) will be started in formula
+        if self.id > 0 and not dont_start_yet: # id 0 (main catalyst) will be started in formula
             self.start_sparkling()
 
+    def new_catalyst_queue(self):
+        return queue.Queue()
 
     def start_sparkling(self):
         """
@@ -108,6 +110,7 @@ class ttCatalyst(ttTonic):
 
         :param tonic_id: The Tonic instance that has finished.
         """
+
         if tonic_id in self.tonics_sparkling:
             self.tonics_sparkling.remove(tonic_id)
 

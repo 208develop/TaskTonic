@@ -15,15 +15,17 @@ class ttFormula():
             ('tasktonic/project/status', 'starting'),
             ('tasktonic/log/to', 'screen'),
             ('tasktonic/log/default', ttLog.QUIET),
-            ('tasktonic/log/services[]/name', 'off'),
-            ('tasktonic/log/services[-1]/service', ttLogService), # base class, without logging
-            ('tasktonic/log/services[]/name', 'screen'),
-            ('tasktonic/log/services[-1]/service', ttScreenLogService),
-            ('tasktonic/log/services[-1]/arguments', {}),
+            ('tasktonic/log/service#', 'off'),
+            ('tasktonic/log/service./service', ttLogService), # base class, without logging
+            ('tasktonic/log/service#', 'screen'),
+            ('tasktonic/log/service./service', ttScreenLogService),
+            ('tasktonic/log/service./arguments', {}),
         ))
         self.starting_at = time.time()
 
-        self.update_formula(self.creating_formula())
+        app_formula = self.creating_formula()
+        if app_formula: self.ledger.update_formula(app_formula)
+
         self.creating_main_catalyst()
         main_catalyst = self.ledger.get_essence_by_id(0)
         if not isinstance(main_catalyst, ttCatalyst):
@@ -45,9 +47,6 @@ class ttFormula():
             for essence in self.ledger.essences[1:].copy():
                 if hasattr(essence, '_ttss__main_catalyst_finished'):
                     essence._ttss__main_catalyst_finished()
-
-    def update_formula(self, formula):
-        self.ledger.update_formula(formula)
 
     def creating_formula(self):
         return None

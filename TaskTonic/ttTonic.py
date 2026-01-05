@@ -1,3 +1,5 @@
+from sys import prefix
+
 from .ttEssence import ttEssence
 import re, threading, copy
 
@@ -12,7 +14,7 @@ class ttTonic(ttEssence):
     on a queue, which is then processed by an external execution loop.
     """
 
-    def __init__(self, name=None, context=None, log_mode=None):
+    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
         """
         Initializes the Tonic instance, discovers sparkles, and calls startup methods.
 
@@ -24,7 +26,8 @@ class ttTonic(ttEssence):
 
         # bind to catalyst
         if not hasattr(self, 'catalyst_queue'):
-            self.catalyst = context.catalyst if hasattr(context, 'catalyst') \
+            self.catalyst = catalyst if catalyst is not None \
+                else context.catalyst if hasattr(context, 'catalyst') \
                 else self.ledger.get_essence_by_id(0)  # main catalyst
             self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
 
@@ -45,6 +48,19 @@ class ttTonic(ttEssence):
         if hasattr(self, 'ttse__on_start'):
             self.ttse__on_start()
 
+        if hasattr(self, '_auto_bind'):
+            for auto_bind in self._auto_bind:
+                prefix, sparkle, binder = auto_bind
+                binder(prefix, sparkle)
+
+    def _get_custom_prefixes(self):
+        """
+        Hook for syntax extension with new prefixes and the binding method to call
+         for binding an event to the sparkle (ea. {'ttqt': self.qt_event_binder}).
+        """
+        return {}
+
+
     def _sparkle_init(self):
         """
         Performs a one-time, intensive setup to discover all sparkles, build
@@ -52,9 +68,16 @@ class ttTonic(ttEssence):
         is the core of the Tonic's introspection and setup logic.
         """
 
+        prefix_extension = self._get_custom_prefixes()
+        prefixes = ['ttsc', 'ttse', 'tts', '_tts', '_ttss']
+        prefixes.extend(prefix_extension.keys())
+        prefix_pattern = "|".join(prefixes)
+
         # Define the regular expressions used to identify different sparkle types.
-        state_pattern = re.compile(r'^(ttsc|ttse|tts|_tts|_ttss)_([a-zA-Z0-9_]+)__([a-zA-Z0-9_]+)$')
-        general_pattern = re.compile(r'^(ttsc|ttse|tts|_tts|_ttss)__([a-zA-Z0-9_]+)$')
+        # state_pattern = re.compile(f'^({prefix_pattern})_([a-zA-Z0-9_]+)__([a-zA-Z0-9_]+)$')
+        # general_pattern = re.compile(f'^({prefix_pattern})__([a-zA-Z0-9_]+)$')
+        general_pattern = re.compile(f'^({prefix_pattern})__(.+)$')
+        state_pattern = re.compile(f'^({prefix_pattern})_(.+?)__(.+)$')
 
         # --- Phase 1: Discover all implementations from the class hierarchy (MRO) ---
         state_impls, generic_impls = {}, {}
@@ -69,19 +92,20 @@ class ttTonic(ttEssence):
             for name, method in cls.__dict__.items():
                 s_match = state_pattern.match(name)
                 g_match = general_pattern.match(name)
-                if s_match:
+                if g_match:
+                    # Found a generic sparkle (e.g., 'ttsc__initialize')
+                    prefix, sp_name = g_match.groups()
+                    generic_impls[(prefix, sp_name)] = method
+                    sparkle_names.add(sp_name)
+                    prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
+                elif s_match:
                     # Found a state-specific sparkle (e.g., 'ttsc_waiting__process')
                     prefix, state_name, sp_name = s_match.groups()
                     state_impls[(prefix, state_name, sp_name)] = method
                     states.add(state_name)
                     sparkle_names.add(sp_name)
                     prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
-                elif g_match:
-                    # Found a generic sparkle (e.g., 'ttsc__initialize')
-                    prefix, sp_name = g_match.groups()
-                    generic_impls[(prefix, sp_name)] = method
-                    sparkle_names.add(sp_name)
-                    prefixes_by_cmd.setdefault(sp_name, set()).add(prefix)
+
 
         # --- Phase 2: Build fast lookup tables for states ---
         self._state_to_index = {name: i for i, name in enumerate(sorted(list(states)))}
@@ -177,6 +201,14 @@ class ttTonic(ttEssence):
         # --- Phase 5: patch the _execute_sparkle function to normal mode ---
         self._execute_sparkle = self.__exec_sparkle
 
+        # --- Phase 6: prpare for auto binding sparkles for extended syntax
+        auto_bind = []
+        for sparkle in self.sparkles:
+            for prefix, binder in prefix_extension.items():
+                if sparkle.startswith(prefix):
+                    auto_bind.append((prefix, sparkle, binder))
+        if auto_bind: self._auto_bind = auto_bind
+
         # Log the results of the discovery process.
         self.log(system_flags={'states': self._index_to_state, 'sparkles': self.sparkles})
 
@@ -202,7 +234,7 @@ class ttTonic(ttEssence):
         else:
             return
 
-        if self.state != -1:
+        if self.state >= 0:
             self.catalyst._execute_extra_sparkle(self, self._direct_execute_ttse__on_exit)
         if to_state >= 0:
             self.catalyst._execute_extra_sparkle(self, self._ttinternal_state_change_to, to_state)
@@ -252,9 +284,12 @@ class ttTonic(ttEssence):
         """
         sparkle execution in normal mode
         """
+        if self.id < 0: return  # Tonic already unregistered (probably old sparkle in queue)
+
         interface_name = sparkle_method.__name__
         if interface_name.startswith('_ttss') \
-                or interface_name in ['ttse__on_finished', 'ttse__on_exit', 'ttse__on_service_context_finished', '_ttinternal_state_machine_stop']:
+        or interface_name in ['ttse__on_finished', 'ttse__on_exit',
+                              'ttse__on_service_context_finished', '_ttinternal_state_machine_stop']:
             self.__exec_sparkle(sparkle_method, *args, **kwargs)
 
     def get_current_state_name(self):

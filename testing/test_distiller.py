@@ -2,7 +2,7 @@
 import pytest
 import time
 from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot
-from TaskTonic.utils import ttDistiller
+from TaskTonic.ttTonicStore import ttDistiller
 
 
 # --- Definitie van de Device Under Test (DUT) ---
