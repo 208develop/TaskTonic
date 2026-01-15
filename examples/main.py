@@ -2,8 +2,8 @@ from TaskTonic import *
 from TaskTonic.ttLoggers import ttScreenLogService
 
 class MyProcess(ttTonic):
-    def __init__(self, context=None, dup_at=0):
-        super().__init__(context=context)
+    def __init__(self, dup_at=0):
+        super().__init__()
         self.dup_at = dup_at
 
     def ttse__on_start(self):
@@ -18,16 +18,16 @@ class MyProcess(ttTonic):
         else:
             if count == self.dup_at:
                 self.log('duplicate')
-                self.bind(MyProcess, dup_at=0)
+                MyProcess(dup_at=0)
             self._tts__process(count)
 
     def ttse__on_finished(self):
         self.log('Finished')
 
-class MyMachine(ttCatalyst):
+class MyMachine(ttTonic):
     def ttse__on_start(self):
         self.to_state('init')
-        self.tmr = self.bind(ttTimerRepeat, .5, name='stepper', sparkle_back=self.ttsc__step)
+        self.tmr = ttTimerRepeat(.5, name='stepper', sparkle_back=self.ttsc__step)
         self.log(f'Timer: {self.tmr}')
 
     def _ttss__main_catalyst_finished(self):

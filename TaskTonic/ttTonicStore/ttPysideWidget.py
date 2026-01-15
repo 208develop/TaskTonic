@@ -2,6 +2,7 @@ import re
 from PySide6.QtWidgets import QWidget, QMainWindow
 from PySide6.QtCore import QObject, Qt
 
+from .. import ttLedger
 from ..ttEssence import __ttEssenceMeta
 from ..ttTonic import ttTonic
 
@@ -9,7 +10,7 @@ from ..ttTonic import ttTonic
 PySideMeta = type(QObject)
 
 
-class ttPysideMeta(__ttEssenceMeta, PySideMeta):
+class ttPysideMeta(PySideMeta, __ttEssenceMeta):
     """
     Lost het metaclass conflict op tussen TaskTonic (ttEssence) en PySide6 (QObject).
     """
@@ -72,13 +73,14 @@ class ttPysideMixin:
 
 class ttPysideWidget(ttPysideMixin, QWidget, ttTonic, metaclass=ttPysideMeta):
     def __init__(self, parent=None, **kwargs):
+        ttTonic.__init__(self, **kwargs)
+
         qt_parent = parent
-        tt_context = kwargs.get('context')
+        tt_context = self.sparkle_stack.stack_essence(-1)
         if qt_parent is None and isinstance(tt_context, QObject):
             qt_parent = tt_context
 
         QWidget.__init__(self, qt_parent)
-        ttTonic.__init__(self, **kwargs)
         self.setup_ui()
 
     def setup_ui(self):
@@ -92,19 +94,21 @@ class ttPysideWidget(ttPysideMixin, QWidget, ttTonic, metaclass=ttPysideMeta):
             self.finish()
 
     def ttse__on_finished(self):
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        # self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.close()
 
 
 class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta):
     def __init__(self, parent=None, **kwargs):
+        ttTonic.__init__(self, **kwargs)
+
         qt_parent = parent
-        tt_context = kwargs.get('context')
+        tt_context = self.sparkle_stack.stack_essence(-1)
+
         if qt_parent is None and isinstance(tt_context, QObject):
             qt_parent = tt_context
 
         QMainWindow.__init__(self, qt_parent)
-        ttTonic.__init__(self, **kwargs)
 
     def closeEvent(self, event):
         if self.finishing:
@@ -114,5 +118,5 @@ class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta
             self.finish()
 
     def ttse__on_finished(self):
-        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        # self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
         self.close()

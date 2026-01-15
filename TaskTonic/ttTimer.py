@@ -14,7 +14,7 @@ class ttTimer(ttEssence):
             raise RuntimeError('ttTimer is a base class and not meant to be instantiated')
         self.expire = -1  # -1 -> timer not running
         self.period = 10  # 10 sec if not initialed
-        self.catalyst = context.catalyst
+        self.catalyst = self.context.catalyst
         if sparkle_back is None:
             self.sparkle_back = self.context.ttse__on_timer
         else:
@@ -23,9 +23,6 @@ class ttTimer(ttEssence):
     # used to sort timers in the list
     def __lt__(self, other):
         return self.expire < other.expire
-
-    def __str__(self):
-        return super().__str__() + f', expires in {self.expire - time.time():3.3f}sec'
 
     def _finished(self):
         """

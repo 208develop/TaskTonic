@@ -16,12 +16,10 @@ class ttCatalyst(ttTonic):
     'sparkles' from the queue and executes them for the correct tonics
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, dont_start_yet=False):
+    def __init__(self, name=None, log_mode=None, dont_start_yet=False):
         """
         Initializes the Catalyst and its master queue.
 
-        :param context: The context in which this Catalyst operates.
-                        For the main Catalyst, this could be a top-level object.
         :param name: An optional name for this Catalyst.
         :param fixed_id: An optional fixed ID for this Catalyst.
         """
@@ -36,7 +34,7 @@ class ttCatalyst(ttTonic):
         self.timers = []
 
         # Initialize the base ttTonic functionality. The Catalyst is also a Tonic.
-        super().__init__(name=name, context=context, log_mode=log_mode)
+        super().__init__(name=name, log_mode=log_mode)
 
         if self.id > 0 and not dont_start_yet: # id 0 (main catalyst) will be started in formula
             self.start_sparkling()
@@ -69,6 +67,7 @@ class ttCatalyst(ttTonic):
         is set to False.
         """
         self.thread_id = threading.get_ident()
+        self.sparkle_stack = self.ledger.sparkle_stack.init_for_thread(self)
         self.sparkling = True
         timeout = 5  # seconds
 
@@ -80,10 +79,14 @@ class ttCatalyst(ttTonic):
                 next_timer_expire = self.timers[0].check_on_expiration(reference) if self.timers else 60
             try:
                 instance, sparkle, args, kwargs = self.catalyst_queue.get(timeout=next_timer_expire)
+                self.sparkle_stack.push(instance, sparkle.__name__)
                 instance._execute_sparkle(sparkle, *args, **kwargs)
+                self.sparkle_stack.pop()
                 while self.extra_sparkles:
                     instance, sparkle, args, kwargs = self.extra_sparkles.pop(0)
+                    self.sparkle_stack.push(instance, sparkle.__name__)
                     instance._execute_sparkle(sparkle, *args, **kwargs)
+                    self.sparkle_stack.pop()
             except queue.Empty: pass
 
     def _execute_extra_sparkle(self, instance, sparkle, *args, **kwargs):
@@ -121,6 +124,13 @@ class ttCatalyst(ttTonic):
     def _ttss__main_catalyst_finished(self):
         # Default: Stop when main catalyst is finished. You can override this method for other behavior
         self.finish()
+
+    # def _ttss__on_binding_finished(self, ess_id):
+    #     super()._ttss__on_binding_finished(ess_id)
+    #     if not self.bindings and self.tonics_sparkling:
+    #         # no more bindings, but stil tonics bound -> finish bound tonics
+    #         for tonic_id in self.tonics_sparkling:
+    #             self.ledger.get_essence_by_id(tonic_id).finish()
 
     def _finished(self):
         """

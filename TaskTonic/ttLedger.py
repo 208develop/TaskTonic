@@ -1,6 +1,6 @@
 from .internals.RWLock import RWLock
-# from .internals.DataShare import DataShare
 from .internals.Store import Store
+from .internals.SparkleStack import ThreadSparkleStack, SparkleStack
 
 class ttLedger:
     """A thread-safe singleton class that serves as the central registry for all ttEssence instances.
@@ -28,6 +28,8 @@ class ttLedger:
             self.records = [] # ledger records by id
             self.essences = [] # direct acces to essence instance by id
             self.formula = Store()
+            self.sparkle_stack = ThreadSparkleStack()
+            # init thread data, a data structure depending on active thread.
             self._singleton_init_done = True
 
     def update_formula(self, formula, val=None):

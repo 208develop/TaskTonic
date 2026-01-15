@@ -5,33 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48ab1892-fa2b-4b20-98c5-b6256cf84c67" name="Changes" comment="feat(ttDistiller) New class, the distiller, a test bench to test tonics (with or without pytest)">
-      <change afterPath="$PROJECT_DIR$/TaskTonic/internals/Store.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPyside6Ui.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPysideWidget.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttStore.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_documents/_introduction.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/_documents/ttStore.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/demo_data_store.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/hello_world.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/ui_main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/testing/test_store.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TaskTonic/internals/SparkleStack.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/internals/DataShare.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/internals/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/internals/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttCatalyst.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttEssence.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttEssence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttFormula.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttFormula.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttLedger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLedger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/ttLoggers/ttScreenLogger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLoggers/ttScreenLogger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttLogger.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttLogger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTimer.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTimer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/internals/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/utils/ttDataShare.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/internals/DataShare.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/utils/ttDistiller.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttDistiller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TaskTonic/utils/ttRWLock.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/internals/RWLock.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_documents/on_start.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttDistiller.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttDistiller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPyside6Ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPyside6Ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPysideWidget.py" beforeDir="false" afterPath="$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPysideWidget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/Tonic Services.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/Tonic Services.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/_introduction.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/_introduction.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/finisching flow.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/finisching flow.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_documents/ttStore.md" beforeDir="false" afterPath="$PROJECT_DIR$/_documents/ttStore.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/TrafficLigthSimulationByGemini.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/TrafficLigthSimulationByGemini.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/binding_demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/binding_demo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/demo_data_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/demo_data_store.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/dut_in_distiller.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/dut_in_distiller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/hello_world.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/hello_world.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ui_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ui_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testing/test_distiller.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_distiller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testing/test_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing/test_store.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,17 +87,17 @@
     "Python tests.pytest in test_utils_ttDataShare.py.executor": "Run",
     "Python.TrafficLigthSimulationByGemini.executor": "Run",
     "Python.binding_demo.executor": "Run",
-    "Python.demo_data_store.executor": "Debug",
+    "Python.demo_data_store.executor": "Run",
     "Python.dut_in_distiller.executor": "Run",
     "Python.hello_world.executor": "Run",
     "Python.ip_communicatie.executor": "Run",
     "Python.main.executor": "Run",
     "Python.py_to_test_stuf_and_trow_away.executor": "Run",
     "Python.testLedger.executor": "Run",
-    "Python.ttCatalyst.executor": "Run",
+    "Python.ttCatalyst.executor": "Debug",
     "Python.ttDataShare.executor": "Run",
     "Python.ttDistiller.executor": "Run",
-    "Python.ttEssence.executor": "Debug",
+    "Python.ttEssence.executor": "Run",
     "Python.ttLedger.executor": "Run",
     "Python.ttPyside6Ui.executor": "Run",
     "Python.ttScreenLogger.executor": "Run",
@@ -117,7 +119,7 @@
       <recent name="G:\Mijn Drive\python projects\TaskTonic" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.ui_main">
     <configuration name="binding_demo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="TaskTonic" />
       <option name="ENV_FILES" value="" />
@@ -248,11 +250,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.demo_data_store" />
-        <item itemvalue="Python.binding_demo" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.ui_main" />
         <item itemvalue="Python.ip_communicatie" />
+        <item itemvalue="Python.ui_main" />
+        <item itemvalue="Python.binding_demo" />
+        <item itemvalue="Python.demo_data_store" />
+        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -352,13 +354,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/TaskTonic/ttTonic.py</url>
-          <line>326</line>
+          <line>328</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/TaskTonic/ttTonic.py</url>
-          <line>346</line>
+          <line>348</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/TaskTonic/ttTonicStore/ttPyside6Ui.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="28" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

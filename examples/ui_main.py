@@ -50,7 +50,6 @@ class TrafficLightWidget(ttPysideWidget):
     def ttqt_red__btn_next__pressed(self):
         self.log('button pressed in state red')
 
-
     # --- Lifecycle ---
 
     def ttse__on_start(self):
@@ -65,6 +64,9 @@ class TrafficLightWidget(ttPysideWidget):
         self.lbl.setStyleSheet(f"font-size: 30px; padding: 20px; background: {colors.get(state)}; color: black;")
 
         self.bind(ttTimerSingleShot, seconds=2)
+
+    # def ttse__on_timer(self, info):
+    #     self.log("Timer!! -> ga naar GROEN")
 
     def ttse_red__on_exit(self):
         self.log('exit red')
@@ -99,7 +101,7 @@ class TrafficFormula(ttFormula):
         ttPyside6Ui(name='main_catalyst')
 
     def creating_starting_tonics(self):
-        MainWindow(context=-1)
+        MainWindow()
 
 
 if __name__ == "__main__":

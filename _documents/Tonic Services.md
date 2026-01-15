@@ -243,7 +243,7 @@ class IpConnectionService(ConnectionService):
 class MyTonic(ttTonic):
   def ttse__on_start(self):
     from services.connection_service import ConnectionService
-    self.conn = self.bind(ConnectionService) # use the service base class
+    self.conn = ConnectionService() # use the service base class
     self.conn.ttsc__connect()
 
 

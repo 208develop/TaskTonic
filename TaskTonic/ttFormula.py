@@ -7,6 +7,7 @@ import time
 class ttFormula():
     def __init__(self):
         self.ledger = ttLedger()
+        self.sparkle_stack = self.ledger.sparkle_stack.init_for_thread()
 
         from .ttLoggers.ttScreenLogger import ttLogService, ttScreenLogService
         self.ledger.update_formula((
@@ -24,14 +25,17 @@ class ttFormula():
         self.starting_at = time.time()
 
         app_formula = self.creating_formula()
-        if app_formula: self.ledger.update_formula(app_formula)
+        if app_formula:
+            self.ledger.update_formula(app_formula)
 
         self.creating_main_catalyst()
         main_catalyst = self.ledger.get_essence_by_id(0)
         if not isinstance(main_catalyst, ttCatalyst):
             raise RuntimeError('Main catalyst (ID 0) in formula is not a ttCatalyst instance')
 
+        self.sparkle_stack.push(self.ledger.get_essence_by_id(0), '__formula__')
         self.creating_starting_tonics()
+        self.sparkle_stack.pop()
 
         if not self.ledger.formula.get('tasktonic/testing/dont_start_catalysts', False):
             self.ledger.update_formula('tasktonic/project/status', 'start_catalysts')

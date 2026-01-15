@@ -26,7 +26,7 @@ class TrafficLight(ttTonic):
         """
         self.log("Traffic light is starting up...")
         self.to_state('red')
-        # self.timer = self.bind(ttTimerPausing, 2, sparkle_back=self.ttsc__change_state)
+        # self.timer = ttTimerPausing(2, sparkle_back=self.ttsc__change_state)
 
     def ttse__on_enter(self):
         """
@@ -40,8 +40,8 @@ class TrafficLight(ttTonic):
 
         # Create a single-shot timer that will fire when this state should end.
         # Its callback will trigger the state change.
-        self.bind(ttTimerSingleShot, seconds=duration, sparkle_back=self.ttsc__change_state)
-        # self.timer.pause_ends()
+        ttTimerSingleShot(seconds=duration, sparkle_back=self.ttsc__change_state)
+
 
     def ttse__on_exit(self):
         """

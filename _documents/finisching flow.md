@@ -147,7 +147,7 @@ class LightSwitch(ttTonic):
 
 Tonics are hierarchical. When a Tonic creates a child (using `bind`), it becomes the child's **Context**.
 
-* **Binding:** `self.child = self.bind(WorkerTonic)`
+* **Binding:** `self.child = WorkerTonic()` auto binds to current context (in sparkle_stack)
 * **Automatic Cleanup:** If a parent finishes, all children are automatically finished.
 
 ---
@@ -184,7 +184,7 @@ Any Tonic can access the service. The first call creates it; subsequent calls re
 
 ```python
 # In some worker Tonic
-self.db = self.bind(DatabaseService, 
+self.db = DatabaseService(
                     srv_db_url="sqlite:///",   # Used only on 1st creation
                     ctxt_user_id="Worker_1")   # Used every time
 ```
@@ -239,7 +239,7 @@ Don't use `time.sleep()`. Use timers to keep the Catalyst running smoothly.
 from TaskTonic import ttTimerRepeat
 
 # Bind a timer to call 'ttsc__tick' every 1 second
-self.bind(ttTimerRepeat, seconds=1, sparkle_back=self.ttsc__tick)
+ttTimerRepeat(seconds=1, sparkle_back=self.ttsc__tick)
 ```
 
 **
@@ -263,7 +263,7 @@ The Catalyst runs a loop that:
 3. **State:** Use `to_state()` to switch contexts; use `ttsc_state__name` for specific logic.
 4. **Blocking:** **Never block** execution (no long `sleep` or heavy computation in the main thread). Use sub-tonics or
    threads for heavy lifting.
-5. **Hierarchy:** Use `self.bind()` to create children so cleanup is automatic.
+5. **Hierarchy:** Create ttEssence (or subclass) creates children so cleanup automatic.
 
 
 

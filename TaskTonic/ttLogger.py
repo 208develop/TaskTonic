@@ -14,6 +14,7 @@ class ttLogOff(ttEssence):
 
 class ttLogService(ttCatalyst):
     _tt_is_service = 'log_service'
+    _tt_root_context = True
     _tt_force_stealth_logging = True
 
     def _ttss__main_catalyst_finished(self):

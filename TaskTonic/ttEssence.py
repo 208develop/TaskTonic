@@ -29,19 +29,21 @@ class __ttEssenceMeta(type):
         instance creation and service/singleton retrieval.
         """
         from .ttLedger import ttLedger
-        service_name = kwargs.pop('service', None)
-        if service_name is None:
-            service_name = getattr(cls, '_tt_is_service', None)
+        ledger = ttLedger()
+        cls.sparkle_stack = ledger.sparkle_stack.get()
+
+        service_name = kwargs.pop('service', getattr(cls, '_tt_is_service', None))
         is_service = service_name is not None
 
         if not is_service:
             # --- STANDARD PATH (NON-SINGLETON) ---
             instance = super().__call__(*args, **kwargs)
+            if hasattr(instance, '_sparkle_init'): instance._sparkle_init()
             instance._init_post_action()
+            cls.sparkle_stack.pop()
             return instance
 
         # --- SERVICE PATH (SINGLETON) ---
-        ledger = ttLedger()
 
         existing_instance = ledger.get_service_essence(service_name)
         kwargs['name'] = service_name
@@ -49,28 +51,32 @@ class __ttEssenceMeta(type):
         if existing_instance is None:
             # --- CREATE NEW SERVICE (RUNS ONCE) ---
             instance = super().__call__(*args, **kwargs)
+            if hasattr(instance, '_sparkle_init'): instance._sparkle_init()
             ledger.update_record(instance.id, {'service': service_name})
             instance.service_context = []
             instance._init_post_action()
         else:
             # --- RETURN EXISTING SERVICE  and add context to service_context list ---
             instance = existing_instance
-            context = kwargs.get('context', None)
-            context = context if isinstance(context, ttEssence) \
-                else ledger.get_essence_by_id(context) if isinstance(context, int) \
-                else None
+
+            cls.sparkle_stack.push(instance, "__init__")
+            context = cls.sparkle_stack.stack_essence(-2)
             if context is None:
                 raise RuntimeError(f"Context can't be None in service_context")
+
+            if instance.id not in context.bindings: context.bindings.append(instance.id) # no init for service, so bind
             instance.service_context.append(context)
 
         # Call _init_service EVERY TIME (if it exists)
         if hasattr(instance, '_init_service'):
             instance._init_service(*args, **kwargs)
 
+        cls.sparkle_stack.pop()
+
         return instance
 
 
-T = TypeVar('T', bound='ttEssence')
+Binding = TypeVar('Binding', bound='ttEssence')
 
 class ttEssence(metaclass=__ttEssenceMeta):
     """A base class for all active components within the TaskTonic framework.
@@ -80,7 +86,7 @@ class ttEssence(metaclass=__ttEssenceMeta):
     registers itself with the central ttLedger upon creation to receive a unique ID.
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, **kwargs):
+    def __init__(self, name=None, log_mode=None, **kwargs):
         """
         Initializes a new ttEssence instance.
 
@@ -91,10 +97,6 @@ class ttEssence(metaclass=__ttEssenceMeta):
         :param name: An optional name for this essence. If not provided, a name
                      will be generated based on its ID and class name.
         :type name: str, optional
-        :param context: The parent context for this essence. Can be another
-                        ttEssence instance, an ID of an existing essence (integer),
-                        or None or -1 for a top-level essence.
-        :type context: ttEssence or int or None
         :param log_mode: The initial logging mode for this essence.
         :type log_mode: ttLog, str, or int, optional
         :param kwargs: Catches any additional keyword arguments, allowing
@@ -102,18 +104,26 @@ class ttEssence(metaclass=__ttEssenceMeta):
                        (e.g., `srv_api_key`) without breaking this
                        base class `__init__`.
         """
+        # safety to prevent double initialization at multiple inheritance
+        if getattr(self, 'id', -1) != -1: return
+
         from .ttLedger import ttLedger
         self.ledger = ttLedger()  # is singleton class, so the ledger is shared
-        self.my_record = {}  # record to add to ledger
+        self.sparkle_stack.push(self, '__init__')
 
-        self.context = context if isinstance(context, ttEssence) \
-            else self.ledger.get_essence_by_id(context) if (isinstance(context, int) and context >= 0) \
-            else None
+        self.my_record = {}  # record to add to ledger
 
         self.bindings = []
         self.id = self.ledger.register(self)
         self.name = name if isinstance(name, str) else f'{self.id:02d}.{self.__class__.__name__}'
         self.finishing = False
+
+        if getattr(self, '_tt_root_context', False): self.context = None
+        else: self.context = self.sparkle_stack.stack_essence(-2)  # look for the caller
+
+        if self.context is not None and self.id not in self.context.bindings:
+            self.context.bindings.append(self.id)
+
         self.my_record.update({
             'id': self.id,
             'name': self.name,
@@ -145,10 +155,11 @@ class ttEssence(metaclass=__ttEssenceMeta):
             # Essence is forcing stealth mode or no log_to set, so also no logservice needed
             self.set_log_mode(ttLog.STEALTH)
         else:
-            self._logger = self.bind(ttLogService)
+            self._logger = ttLogService()
 
             if log_mode is None:
-                log_mode = self.context._log_mode if self.context \
+                log_mode = \
+                    self.context._log_mode if (self.context and self.context._log_mode) \
                     else log_formula.get('default', ttLog.STEALTH) if self.ledger.formula \
                     else ttLog.STEALTH
             self.set_log_mode(log_mode)
@@ -192,8 +203,10 @@ class ttEssence(metaclass=__ttEssenceMeta):
         return self
 
     # ledger functionality
-    def bind(self, essence: Union[Type[T], T], *args, **kwargs) -> T:
+    def bind(self, essence: Union[Type[Binding], Binding], *args, **kwargs) -> Binding:
         """Bind a child essence (subject) to this essence.
+
+        !!!! Kept for backwards compatibility
 
         Called to create, start, and bind an essence as a child
         of the current context.
@@ -207,16 +220,14 @@ class ttEssence(metaclass=__ttEssenceMeta):
         """
         if isinstance(essence, ttEssence):
             e = essence
-            service_context = e.service_context if hasattr(e, 'service_context') else []
-            if e.context != self and self not in service_context:
-                raise RuntimeError(f"Add context to essence to bind! "
-                                   f"({e.__class__.__name__} context: {e.context} / service_context: {service_context})")
         elif issubclass(essence, ttEssence):
-            e = essence(*args, context=self, **kwargs)
+            e = essence(*args, **kwargs)
         else:
             raise TypeError('Expected a class reference or an instance of a ttEssence')
 
-        self.bindings.append(e.id)
+        import warnings
+        warnings.warn("Using bind is deprecated, please remove!", DeprecationWarning)
+
         return e
 
     def unbind(self, ess_id):

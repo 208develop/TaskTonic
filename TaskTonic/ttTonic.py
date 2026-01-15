@@ -14,7 +14,7 @@ class ttTonic(ttEssence):
     on a queue, which is then processed by an external execution loop.
     """
 
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
+    def __init__(self, name=None, log_mode=None, catalyst=None):
         """
         Initializes the Tonic instance, discovers sparkles, and calls startup methods.
 
@@ -22,12 +22,13 @@ class ttTonic(ttEssence):
         :param name: An optional name for the tonic. Defaults to the class name.
         :param fixed_id: An optional fixed ID for the tonic.
         """
-        super().__init__(name=name, context=context, log_mode=log_mode)
+        super().__init__(name=name, log_mode=log_mode)
 
         # bind to catalyst
         if not hasattr(self, 'catalyst_queue'):
-            self.catalyst = catalyst if catalyst is not None \
-                else context.catalyst if hasattr(context, 'catalyst') \
+            self.catalyst = \
+                catalyst if catalyst is not None \
+                else self.context.catalyst if hasattr(self.context, 'catalyst') \
                 else self.ledger.get_essence_by_id(0)  # main catalyst
             self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
 
@@ -66,6 +67,8 @@ class ttTonic(ttEssence):
         Performs a one-time, intensive setup to discover all sparkles, build
         the dispatch system, and create the public-facing callable methods. This
         is the core of the Tonic's introspection and setup logic.
+
+        Called from the Essence metaclass after completion of __init__
         """
 
         prefix_extension = self._get_custom_prefixes()

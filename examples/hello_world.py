@@ -1,8 +1,8 @@
 from TaskTonic import *
 
 class HelloWorld(ttTonic):
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
+    def __init__(self, name=None, log_mode=None):
+        super().__init__(name, log_mode)
 
     def ttse__on_start(self):
         self.tts__hello()
@@ -43,4 +43,4 @@ class myApp(ttFormula):
 
 
 if __name__ == '__main__':
-    myApp(
+    myApp()

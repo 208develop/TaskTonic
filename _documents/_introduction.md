@@ -183,7 +183,7 @@ class DatabaseService(ttTonic):
         pass
 
 # Usage in a worker tonic
-self.db = self.bind(DatabaseService)
+self.db = DatabaseService()
 ```
 
 ---
@@ -211,7 +211,7 @@ If no `sparkle_back` is provided, the timer looks for `ttse__on_timer` in the pa
 
 ```python
 # Default callback (calls self.ttse__on_timer)
-self.bind(ttTimerSingleShot, 5.0)
+ttTimerSingleShot(5.0)
 
 def ttse__on_timer(self, info):
     self.log("5 seconds passed")

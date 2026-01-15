@@ -7,12 +7,12 @@ class E(ttEssence):
 
 class T(ttTonic):
     def ttse__on_start(self):
-        self.bind(S)
+        S()
         pass
 
     def ttsc__bindings_in_row(self, cnt):
         self.log(f'Create {cnt} bindings as row')
-        t = self.bind(T)
+        t =T()
         self.log(self.bindings)
         cnt -= 1
         if cnt > 0:
@@ -32,23 +32,23 @@ class Demo(ttTonic):
         self.log(json.dumps(self.ledger.records, indent=4))
 
     def ttse__on_start(self):
-        self.bind(S)
+        S()
         self.log('== Binding at Tonic level ==')
         self.ttsc__4bindings_in_self()
 
     def ttsc__4bindings_in_self(self):
         self.log('Create 4 bindings in self')
         for i in range(4):
-            self.bind(T)
+            T()
         self.log(self.bindings)
         self.ttsc__bindings_in_row(4)
 
     def ttsc__bindings_in_row(self, cnt):
         self.log(f'Create {cnt} bindings as row')
-        t = self.bind(T)
+        t = T()
         t.ttsc__bindings_in_row(cnt-1)
         self.log(self.bindings)
-        self.bind(ttTimerSingleShot, 1, sparkle_back=self.ttsc__finish_demo)
+        ttTimerSingleShot(1, sparkle_back=self.ttsc__finish_demo)
         self.log(self.bindings)
 
     def ttsc__finish_demo(self, timer_info):

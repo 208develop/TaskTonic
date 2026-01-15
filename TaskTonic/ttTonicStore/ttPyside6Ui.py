@@ -28,6 +28,7 @@ class PysideQueue(queue.Queue):
 
 class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
     def __init__(self, name=None, app_args=None):
+        ttCatalyst.__init__(self, name=name)
         QObject.__init__(self)
         if QApplication.instance():
             self.app = QApplication.instance()
@@ -37,7 +38,6 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
         self._heartbeat_timer = QTimer(self)
         self._heartbeat_timer.setSingleShot(True)
         self._heartbeat_timer.timeout.connect(self._on_qt_timer_timeout)
-        ttCatalyst.__init__(self, name=name)
 
     def new_catalyst_queue(self):
         return PysideQueue(catalyst_ui=self)
@@ -48,6 +48,8 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
 
         self._schedule_next_timer()
         print("[ttPyside6Ui] Starting Qt Event Loop...")
+        self.sparkle_stack.catalyst = self
+
         self.app.exec()
         super().sparkle()  # finish last TaskTonic calls (if any) after ui ended
 
@@ -55,18 +57,17 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
         if event.type() == SparkleEvent.EVENT_TYPE:
             try:
                 item = self.catalyst_queue.get_nowait()
-                instance, method, args, kwargs = item
-
-                if hasattr(instance, '_execute_sparkle'):
-                    # FIX: Unpack args correctly
-                    instance._execute_sparkle(method, *args, **kwargs)
+                instance, sparkle, args, kwargs = item
+                self.sparkle_stack.push(instance, sparkle.__name__)
+                instance._execute_sparkle(sparkle, *args, **kwargs)
+                self.sparkle_stack.pop()
 
                 self._process_extra_sparkles()
 
             except queue.Empty:
                 pass
             except Exception as e:
-                print(f"[ttPyside6Ui] Error: {e}")
+                raise(f"[ttPyside6Ui] Error: {e}")
             finally:
                 self._schedule_next_timer()
             event.accept()
@@ -76,9 +77,10 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
     def _process_extra_sparkles(self):
         while self.extra_sparkles:
             payload = self.extra_sparkles.pop(0)
-            instance, method, args, kwargs = payload
-            if hasattr(instance, '_execute_sparkle'):
-                instance._execute_sparkle(method, *args, **kwargs)
+            instance, sparkle, args, kwargs = payload
+            self.sparkle_stack.push(instance, sparkle.__name__)
+            instance._execute_sparkle(sparkle, *args, **kwargs)
+            self.sparkle_stack.pop()
 
     def _schedule_next_timer(self):
         reference = time.time()

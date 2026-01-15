@@ -16,6 +16,7 @@ class ttDistiller(ttCatalyst):
     def start_sparkling(self):
         # print('Distiller is setup and ready for testing')
         self.thread_id = threading.get_ident()
+        self.sparkle_stack.catalyst = self
         self.sparkling = True
 
     def sparkle(self,
@@ -80,7 +81,9 @@ class ttDistiller(ttCatalyst):
                 'state': instance.get_current_state_name(),
             }
         })
+        self.sparkle_stack.push(instance, sparkle.__name__)
         instance._execute_sparkle(sparkle, *args, **kwargs)
+        self.sparkle_stack.pop()
         status['sparkle_trace'][-1].update({
             'at_exit': {
                 '@': time.time(),

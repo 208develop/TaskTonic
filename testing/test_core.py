@@ -5,12 +5,18 @@ from TaskTonic import ttEssence, ttFormula
 
 # --- Mock Classes ---
 class SimpleEssence(ttEssence):
-    pass
+    def __init__(self, create_child=False, **kwargs):
+        super().__init__(**kwargs)
+        self.se = SimpleEssence() if create_child else None
+
+    def get_child_essence(self):
+            return self.se
 
 class EssenceWithService(ttEssence):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.srv = self.bind(MockService)
+        self.srv = MockService()
+
 
 class MockService(ttEssence):
     _tt_is_service = "MySingletonService"
@@ -48,12 +54,12 @@ def test_ledger_registration():
     assert main_catalyst.name == 'main_catalyst'
     assert main_catalyst.context is None
 
-    t1 = SimpleEssence(name="Ess1", context=-1)
+    t1 = SimpleEssence(name="Ess1")
     assert t1.id == 1
     assert t1.name == "Ess1"
 
 
-    t2 = SimpleEssence(name="Ess2", context=-1)
+    t2 = SimpleEssence(name="Ess2")
     assert t2.id == 2
     assert t2.name == "Ess2"
 
@@ -67,10 +73,11 @@ def test_ledger_registration():
 def test_parent_child_binding():
     """Test parent-child relaties en automatische cleanup."""
     f = CoreFormula()
-    parent = SimpleEssence(context=-1)
+    parent = SimpleEssence(create_child=True)
 
-    # Bind a child
-    child = parent.bind(SimpleEssence)
+    # get the bound child
+    child = parent.get_child_essence()
+
     assert child.context == parent
     assert child.id in parent.bindings
 

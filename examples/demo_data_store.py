@@ -5,14 +5,14 @@ import random
 
 class OperatorInterface(ttTonic):
 
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
+    def __init__(self, name=None, log_mode=None, catalyst=None):
+        super().__init__(name, log_mode, catalyst)
         self.twin = self.bind(DigitalTwin)
 
     def ttse__on_start(self):
         self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-        self.bind(ttTimerSingleShot, 5, sparkle_back=self.ttse__on_parm_update)
-        self.bind(ttTimerSingleShot, 8, sparkle_back=self.ttse__on_end_program)
+        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
+        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
 
 
     def ttse__on_sensor_update(self, updates):
@@ -25,28 +25,26 @@ class OperatorInterface(ttTonic):
 
     def ttse__on_end_program(self, tmr):
         self.finish()
+        self.catalyst.finish() # stop application
 
 class MyProcess(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
+    def __init__(self, name=None, log_mode=None, catalyst=None):
+        super().__init__(name, log_mode, catalyst)
         self.my_record['auto_finish'] = True
-        self.twin = self.bind(DigitalTwin)
+        self.twin = DigitalTwin()
         self.temp_sens = self.twin.at('sensors/#0')
         self.utmr = None
 
     def ttse__on_start(self):
         self.twin.subscribe("parameters", self.ttse__on_param_update)
-        self.utmr = self.bind(ttTimerRepeat,
-                              self.twin.get('parameters/update_freq', 5),
-                              sparkle_back=self.ttse__on_update_timer)
+        self.utmr = ttTimerRepeat(self.twin.get('parameters/update_freq', 5),
+                                  sparkle_back=self.ttse__on_update_timer)
 
     def ttse__on_param_update(self, updates):
         for path, new, old, source in updates:
             if path == 'parameters/update_freq':
                 self.utmr.stop()
-                self.utmr = self.bind(ttTimerRepeat, new, sparkle_back=self.ttse__on_update_timer)
-
+                self.utmr = ttTimerRepeat( new, sparkle_back=self.ttse__on_update_timer)
 
     def ttse__on_update_timer(self, tmr):
         self.temp_sens['value'].v += random.uniform(-2, 2)
@@ -86,10 +84,10 @@ class myApp(ttFormula):
         super().creating_main_catalyst()
 
     def creating_starting_tonics(self):
-        oi = OperatorInterface(context=0)
-        DigitalTwin(context=oi.id)
-        MyProcess(context=oi.id)
-        # MyProcess(log_mode='full')
+        DigitalTwin()
+        OperatorInterface()
+        MyProcess()
+
 
 
 

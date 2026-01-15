@@ -15,7 +15,7 @@ class DUT(ttTonic):
 
     def ttsc_paused__start_timer(self):
         # Start een timer van 2 seconden
-        self.bind(ttTimerSingleShot, 2)
+        ttTimerSingleShot(2)
         self.to_state('wait_on_timer')
 
     def ttse_wait_on_timer__on_timer(self, info):

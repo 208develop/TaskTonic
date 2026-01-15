@@ -343,14 +343,14 @@ class OperatorInterface(ttTonic):
     def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
         super().__init__(name, context, log_mode, catalyst)
         # Bind to the service
-        self.twin = self.bind(DigitalTwin)
+        self.twin = DigitalTwin()
 
     def ttse__on_start(self):
         # Subscribe to sensor changes
         self.twin.subscribe("sensors", self.ttse__on_sensor_update)
         # Schedule parameter update and end of program
-        self.bind(ttTimerSingleShot, 5, sparkle_back=self.ttse__on_parm_update)
-        self.bind(ttTimerSingleShot, 8, sparkle_back=self.ttse__on_end_program)
+        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
+        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
 
     def ttse__on_sensor_update(self, updates):
         for path, new, old, source in updates:
