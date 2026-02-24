@@ -26,3 +26,6 @@ Documentation = "https://github.com/208develop/TaskTonic/tree/master/_documents"
 [tool.setuptools.packages.find]
 include = ["TaskTonic", "TaskTonic.*"]
 
+[tool.pytest.ini_options]
+testpaths = ["testing"]
+

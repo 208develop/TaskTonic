@@ -6,7 +6,8 @@ from typing import List, Tuple, Any
 # Adjust the import below to match your actual project structure
 # from TaskTonic.ttTonicStore import Store, Item, ttStore
 # For this example, assuming they are available in the context:
-from TaskTonic.ttTonicStore import Store, Item, ttStore
+from TaskTonic.ttTonicStore import ttStore
+from TaskTonic.internals.Store import Store, Item
 
 
 # ======================================================================================================================
