@@ -10,7 +10,7 @@ It allows you to write highly responsive, concurrent applications (like UIs or I
 without the race conditions and headaches of traditional multi-threading. \
 """
 
-readme = "README.md"
+readme = "readme.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,3 +22,7 @@ classifiers = [
 Homepage = "https://github.com/208develop/TaskTonicc"
 Issues = "https://github.com/208develop/TaskTonic/issues"
 Documentation = "https://github.com/208develop/TaskTonic/tree/master/_documents"
+
+[tool.setuptools.packages.find]
+include = ["TaskTonic", "TaskTonic.*"]
+
