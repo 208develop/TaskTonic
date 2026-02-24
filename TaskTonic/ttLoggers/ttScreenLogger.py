@@ -12,7 +12,7 @@ class ttScreenLogService(ttLogService):
         lt = time.localtime(ts)
         l_time_start = f'{time.strftime("%H%M%S", lt)}.{int((ts - int(ts)) * 1000):03d}'
 
-        print(f"[{l_time_start}] TaskTonic log for {prj['name'].v}, started at {time.strftime("%H:%M:%S", lt)}")
+        print(f"[{l_time_start}] TaskTonic log for {prj['name'].v}, started at {time.strftime('%H:%M:%S', lt)}")
         print(41 * '-=')
     def _tt_init_service_base(self, base, *args, **kwargs):
         self.log(close_log=True)
