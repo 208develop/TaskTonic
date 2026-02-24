@@ -2,15 +2,15 @@ import re
 from PySide6.QtWidgets import QWidget, QMainWindow
 from PySide6.QtCore import QObject, Qt
 
-from .. import ttLedger
-from ..ttEssence import __ttEssenceMeta
+from .. import ttLedger, ttSparkleStack
+from ..ttLiquid import __ttLiquidMeta
 from ..ttTonic import ttTonic
 
 # Dynamische resolutie van de Qt Metaclass
 PySideMeta = type(QObject)
 
 
-class ttPysideMeta(PySideMeta, __ttEssenceMeta):
+class ttPysideMeta(__ttLiquidMeta, PySideMeta):
     """
     Lost het metaclass conflict op tussen TaskTonic (ttEssence) en PySide6 (QObject).
     """
@@ -66,7 +66,6 @@ class ttPysideMixin:
         # 5. Verbinden!
         try:
             signal.connect(tonic_wrapper)
-            # print(f"[ttPyside] Bound {w_name}.{s_name} -> {sparkle_name}")
         except Exception as e:
             raise RuntimeError(f"[ttPyside] Failed to connect {sparkle_name}: {e}")
 
@@ -76,8 +75,8 @@ class ttPysideWidget(ttPysideMixin, QWidget, ttTonic, metaclass=ttPysideMeta):
         ttTonic.__init__(self, **kwargs)
 
         qt_parent = parent
-        tt_context = self.sparkle_stack.stack_essence(-1)
-        if qt_parent is None and isinstance(tt_context, QObject):
+        tt_context = ttSparkleStack().get_tonic()
+        if qt_parent is None and isinstance(tt_context, QWidget):
             qt_parent = tt_context
 
         QWidget.__init__(self, qt_parent)
@@ -103,10 +102,10 @@ class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta
         ttTonic.__init__(self, **kwargs)
 
         qt_parent = parent
-        tt_context = self.sparkle_stack.stack_essence(-1)
+        tt_base = self.base
 
-        if qt_parent is None and isinstance(tt_context, QObject):
-            qt_parent = tt_context
+        if qt_parent is None and isinstance(tt_base, QWidget):
+            qt_parent = tt_base
 
         QMainWindow.__init__(self, qt_parent)
 
@@ -115,7 +114,10 @@ class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta
             event.accept()
         else:
             event.ignore()
-            self.finish()
+            self.ttse__on_close_event()
+
+    def ttse__on_close_event(self):
+        self.ttsc__finish()
 
     def ttse__on_finished(self):
         # self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)

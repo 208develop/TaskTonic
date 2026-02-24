@@ -2,7 +2,7 @@ from TaskTonic import *
 import json
 
 
-class E(ttEssence):
+class E(ttLiquid):
     pass
 
 class T(ttTonic):
@@ -13,14 +13,10 @@ class T(ttTonic):
     def ttsc__bindings_in_row(self, cnt):
         self.log(f'Create {cnt} bindings as row')
         t =T()
-        self.log(self.bindings)
+        self.log(self.infusions)
         cnt -= 1
         if cnt > 0:
             t.ttsc__bindings_in_row(cnt)
-
-    # def _ttss__on_binding_finished(self, ess_id):
-    #     super()._ttss__on_binding_finished(ess_id)
-
 
 class S(ttTonic):
     _tt_is_service = 'demo_service'
@@ -40,16 +36,16 @@ class Demo(ttTonic):
         self.log('Create 4 bindings in self')
         for i in range(4):
             T()
-        self.log(self.bindings)
+        self.log(self.infusions)
         self.ttsc__bindings_in_row(4)
 
     def ttsc__bindings_in_row(self, cnt):
         self.log(f'Create {cnt} bindings as row')
         t = T()
         t.ttsc__bindings_in_row(cnt-1)
-        self.log(self.bindings)
+        self.log(self.infusions)
         ttTimerSingleShot(1, sparkle_back=self.ttsc__finish_demo)
-        self.log(self.bindings)
+        self.log(self.infusions)
 
     def ttsc__finish_demo(self, timer_info):
         self.log('Finishing demo tonic')

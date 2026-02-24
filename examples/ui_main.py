@@ -2,13 +2,14 @@ import sys
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget
 from PySide6.QtCore import Qt
 
-from TaskTonic import ttFormula, ttTimerSingleShot
+from TaskTonic import *
 from TaskTonic.ttTonicStore import ttPyside6Ui, ttPysideWindow, ttPysideWidget
 
 
 class TrafficLightWidget(ttPysideWidget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.tm_next = None
 
     def setup_ui(self):
         self.layout = QVBoxLayout(self)
@@ -22,59 +23,67 @@ class TrafficLightWidget(ttPysideWidget):
         self.btn_next = QPushButton("Next State")
         self.layout.addWidget(self.btn_next)
 
+    # --- Lifecycle ---
+
+    def ttse__on_start(self):
+        self.to_state('red')
+        self.tm_next = ttTimerPausing(name='tm_next').pause()
+
     # --- State Machine Event Handling ---
 
     # Syntax: ttqt_<state>__<widget>__<signal>
     # TaskTonic maakt hiervan automatisch één wrapper 'ttqt__btn_next__clicked'
     # en zorgt dat de juiste methode wordt aangeroepen op basis van de state.
 
+    def set_color(self, color):
+        self.lbl.setText(color.upper())
+        colors = {'red': '#f00', 'green': '#0f0', 'yellow': '#ff0', 'off': '#222'}
+        self.lbl.setStyleSheet(f"font-size: 30px; padding: 20px; background: {colors.get(color)}; color: black;")
+
+    def ttse_red__on_enter(self):
+        self.log('COLOR RED')
+        self.set_color('red')
+
     def ttqt_red__btn_next__clicked(self):
-        self.log("Klik in ROOD -> ga naar GROEN")
         self.to_state('green')
+
+    def ttse_green__on_enter(self):
+        self.log('COLOR GREEN')
+        self.set_color('green')
+        self.tm_next.change_timer(seconds=5).resume()
 
     def ttqt_green__btn_next__clicked(self):
         self.log("Klik in GROEN -> ga naar GEEL")
         self.to_state('yellow')
 
+    def ttse_green__on_tm_next(self, tinfo):
+        self.log('Timeout on status')
+        self.to_state('yellow')
+
+    def ttse_yellow__on_enter(self):
+        self.log('COLOR YELLOW')
+        self.set_color('yellow')
+        self.tm_next.change_timer(seconds=2.5).resume()
+
     def ttqt_yellow__btn_next__clicked(self):
         self.log("Klik in GEEL -> ga naar ROOD")
         self.to_state('red')
 
-    def ttse_yellow__on_timer(self, info):
-        self.log("Timer!! -> ga naar ROOD")
+    def ttse_yellow__on_tm_next(self, tinfo):
+        self.log('Timeout on status')
         self.to_state('red')
 
-    def ttqt__btn_next__released(self):
-        self.log('button released')
+    def ttse__on_exit(self):
+        # for all states:
+        self.tm_next.pause()
+        self.log('COLOR OFF')
+        self.set_color('off')
 
-    def ttqt_red__btn_next__pressed(self):
-        self.log('button pressed in state red')
-
-    # --- Lifecycle ---
-
-    def ttse__on_start(self):
-        self.to_state('red')
-
-    def ttse__on_enter(self):
-        state = self.get_current_state_name()
-
-        # Update UI
-        self.lbl.setText(state.upper())
-        colors = {'red': '#f00', 'green': '#0f0', 'yellow': '#ff0'}
-        self.lbl.setStyleSheet(f"font-size: 30px; padding: 20px; background: {colors.get(state)}; color: black;")
-
-        self.bind(ttTimerSingleShot, seconds=2)
-
-    # def ttse__on_timer(self, info):
-    #     self.log("Timer!! -> ga naar GROEN")
-
-    def ttse_red__on_exit(self):
-        self.log('exit red')
-        # todo: waar komt put_sparkle vandaan rond to state??? (er komt er 1 extra als deze method er niet is)
-        # todo: waarom duurt afsluiten zo lang, na indrukken [x] op window
-        #  + Process finished with exit code -1073741819 (0xC0000005)
-        # todo: mainwindow on_start duurt 1.2 sec!!??
-
+    # def ttqt__btn_next__released(self):
+    #     self.log('button released')
+    #
+    # def ttqt_red__btn_next__pressed(self):
+    #     self.log('button pressed in state red')
 
 class MainWindow(ttPysideWindow):
     def __init__(self, **kwargs):
@@ -83,7 +92,7 @@ class MainWindow(ttPysideWindow):
         self.setWindowTitle("TaskTonic + PySide6 Pluggable Syntax")
         self.resize(300, 250)
 
-        self.light = self.bind(TrafficLightWidget)
+        self.light = TrafficLightWidget()
         self.setCentralWidget(self.light)
 
     def ttse__on_start(self):
@@ -98,7 +107,7 @@ class TrafficFormula(ttFormula):
         }
 
     def creating_main_catalyst(self):
-        ttPyside6Ui(name='main_catalyst')
+        ttPyside6Ui(name='tt_main_catalyst')
 
     def creating_starting_tonics(self):
         MainWindow()

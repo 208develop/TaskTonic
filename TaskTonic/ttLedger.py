@@ -1,6 +1,6 @@
+from . import ttLiquid, ttTonic
 from .internals.RWLock import RWLock
 from .internals.Store import Store
-from .internals.SparkleStack import ThreadSparkleStack, SparkleStack
 
 class ttLedger:
     """A thread-safe singleton class that serves as the central registry for all ttEssence instances.
@@ -12,6 +12,11 @@ class ttLedger:
     _lock = RWLock()
     _instance = None
     _singleton_init_done = False
+
+    class TonicReservation(object):
+        def __init__(self, tid, name):
+            self.id = tid
+            self.name = name
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -25,10 +30,10 @@ class ttLedger:
         if self._singleton_init_done: return
         with self._lock.write_access():
             if self._singleton_init_done: return
-            self.records = [] # ledger records by id
-            self.essences = [] # direct acces to essence instance by id
+            self.tonics = [] # direct acces to liquid instance by id
+            self.tonic_by_name = {}
+            self.tonic_by_service = {}
             self.formula = Store()
-            self.sparkle_stack = ThreadSparkleStack()
             # init thread data, a data structure depending on active thread.
             self._singleton_init_done = True
 
@@ -41,62 +46,90 @@ class ttLedger:
         :param val: used if formula is a string to create a key, val pair
         :type val: any, optional
         """
-
         self.formula.set(formula, val)
 
-    def update_record(self, ess_id, data):
-        if 0 > ess_id >= len(self.records) or self.essences[ess_id] is None:
-            raise RuntimeError(f"Essence ID {ess_id} does not exist")
+    def make_reservation(self, service_name=None):
         with self._lock.write_access():
-            self.records[ess_id].update(data)
+            try:
+                tid = self.tonics.index(None)
+                self.tonics[tid] = self.TonicReservation(tid, None)
+            except ValueError:
+                tid = len(self.tonics)
+                self.tonics.append(self.TonicReservation(tid, None))
 
-    def register(self, essence):
-        from TaskTonic.ttEssence import ttEssence
+            if service_name is not None:
+                self.tonic_by_name[service_name] = self.TonicReservation(tid, service_name)
+        return tid
+
+    def check_reservation(self, reservation, raise_on_err=False):
+        if isinstance(reservation, str):
+            reservation = self.tonic_by_name.get(reservation, None)
+            if reservation is not None and isinstance(reservation, self.TonicReservation):
+                return reservation.id
+        elif isinstance(reservation, int) and reservation >= 0:
+            if 0 <= reservation < len(self.tonics) \
+            and isinstance(self.tonics[reservation], self.TonicReservation):
+                return reservation
+
+        if raise_on_err: raise RuntimeError(f'ID "{reservation}" is not a reservation')
+        return None
+
+    def register(self, essence, reservation=None):
         """Registers a ttEssence instance and assigns it a unique ID.
 
         :param essence: The ttEssence instance to be registered.
         :type essence: ttEssence
 
-        :raises TypeError: If `essence` is not a ttEssence instance 
+        :raises TypeError: If `essence` is not a ttEssence instance
         :return: The unique integer ID assigned to the essence.
         :rtype: int
         """
-        if not isinstance(essence, ttEssence):
+        from TaskTonic.ttLiquid import ttLiquid
+        if not isinstance(essence, ttLiquid):
             raise TypeError('essence must be of type ttEssence')
 
-        with self._lock.write_access():
-            try:
-                ess_id = self.essences.index(None)
-                self.essences[ess_id] = essence
-            except ValueError:
-                ess_id = len(self.essences)
-                self.essences.append(essence)
-                self.records.append(essence.my_record)
+        if reservation is not None:
+            ess_id = self.check_reservation(reservation, raise_on_err=True)
+            self.tonics[ess_id] = essence
+            self.tonic_by_name[essence.name] = essence
+
+        else: # no reservation, find or create space in list
+            with self._lock.write_access():
+                try:
+                    ess_id = self.tonics.index(None)
+                    self.tonics[ess_id] = essence
+                    self.tonic_by_name[essence.name] = essence
+                except ValueError:
+                    ess_id = len(self.tonics)
+                    self.tonics.append(essence)
+                    self.tonic_by_name[essence.name] = essence
         return ess_id
 
-    def unregister(self, essence):
+    def unregister(self, liquid):
         """Unregisters a ttEssence instance from the ledger.
 
         (Note: This method is not yet implemented).
 
-        :param essence: The ttEssence instance to unregister.
-        :type essence: ttEssence
+        :param liquid: The ttEssence instance to unregister.
+        :type liquid: ttEssence
         """
-        from TaskTonic import ttEssence
-        if isinstance(essence, ttEssence):
-            ess_id = essence.id
-        elif isinstance(essence, int):
-            ess_id = essence
-        elif isinstance(essence, str):
-            ess_id = self.get_id_by_name(essence)
+        from TaskTonic import ttLiquid
+        if isinstance(liquid, (ttLiquid, self.TonicReservation)):
+            pass
+        elif isinstance(liquid, int):
+
+            if liquid == -1 or liquid >= len(self.tonics) or self.tonics[liquid] is None:
+                raise RuntimeError(f"Id '{liquid}' not found to unregister")
+            liquid = self.tonics[liquid]
+        elif isinstance(liquid, str):
+            liquid = self.tonic_by_name[liquid]
         else:
             raise TypeError('essence must be of type ttEssence or int or str')
-        if ess_id == -1 or ess_id >= len(self.essences) or self.essences[ess_id] is None:
-            raise RuntimeError(f"Id '{ess_id}' not found to unregister")
+
         with self._lock.write_access():
-            self.essences[ess_id].id = -1
-            self.essences[ess_id] = None
-            self.records[ess_id] = None
+            self.tonics[liquid.id] = None
+            self.tonic_by_name.pop(liquid.name, None)
+            liquid.id = -1
 
     def get_id_by_name(self, name):
         """Retrieves the ID of an essence by its registered name.
@@ -107,12 +140,10 @@ class ttLedger:
         :rtype: int
         """
         with self._lock.read_access():
-            for record in self.records:
-                if record and record.get('name', '') == name:
-                    return record['id']
-        return -1
+            ess = self.tonic_by_name.get(name, None)
+            return ess.id if ess is not None else -1
 
-    def get_essence_by_name(self, name):
+    def get_tonic_by_name(self, name):
         """Retrieves a ttEssence instance by its registered name.
 
         :param name: The name of the essence to retrieve.
@@ -121,12 +152,10 @@ class ttLedger:
         :rtype: ttEssence or None
         """
         with self._lock.read_access():
-            for record in self.records:
-                if record and record.get('name', '') == name:
-                    return self.essences[record['id']]
-        return None
+            return self.tonic_by_name.get(name, None)
 
-    def get_essence_by_id(self, id):
+
+    def get_tonic_by_id(self, id):
         """Retrieves a ttEssence instance by its unique ID.
 
         :param id: The unique integer ID of the essence.
@@ -135,8 +164,8 @@ class ttLedger:
         :rtype: ttEssence or None
         """
         with self._lock.read_access():
-            if id < 0 or id >= len(self.essences): return None
-            return self.essences[id]
+            if 0 <= id < len(self.tonics): return self.tonics[id]
+            return None
 
     def get_service_essence(self, service):
         """Retrieves a ttEssence instance by its service name.
@@ -147,7 +176,28 @@ class ttLedger:
         :rtype: ttEssence or None
         """
         with self._lock.read_access():
-            for record in self.records:
-                if record and record.get('service', '') == service:
-                    return self.essences[record['id']]
-        return None
+            return self.tonic_by_name.get(service, None)
+
+    def sdump(self):
+        def sdumptonic(t, b, indent):
+            s = f'\n{indent}{"F! " if t.finishing else ""} {t.id:02d}[{t.name}] <{t.__class__.__name__}>'
+            if hasattr(t, 'tonics_sparkling'): s+=f' cat:{t.tonics_sparkling} '
+            if t.finishing: s+=' FINISHING '
+            if hasattr(t, 'service_bases'):
+                if t.base != b: return s+' SERVICE COPY'
+                for sb in t.service_bases:
+                    s+=f'\n{indent}  sb: {sb.id:02d}[{sb.name}]'
+            for i in t.infusions:
+                s += sdumptonic(i, t, ' | '+indent)
+            return s
+
+        from .ttTonic import ttTonic
+        s = 'Ledger dump'
+        for t in self.tonics:
+            if isinstance(t, ttTonic):
+                if t.base is None:
+                    s += sdumptonic(t, None, ' - ')
+            elif isinstance(t, self.TonicReservation):
+                s += f'\n - {t.id:20d}[{t.name}] <RESERVATION>'
+
+        return s+'\n'

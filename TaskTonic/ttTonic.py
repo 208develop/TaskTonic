@@ -1,10 +1,11 @@
 from sys import prefix
 
-from .ttEssence import ttEssence
+from .ttSparkleStack import ttSparkleStack
+from .ttLiquid import ttLiquid
 import re, threading, copy
 
 
-class ttTonic(ttEssence):
+class ttTonic(ttLiquid):
     """
     A robust, passive framework class for creating task-oriented objects (Tonics).
 
@@ -23,25 +24,31 @@ class ttTonic(ttEssence):
         :param fixed_id: An optional fixed ID for the tonic.
         """
         super().__init__(name=name, log_mode=log_mode)
-
-        # bind to catalyst
-        if not hasattr(self, 'catalyst_queue'):
-            self.catalyst = \
-                catalyst if catalyst is not None \
-                else self.context.catalyst if hasattr(self.context, 'catalyst') \
-                else self.ledger.get_essence_by_id(0)  # main catalyst
-            self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
-
-            self.log(None, {'catalyst': self.catalyst.name})
-            self.catalyst._ttss__bind_tonic_to_catalyst(self.id)
-
+        self.catalyst = catalyst
         # Discover all sparkles and build the execution system.
         self.state = -1  # Start with no state (-1)
         self._pending_state = -1
         self._sparkle_init()
 
-    def _init_post_action(self):
-        super()._init_post_action()
+    def _tt_post_init_action(self):
+        # Prevent _tt_post_init_action  to runs twice
+        # (e.g., due to the complex initialization order in ttPysideWidget
+        # involving metaclasses and multiple inheritance).
+        if getattr(self, '_post_init_done', False):
+            return
+        self._post_init_done = True
+        # -----------------------
+        # bind to catalyst
+        if not hasattr(self, 'catalyst_queue'):
+            self.catalyst = \
+                self.catalyst if self.catalyst is not None \
+                else self.base.catalyst if hasattr(self.base, 'catalyst') and self.base.catalyst is not None\
+                else self.ledger.get_tonic_by_name('tt_main_catalyst')
+            self.catalyst_queue = self.catalyst.catalyst_queue  # copy queue for (a bit) faster acces
+            self.log(flags={'catalyst': self.catalyst.name})
+            self.catalyst._ttss__add_tonic_to_catalyst(self.id)
+
+        super()._tt_post_init_action()
 
         # After initialization is completed, queue the synchronous startup sparkles.
         if hasattr(self, '_ttss__on_start'):
@@ -71,6 +78,14 @@ class ttTonic(ttEssence):
         Called from the Essence metaclass after completion of __init__
         """
 
+        # Prevent _sparkle_init  to runs twice
+        # (e.g., due to the complex initialization order in ttPysideWidget
+        # involving metaclasses and multiple inheritance).
+        if getattr(self, '_sparkle_init_done', False): return
+        self._sparkle_init_done = True
+
+        sp_stck = ttSparkleStack()
+
         prefix_extension = self._get_custom_prefixes()
         prefixes = ['ttsc', 'ttse', 'tts', '_tts', '_ttss']
         prefixes.extend(prefix_extension.keys())
@@ -90,7 +105,7 @@ class ttTonic(ttEssence):
         # Iterate through the MRO (Method Resolution Order) in reverse to ensure
         # that methods in child classes correctly override those in parent classes.
         for cls in reversed(self.__class__.__mro__):
-            if cls in (ttEssence, object):
+            if cls in (ttLiquid, object):
                 continue
             for name, method in cls.__dict__.items():
                 s_match = state_pattern.match(name)
@@ -145,7 +160,7 @@ class ttTonic(ttEssence):
                         def create_executer():
                             def execute_state_sparkle(self, *args, **kwargs):
                                 state_sparkle = _list[self.state]
-                                self.log(None, {'state': self.state})
+                                self.log(flags={'state': self.state})
                                 state_sparkle(self, *args, **kwargs)
                             execute_state_sparkle.__name__ = _name
                             return execute_state_sparkle
@@ -155,7 +170,7 @@ class ttTonic(ttEssence):
                                 args = tuple((arg if callable(arg) else copy.deepcopy(arg)) for arg in args)
                                 kwargs = {key: (value if callable(value) else copy.deepcopy(value))
                                           for key, value in kwargs.items()}
-                            self.catalyst_queue.put((self, create_executer(), args, kwargs))
+                            self.catalyst_queue.put((self, create_executer(), args, kwargs, sp_stck.get_stack()))
                         return put_state_sparkle
 
                     # Bind the new put_state_sparkle function to the instance, making it a method.
@@ -171,7 +186,7 @@ class ttTonic(ttEssence):
                             # This is the exact logic copied from 'execute_state_sparkle'
                             def direct_execute_method(self, *args, **kwargs):
                                 state_sparkle = _list[self.state]
-                                self.log(None, {'state': self.state})
+                                self.log(flags={'state': self.state})
                                 state_sparkle(self, *args, **kwargs)
                             direct_execute_method.__name__ = _name
                             return direct_execute_method
@@ -192,7 +207,7 @@ class ttTonic(ttEssence):
                                 args = tuple((arg if callable(arg) else copy.deepcopy(arg)) for arg in args)
                                 kwargs = {key: (value if callable(value) else copy.deepcopy(value))
                                           for key, value in kwargs.items()}
-                            self.catalyst_queue.put((self, _method, args, kwargs))
+                            self.catalyst_queue.put((self, _method, args, kwargs, sp_stck.get_stack()))
                         return put_sparkle
 
                     # Bind the new put_sparkle function to the instance, making it a method.
@@ -278,7 +293,9 @@ class ttTonic(ttEssence):
         sparkle execution in running mode
         """
         interface_name = sparkle_method.__name__
-        self.log(None, {'sparkle': interface_name})
+        sp_stck = ttSparkleStack()
+        self.log(flags={'sparkle': interface_name,
+                        'source': f'{sp_stck.source_tonic_name}.{sp_stck.source_sparkle_name}'})
         # Execute the user's actual sparkle code, passing self to bind it.
         sparkle_method(self, *args, **kwargs)
         self.log(close_log=True)
@@ -290,9 +307,12 @@ class ttTonic(ttEssence):
         if self.id < 0: return  # Tonic already unregistered (probably old sparkle in queue)
 
         interface_name = sparkle_method.__name__
+
         if interface_name.startswith('_ttss') \
-        or interface_name in ['ttse__on_finished', 'ttse__on_exit',
-                              'ttse__on_service_context_finished', '_ttinternal_state_machine_stop']:
+        or interface_name in [
+            'ttse__on_finished', 'ttse__on_exit',
+            'ttse__on_service_base_completed', '_ttinternal_state_machine_stop',
+        ]:
             self.__exec_sparkle(sparkle_method, *args, **kwargs)
 
     def get_current_state_name(self):
@@ -315,43 +335,90 @@ class ttTonic(ttEssence):
         """System-level sparkle for internal framework setup."""
         pass
 
-    # convert the static essence to a sparkling tonic
-    def _finished(self):
-        if hasattr(self, 'catalyst'):
-            self.catalyst._ttss__remove_tonic_from_catalyst(self.id)
-        super()._finished()
-
-    def finish(self, from_context=None):
+    def finish(self):
         # Finish on tonic level, will first stop the tonic, and after that finish admin in the essence
         if self.finishing: return
-        self._ttss__finish(from_context if from_context else self)
+        self.ttsc__finish()
 
-    def _ttss__finish(self, from_context=None):
+    def ttsc__finish(self):
         if self.finishing: return
 
-        if self._finish_service_context(from_context):
-            # TODO: Now a service is stopped when no service context is left.
-            #  Consider implementing the possibility to maintain te service, wait for new service context
-            if len(self.service_context) > 0:
-                return
+        calling_tonic = ttSparkleStack().source_tonic
 
-        self.finishing = True
+        # check on valid tonic finish
+        if calling_tonic in [self.base, self]:
+            if hasattr(self, 'service_bases') and calling_tonic in self.service_bases:
+                self.service_bases.remove(calling_tonic)
 
-        # --- patch the _execute_sparkle function to finish mode, only executing system sparkles ---
-        self._execute_sparkle = self.__exec_system_sparkle
+            if self.base:
+                self.base._ttss__on_infusion_completed(self)
 
-        # stop the tonic
-        if self.state != -1: self.to_state(-1)  # stop state machine if active
-        self.ttse__on_finished()  # stop tonic
-        self._ttss__on_finished(from_context)  # cleanup tonic
+            # start finishing the tonic
+            self.finishing = True
+            self._execute_sparkle = self.__exec_system_sparkle # patch the _execute_sparkle function to finish mode
+            if self.state != -1: self.to_state(-1)  # stop state machine if active
+            self.ttse__on_finished()  # stop tonic (user level)
+            self._ttss__on_finished()  # cleanup tonic (system level)
 
-    def _ttss__on_finished(self, from_context=None):
+
+        # check if service finish
+        elif hasattr(self, 'service_bases') and calling_tonic in self.service_bases:
+            self.service_bases.remove(calling_tonic)
+            # notify
+            try: getattr(self, 'ttse__on_service_base_removed')(calling_tonic.id, len(self.service_bases))
+            except AttributeError: pass
+            try: getattr(calling_tonic, f'ttse__on_{self.name}_completed')()
+            except AttributeError: pass
+            try: getattr(calling_tonic, '_ttss__on_infusion_completed')(self.id)
+            except AttributeError: pass
+
+            if len(self.service_bases) <= 0: self.finish()
+
+    def _ttss__on_finished(self):
         """System-level sparkle for final cleanup."""
-        super()._finish()  # finish at essence level
+        #notify and remove service bases left
+        try:
+            for sb in self.service_bases:
+                try: getattr(sb, f'ttse__on_{self.name}_completed')()
+                except AttributeError: pass
+                try: getattr(sb, '_ttss__on_infusion_completed')(self.id)
+                except AttributeError: pass
+            self.service_bases.clear()
+        except AttributeError: pass
 
-    def binding_finished(self, ess_id):
-        self._ttss__on_binding_finished(ess_id)
+        # finish all infusions
+        sp_stck = ttSparkleStack()
+        sp_stck.push(self, 'finish')
+        for tonic in self.infusions.copy():
+            tonic.ttsc__finish()
+        sp_stck.pop()
+        self.infusions=[]
 
-    def _ttss__on_binding_finished(self, ess_id):
-        super().binding_finished(ess_id) # call the static admin method
+        # # complete
+        # self.catalyst._ttss__remove_tonic_from_catalyst(self.id)
+        # self.ledger.unregister(self.id)
+        # self.id = -1  # finished
+
+        # finish the Tonic
+        # if not self.infusions:
+        #     self._ttss__on_completion()
+        # else:
+        #     sp_stck = ttSparkleStack()
+        #     sp_stck.push(self, 'finish')
+        #     for tonic in self.infusions.copy():
+        #         tonic.ttsc__finish()
+        #     sp_stck.pop()
+
+        self._ttss__on_completion()
+
+    def _ttss__on_infusion_completed(self, tonic):
+        if tonic in self.infusions:
+            self.infusions.remove(tonic)
+            # if self.finishing and not self.infusions:
+            #     self._ttss__on_completion()
+
+    def _ttss__on_completion(self):
+        self.catalyst._ttss__remove_tonic_from_catalyst(self.id)
+        self.ledger.unregister(self.id)
+        self.id = -1  # finished
 

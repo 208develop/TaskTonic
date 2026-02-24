@@ -1,10 +1,10 @@
 # ------------------------------------------------------------------------------
 # Class: ttStore (TaskTonic Service Wrapper)
 # ------------------------------------------------------------------------------
-from ..ttEssence import ttEssence
+from ..ttLiquid import ttLiquid
 from ..internals.Store import Store, Item
 
-class ttStore(ttEssence, Store):
+class ttStore(ttLiquid, Store):
     """
     TaskTonic specific wrapper that integrates Store with the Ledger.
     Defined as a Singleton Service via _tt_is_service.
@@ -16,7 +16,7 @@ class ttStore(ttEssence, Store):
     def __init__(self, *args, **kwargs):
         # 1. Init ttEssence (Registers in Ledger)
         # Note: ttEssenceMeta ensures this runs only once for the singleton
-        ttEssence.__init__(self, *args, **kwargs)
+        ttLiquid.__init__(self, *args, **kwargs)
 
         # 2. Init Store (Setup locks and storage)
         Store.__init__(self)

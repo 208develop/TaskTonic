@@ -9,7 +9,7 @@ class TrafficLight(ttTonic):
     It cycles through red, green, and yellow states using timers.
     """
 
-    def __init__(self, context, red_duration=5, green_duration=5, yellow_duration=2):
+    def __init__(self, red_duration=5, green_duration=5, yellow_duration=2):
         # Store the duration for each light state
         self.durations = {
             'red': red_duration,
@@ -17,7 +17,7 @@ class TrafficLight(ttTonic):
             'yellow': yellow_duration
         }
         self.timer = None
-        super().__init__(context)
+        super().__init__()
 
     def ttse__on_start(self):
         """
@@ -91,7 +91,7 @@ class TrafficLightSimulation(ttFormula):
         This method is called by the framework to create the initial Tonics.
         We create one instance of our TrafficLight.
         """
-        TrafficLight(context=-1, red_duration=5, green_duration=5, yellow_duration=2)
+        TrafficLight(red_duration=5, green_duration=5, yellow_duration=2)
 
 
 # --- Main execution block ---

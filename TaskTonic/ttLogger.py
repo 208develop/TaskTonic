@@ -1,35 +1,37 @@
 from .ttCatalyst import ttCatalyst
-from .ttEssence import ttEssence
+from .ttLiquid import ttLiquid
 import enum
 
 # empty log class, base for all loggers in ttLoggers map
 # A logservice allways gets te service name log_service
 
-class ttLogOff(ttEssence):
-    _tt_is_service = 'log_service'
+class ttLogOff(ttLiquid):
+    _tt_is_service = 'tt_log_service'
     _tt_force_stealth_logging = True
 
     def put_log(self, log):
         pass
 
 class ttLogService(ttCatalyst):
-    _tt_is_service = 'log_service'
-    _tt_root_context = True
+    _tt_is_service = 'tt_log_service'
+    _tt_base_essence = True
     _tt_force_stealth_logging = True
 
-    def _ttss__main_catalyst_finished(self):
-        if len(self.service_context) == 0:
-            self.finish()
-        pass
+    def __init__(self, name=None, log_mode=None, dont_start_yet=False):
+        super().__init__(name, ttLog.OFF, dont_start_yet)
 
-    def ttse__on_service_context_finished(self, ctxt, ctxts_left):
-        if ctxts_left == 0:  # logger is also from essence, so is bound to itself as well
+
+    def _ttss__main_catalyst_finished(self):
+        if set(self.service_bases).issubset(self.infusions):
+            self.finish()
+
+    def ttse__on_service_base_completed(self, tonic, srv_left):
+        if srv_left == 0:
             self.finish()
         pass
 
     def put_log(self, log):
         pass
-
 
 class ttLog(enum.IntEnum):
     """

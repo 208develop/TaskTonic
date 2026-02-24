@@ -1,0 +1,111 @@
+### TaskTonic: Architectuur & Begrippen
+
+| Component & Rol | Beschrijving |
+| :--- | :--- |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#3b82f6" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><rect x="30" y="25" width="40" height="50" rx="2"/><line x1="38" y1="40" x2="62" y2="40"/><line x1="38" y1="50" x2="55" y2="50"/></g></svg> **Formula**<br>*The Recipe* | Het startpunt (`ttFormula`) dat de configuratie laadt en de initiële agents aanmaakt. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#14b8a6" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><polygon points="45,30 55,30 55,40 70,70 30,70 45,40"/><line x1="35" y1="60" x2="65" y2="60"/></g></svg> **Tonic**<br>*The Agent* | De autonome werker (`ttTonic`). Behoudt zijn eigen status en bevat alle taaklogica. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#eab308" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><circle cx="40" cy="65" r="8"/><circle cx="65" cy="45" r="6"/><circle cx="45" cy="30" r="4"/></g></svg> **Sparkle**<br>*The Action* | De kleinste, ondeelbare eenheid van werk (methodes) die in de wachtrij wordt geplaatst. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#ef4444" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><circle cx="50" cy="50" r="14"/><line x1="50" y1="28" x2="50" y2="72"/><line x1="28" y1="50" x2="72" y2="50"/><line x1="34" y1="34" x2="66" y2="66"/><line x1="34" y1="66" x2="66" y2="34"/></g></svg> **Catalyst**<br>*The Engine* | De robuuste dispatcher (`ttCatalyst`) die continu Sparkles uit de wachtrij verwerkt. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#f97316" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><rect x="40" y="25" width="20" height="15" rx="1"/><rect x="25" y="55" width="20" height="15" rx="1"/><rect x="55" y="55" width="20" height="15" rx="1"/><path d="M 50 40 v 10 M 35 50 h 30 v 5 M 35 50 v 5"/></g></svg> **Ledger**<br>*The Registry* | Het veilige, centrale register (`ttLedger`) dat de levenscyclus van actieve Tonics bijhoudt. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#6366f1" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><circle cx="50" cy="55" r="18"/><line x1="50" y1="25" x2="50" y2="37"/><line x1="45" y1="25" x2="55" y2="25"/><line x1="50" y1="55" x2="60" y2="45"/></g></svg> **Timer**<br>*The Clock* | Niet-blokkerende mechaniek (`ttTimerSingleShot`) die acties vertraagd triggert. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#22c55e" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><circle cx="30" cy="50" r="6"/><circle cx="70" cy="30" r="6"/><circle cx="70" cy="70" r="6"/><path d="M 36 48 L 64 32 M 36 52 L 64 68 M 70 36 L 70 64"/></g></svg> **State Machine**<br>*The Router* | Ingebouwde architectuur die Sparkles automatisch routeert op basis van de huidige status. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#a855f7" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><ellipse cx="50" cy="35" rx="20" ry="8"/><path d="M 30 35 v 30 a 20 8 0 0 0 40 0 v -30"/><ellipse cx="50" cy="50" rx="20" ry="8"/></g></svg> **Store**<br>*The Digital Twin* | Hiërarchische database (`ttStore`) die via een Pub/Sub-model verbonden is met actieve Tonics. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#06b6d4" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><path d="M 50 30 Q 70 65 50 75 Q 30 65 50 30 Z"/><circle cx="35" cy="60" r="2"/><circle cx="65" cy="60" r="2"/></g></svg> **Liquid**<br>*The Hierarchy* | De basisfoundation (`ttLiquid`) die garandeert dat gestopte parent-taken hun child-agents opruimen. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#ec4899" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><path d="M 25 50 Q 50 25 75 50 Q 50 75 25 50 Z"/><circle cx="50" cy="50" r="8"/></g></svg> **Logger**<br>*The Eye* | Component (`ttLogger`) om overzicht te behouden op de asynchrone stroom. |
+| <svg width="45" height="45" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><circle cx="50" cy="50" r="35" fill="#f59e0b" opacity="0.2"/><g stroke="#334155" stroke-width="1.5" fill="none"><circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/><polygon points="25,30 75,30 55,55 55,75 45,75 45,55"/><line x1="45" y1="42" x2="55" y2="42"/></g></svg> **Distiller**<br>*The Filter* | Analytische testomgeving (`ttDistiller`) voor gecontroleerde observatie en debugging. |
+
+---
+
+### TaskTonic Core Lifecycle
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#f8fafc" rx="12" />
+
+  <line x1="400" y1="150" x2="400" y2="245" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="395,235 400,245 405,235" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="410" y="200" font-size="13" fill="#334155" font-family="sans-serif">Manages</text>
+
+  <line x1="365" y1="135" x2="235" y2="265" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="235,255 235,265 245,265" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="280" y="190" font-size="13" fill="#334155" font-family="sans-serif" text-anchor="middle">Tracks Lifecycle</text>
+
+  <line x1="250" y1="300" x2="345" y2="300" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="335,295 345,300 335,305" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="300" y="290" font-size="13" fill="#334155" font-family="sans-serif" text-anchor="middle">Base Class</text>
+
+  <line x1="450" y1="300" x2="545" y2="300" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="535,295 545,300 535,305" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="500" y="290" font-size="13" fill="#334155" font-family="sans-serif" text-anchor="middle">Emits</text>
+
+  <line x1="400" y1="450" x2="400" y2="355" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="395,365 400,355 405,365" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="410" y="410" font-size="13" fill="#334155" font-family="sans-serif">Executes On</text>
+
+  <line x1="435" y1="465" x2="565" y2="335" stroke="#64748b" stroke-width="2" stroke-dasharray="6 4" />
+  <polyline points="555,335 565,335 565,345" stroke="#64748b" stroke-width="2" fill="none" />
+  <text x="520" y="420" font-size="13" fill="#334155" font-family="sans-serif" text-anchor="middle">Pulls from Queue</text>
+
+
+  <g transform="translate(350, 50)">
+    <circle cx="50" cy="50" r="45" fill="#f97316" opacity="0.2"/>
+    <g stroke="#334155" stroke-width="1.5" fill="none">
+      <circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/>
+      <rect x="40" y="25" width="20" height="15" rx="1"/>
+      <rect x="25" y="55" width="20" height="15" rx="1"/>
+      <rect x="55" y="55" width="20" height="15" rx="1"/>
+      <path d="M 50 40 v 10 M 35 50 h 30 v 5 M 35 50 v 5"/>
+    </g>
+    <text x="50" y="115" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="sans-serif">Ledger</text>
+    <text x="50" y="135" font-size="12" fill="#475569" text-anchor="middle" font-family="sans-serif">🗃️ The Registry</text>
+  </g>
+
+  <g transform="translate(150, 250)">
+    <circle cx="50" cy="50" r="45" fill="#06b6d4" opacity="0.2"/>
+    <g stroke="#334155" stroke-width="1.5" fill="none">
+      <circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/>
+      <path d="M 50 30 Q 70 65 50 75 Q 30 65 50 30 Z"/>
+      <circle cx="35" cy="60" r="2"/>
+      <circle cx="65" cy="60" r="2"/>
+    </g>
+    <text x="50" y="115" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="sans-serif">Liquid</text>
+    <text x="50" y="135" font-size="12" fill="#475569" text-anchor="middle" font-family="sans-serif">💧 The Hierarchy</text>
+  </g>
+
+  <g transform="translate(350, 250)">
+    <circle cx="50" cy="50" r="45" fill="#14b8a6" opacity="0.25"/>
+    <g stroke="#334155" stroke-width="2" fill="none">
+      <circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/>
+      <polygon points="45,30 55,30 55,40 70,70 30,70 45,40"/>
+      <line x1="35" y1="60" x2="65" y2="60"/>
+    </g>
+    <text x="50" y="115" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="sans-serif">Tonic</text>
+    <text x="50" y="135" font-size="12" fill="#475569" text-anchor="middle" font-family="sans-serif">🤖 The Agent</text>
+  </g>
+
+  <g transform="translate(550, 250)">
+    <circle cx="50" cy="50" r="45" fill="#eab308" opacity="0.25"/>
+    <g stroke="#334155" stroke-width="2" fill="none">
+      <circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/>
+      <circle cx="40" cy="65" r="8"/>
+      <circle cx="65" cy="45" r="6"/>
+      <circle cx="45" cy="30" r="4"/>
+    </g>
+    <text x="50" y="115" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="sans-serif">Sparkle</text>
+    <text x="50" y="135" font-size="12" fill="#475569" text-anchor="middle" font-family="sans-serif">⚡ The Action</text>
+  </g>
+
+  <g transform="translate(350, 450)">
+    <circle cx="50" cy="50" r="45" fill="#ef4444" opacity="0.25"/>
+    <g stroke="#334155" stroke-width="2" fill="none">
+      <circle cx="50" cy="50" r="42" stroke-dasharray="10 4"/>
+      <circle cx="50" cy="50" r="14"/>
+      <line x1="50" y1="28" x2="50" y2="72"/>
+      <line x1="28" y1="50" x2="72" y2="50"/>
+      <line x1="34" y1="34" x2="66" y2="66"/>
+      <line x1="34" y1="66" x2="66" y2="34"/>
+    </g>
+    <text x="50" y="115" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="sans-serif">Catalyst</text>
+    <text x="50" y="135" font-size="12" fill="#475569" text-anchor="middle" font-family="sans-serif">🔄 The Engine</text>
+  </g>
+
+</svg>

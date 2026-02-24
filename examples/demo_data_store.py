@@ -7,12 +7,12 @@ class OperatorInterface(ttTonic):
 
     def __init__(self, name=None, log_mode=None, catalyst=None):
         super().__init__(name, log_mode, catalyst)
-        self.twin = self.bind(DigitalTwin)
+        self.twin = DigitalTwin()
 
     def ttse__on_start(self):
         self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
-        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
+        ttTimerSingleShot(5, name='parm_update')
+        ttTimerSingleShot(10, name='end_program')
 
 
     def ttse__on_sensor_update(self, updates):
@@ -30,21 +30,19 @@ class OperatorInterface(ttTonic):
 class MyProcess(ttTonic):
     def __init__(self, name=None, log_mode=None, catalyst=None):
         super().__init__(name, log_mode, catalyst)
-        self.my_record['auto_finish'] = True
         self.twin = DigitalTwin()
         self.temp_sens = self.twin.at('sensors/#0')
         self.utmr = None
 
     def ttse__on_start(self):
         self.twin.subscribe("parameters", self.ttse__on_param_update)
-        self.utmr = ttTimerRepeat(self.twin.get('parameters/update_freq', 5),
-                                  sparkle_back=self.ttse__on_update_timer)
+        self.utmr = ttTimerRepeat(seconds=self.twin.get('parameters/update_freq', 5),
+                                  name='update_timer')
 
     def ttse__on_param_update(self, updates):
         for path, new, old, source in updates:
             if path == 'parameters/update_freq':
-                self.utmr.stop()
-                self.utmr = ttTimerRepeat( new, sparkle_back=self.ttse__on_update_timer)
+                self.utmr.change_timer(seconds=new).restart()
 
     def ttse__on_update_timer(self, tmr):
         self.temp_sens['value'].v += random.uniform(-2, 2)
@@ -56,10 +54,9 @@ class DigitalTwin(ttStore):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.my_record['auto_finish'] = True
 
-    def _init_post_action(self):
-        super()._init_post_action()
+    def _tt_post_init_action(self):
+        super()._tt_post_init_action()
         with self.group(notify=False):
             self.set((
                 ('parameters/update_freq', 2),
@@ -72,6 +69,7 @@ class DigitalTwin(ttStore):
                 ('sensors/./value', -1),
             ))
         self.log(f"Digital Twin is initialized\n{self.dumps()}")
+
 
 class myApp(ttFormula):
     def creating_formula(self):

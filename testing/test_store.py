@@ -242,10 +242,6 @@ class TestTTStoreFeatures:
 
     @pytest.fixture
     def store(self):
-        # fix sparkle_stack in absence of TaskTonic framework
-        from TaskTonic import ttLedger
-        l = ttLedger()
-        sparkle_stack = l.sparkle_stack.init_for_thread()
         return MockStore()
 
     def test_subscribe_and_callback(self, store):

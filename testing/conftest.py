@@ -19,7 +19,7 @@ def reset_ledger():
     if ttLedger._instance:
         # Forceer een clear van de interne lijsten indien nodig
         ttLedger._instance.records = []
-        ttLedger._instance.essences = []
+        ttLedger._instance.tonics = []
         ttLedger._instance.formula = None
 
     ttLedger._instance = None

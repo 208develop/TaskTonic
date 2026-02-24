@@ -1,17 +1,32 @@
+from .. import ttTimerRepeat
 from ..ttLogger import ttLogService
 import time
 
 class ttScreenLogService(ttLogService):
 
-    def __init__(self, name=None, context=None, log_mode=None):
-        super().__init__(name, context, log_mode)
+    def __init__(self, name=None):
+        super().__init__(name)
         self.log_records = []
+        prj = self.ledger.formula.at('tasktonic/project')
+        ts = prj['started@'].v
+        lt = time.localtime(ts)
+        l_time_start = f'{time.strftime("%H%M%S", lt)}.{int((ts - int(ts)) * 1000):03d}'
 
-    def __init_service__(self, *args, **kwargs):
-        pass
+        print(f"[{l_time_start}] TaskTonic log for '{prj['name'].v}', started at {time.strftime("%H:%M:%S", lt)}")
+        print(41 * '-=')
+    def _tt_init_service_base(self, base, *args, **kwargs):
+        self.log(close_log=True)
 
     def put_log(self, log):
         self.ttsc__add_log(log)
+
+    def ttse__on_start(self):
+        pass
+
+    def ttse__on_finished(self):
+        print(41*'-=')
+        print('Logging finished')
+        print(self.ledger.sdump())
 
     def ttsc__add_log(self, log):
         """
@@ -61,4 +76,5 @@ class ttScreenLogService(ttLogService):
 
         if log.get('log'):
             for line in log['log']:
+                line = str(line).replace('\n', f"\n{18*' '}")
                 print(f"{16 * ' '}- {line}")

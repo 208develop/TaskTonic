@@ -7,6 +7,10 @@ from TaskTonic.ttTonicStore import ttDistiller
 
 # --- Definitie van de Device Under Test (DUT) ---
 class DUT(ttTonic):
+    def __init__(self, name=None, log_mode=None, catalyst=None):
+        super().__init__(name, log_mode, catalyst)
+        self.tm = None
+
     def ttse__on_start(self):
         self.to_state('init')
 
@@ -15,7 +19,7 @@ class DUT(ttTonic):
 
     def ttsc_paused__start_timer(self):
         # Start een timer van 2 seconden
-        ttTimerSingleShot(2)
+        self.tm = ttTimerSingleShot(seconds=2)
         self.to_state('wait_on_timer')
 
     def ttse_wait_on_timer__on_timer(self, info):
@@ -24,6 +28,9 @@ class DUT(ttTonic):
 
     def ttse_finished_cycle__on_enter(self):
         pass  # empty state
+
+    def ttsc__dut_finish(self):
+        self.ttsc__finish()
 
 
 # --- Definitie van de Test Formula ---
@@ -36,7 +43,7 @@ class TestRecipe(ttFormula):
 
     def creating_main_catalyst(self):
         # We gebruiken de Distiller in plaats van de standaard Catalyst
-        ttDistiller()
+        ttDistiller(name='tt_main_catalyst')
 
     def creating_starting_tonics(self):
         DUT(name="MyDevice")
@@ -49,8 +56,8 @@ def test_dut_flow_with_timer():
 
     # 2. Haal de referenties op via de Ledger
     ledger = recipe.ledger
-    distiller = ledger.get_essence_by_id(0)  # Main catalyst is altijd ID 0
-    dut = ledger.get_essence_by_name("MyDevice")  # Zoek op naam is veiliger dan ID
+    distiller = ledger.get_tonic_by_name('tt_main_catalyst')
+    dut = ledger.get_tonic_by_name("MyDevice")
 
     assert isinstance(distiller, ttDistiller)
     assert dut is not None
@@ -84,8 +91,9 @@ def test_dut_flow_with_timer():
     assert dut.get_current_state_name() == 'finished_cycle'
 
     # finish DUT
-    dut.finish()
+    dut.ttsc__dut_finish()
     status = distiller.sparkle(timeout=.5)
+    assert 'catalyst finished' in status['stop_condition']
     assert dut.id == -1
 
     # 6. Opruimen

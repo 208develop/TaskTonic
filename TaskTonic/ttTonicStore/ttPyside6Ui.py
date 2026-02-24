@@ -3,6 +3,7 @@ import sys, queue, time
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QObject, QEvent, QCoreApplication, QTimer
 
+from .. import ttSparkleStack
 from ..ttCatalyst import ttCatalyst
 from .ttPysideWidget import ttPysideMeta
 
@@ -15,9 +16,9 @@ class SparkleEvent(QEvent):
         self.payload = payload
 
 
-class PysideQueue(queue.Queue):
-    def __init__(self, catalyst_ui, maxsize=0):
-        super().__init__(maxsize)
+class PysideQueue(queue.SimpleQueue):
+    def __init__(self, catalyst_ui):
+        super().__init__()
         self.catalyst_ui = catalyst_ui
 
     def put(self, item, block=True, timeout=None):
@@ -47,21 +48,23 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
             raise RuntimeError(f'{self.__class__.__name__} must be a main catalyst (id==0)')
 
         self._schedule_next_timer()
-        print("[ttPyside6Ui] Starting Qt Event Loop...")
-        self.sparkle_stack.catalyst = self
+        ttSparkleStack().catalyst = self
 
         self.app.exec()
         super().sparkle()  # finish last TaskTonic calls (if any) after ui ended
 
     def customEvent(self, event):
         if event.type() == SparkleEvent.EVENT_TYPE:
+            sp_stck = ttSparkleStack()
             try:
                 item = self.catalyst_queue.get_nowait()
-                instance, sparkle, args, kwargs = item
-                self.sparkle_stack.push(instance, sparkle.__name__)
+                instance, sparkle, args, kwargs, sp_stck.source = item
+                sp_name = sparkle.__name__
+                sp_stck.push(instance, sp_name)
                 instance._execute_sparkle(sparkle, *args, **kwargs)
-                self.sparkle_stack.pop()
+                sp_stck.pop()
 
+                sp_stck.source = (instance, sp_name)
                 self._process_extra_sparkles()
 
             except queue.Empty:
@@ -75,12 +78,13 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
             super().customEvent(event)
 
     def _process_extra_sparkles(self):
+        sp_stck = ttSparkleStack()
         while self.extra_sparkles:
             payload = self.extra_sparkles.pop(0)
             instance, sparkle, args, kwargs = payload
-            self.sparkle_stack.push(instance, sparkle.__name__)
+            sp_stck.push(instance, sparkle.__name__)
             instance._execute_sparkle(sparkle, *args, **kwargs)
-            self.sparkle_stack.pop()
+            sp_stck.pop()
 
     def _schedule_next_timer(self):
         reference = time.time()
