@@ -1,0 +1,23 @@
+site_name: TaskTonic
+site_description: A Refreshing Approach to Python Concurrency
+repo_url: https://github.com/208develop/TaskTonic
+repo_name: 208develop/TaskTonic
+
+theme:
+  name: material
+  palette:
+    primary: teal
+    accent: cyan
+    features:
+      - navigation.tabs
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Documentation: documentation.md
+  - Tonic Bar: tonic-bar.md 
+
+
