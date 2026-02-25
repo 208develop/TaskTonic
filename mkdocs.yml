@@ -8,8 +8,8 @@ theme:
   palette:
     primary: teal
     accent: cyan
-    features:
-      - navigation.tabs
+  features:
+    - navigation.tabs
 
 markdown_extensions:
   - pymdownx.highlight
@@ -17,7 +17,13 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Documentation: documentation.md
-  - Tonic Bar: tonic-bar.md 
-
-
+  - Documentation:
+      - The Introduction: 'TaskTonic  - The introduction.md'
+      - Sparkling Programming: 'TaskTonic - Sparkling Programming.md'
+      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
+      - Depending on State: 'TaskTonic - Depending on your state.md'
+      - Timers Without Waiting: 'TaskTonic - Timers without waiting.md'
+      - Active Data Store: 'TaskTonic - Active data store.md'
+      - At Your Service: 'Tasktonic - At your service.md'
+      - Testing in ttDistiller: 'TaskTonic - Testing in the ttDistiller.md'
+  - Tonic Bar: tonic-bar.md
