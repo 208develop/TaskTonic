@@ -1,0 +1,1786 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Refreshing Approach to Python Concurrency">
+      
+      
+      
+      
+        <link rel="prev" href="../TaskTonic%20-%20Timers%20without%20waiting/">
+      
+      
+        <link rel="next" href="../Tasktonic%20-%20At%20your%20service/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>Active Data Store - TaskTonic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ttstore-storeitem-central-data-repository" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TaskTonic" class="md-header__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TaskTonic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Active Data Store
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../TaskTonic%20%20-%20The%20introduction/" class="md-tabs__link">
+          
+  
+  
+  Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tasting-the-tonic/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tasting The Tonic
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TaskTonic" class="md-nav__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TaskTonic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20%20-%20The%20introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Sparkling%20Programming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparkling Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Understanding%20the%20ttCatalyst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Depending%20on%20your%20state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depending on State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Timers%20without%20waiting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timers Without Waiting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-store-vs-ttstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts: Store vs. ttStore
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concepts: Store vs. ttStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-core-store-and-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Core: Store and Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-the-service-ttstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Service: ttStore
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Reference &amp; Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference &amp; Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-access-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary Access ([] Syntax)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-data-set-v-append" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing Data (set, .v, .append)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing Data (set, .v, .append)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(data)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v-value-property-via-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .v (Value Property via Item)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appendvalue-via-item-or-appendpath-value-via-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        append(value) (via Item) or append(path, value) (via Store)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-data-get-at" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading Data (get, at)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading Data (get, at)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getpath-defaultnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(path, default=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atpath-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        at(path) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#navigation-item-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Navigation (Item objects)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation (Item objects)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#childrenprefixnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .children(prefix=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reactivity-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reactivity (subscribe)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reactivity (subscribe)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subscribepath-callback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subscribe(path, callback)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities-dumps-group-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities (dumps, group, source)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities (dumps, group, source)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dumps()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groupnotifytrue-source_idnone-sourcesource_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        group(notify=True, source_id=None) &amp; source(source_id)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance &amp; Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance &amp; Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-batch-updates-with-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Batch Updates with group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-efficiency-of-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Efficiency of Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-data-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Data Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Tasktonic%20-%20At%20your%20service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Testing%20in%20the%20ttDistiller/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing in ttDistiller
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasting-the-tonic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasting The Tonic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-store-vs-ttstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts: Store vs. ttStore
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concepts: Store vs. ttStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-core-store-and-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Core: Store and Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-the-service-ttstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Service: ttStore
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Reference &amp; Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference &amp; Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dictionary-access-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dictionary Access ([] Syntax)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-data-set-v-append" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing Data (set, .v, .append)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Writing Data (set, .v, .append)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setdata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(data)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v-value-property-via-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .v (Value Property via Item)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appendvalue-via-item-or-appendpath-value-via-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        append(value) (via Item) or append(path, value) (via Store)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-data-get-at" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading Data (get, at)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading Data (get, at)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getpath-defaultnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(path, default=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atpath-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        at(path) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#navigation-item-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Navigation (Item objects)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation (Item objects)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#childrenprefixnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .children(prefix=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reactivity-subscribe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reactivity (subscribe)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reactivity (subscribe)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subscribepath-callback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subscribe(path, callback)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities-dumps-group-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities (dumps, group, source)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities (dumps, group, source)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dumps()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groupnotifytrue-source_idnone-sourcesource_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        group(notify=True, source_id=None) &amp; source(source_id)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance &amp; Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance &amp; Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-batch-updates-with-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Batch Updates with group
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-efficiency-of-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Efficiency of Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-data-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Data Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ttstore-storeitem-central-data-repository">ttStore &amp; Store/Item: Central Data Repository</h1>
+<p><img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy"></p>
+<p>This documentation describes the functionality of the <code>Store</code> and <code>Item</code> classes and their integration within TaskTonic
+via <code>ttStore</code>.</p>
+<h2 id="introduction">Introduction</h2>
+<p>In complex applications, it is essential to share data between different components in a structured and accessible way.
+<code>ttStore</code> functions as a <strong>Central Data Repository</strong>. It offers a hierarchical storage structure (comparable to a file
+system or a nested dictionary) that is:</p>
+<ol>
+<li><strong>Centralized:</strong> A single source of truth for parameters, sensor values, and configurations.</li>
+<li><strong>Reactive:</strong> Components can subscribe to changes in specific data paths.</li>
+<li><strong>Flexible:</strong> Data can be accessed via absolute paths or relative pointers (<code>Item</code>).</li>
+</ol>
+<hr />
+<h2 id="concepts-store-vs-ttstore">Concepts: Store vs. ttStore</h2>
+<p>The system consists of two layers that can also be used <strong>independently</strong>.</p>
+<h3 id="1-the-core-store-and-item">1. The Core: <code>Store</code> and <code>Item</code></h3>
+<p>The <code>Store</code> is the pure data container. It is a standalone class that holds the data and provides methods to read or
+write data via paths (e.g., <code>'sensors/temp/value'</code>).</p>
+<p>The <code>Item</code> is a smart "pointer" or "cursor" to a specific location in the <code>Store</code>. It allows for relative navigation
+without needing to know the full absolute path.</p>
+<blockquote>
+<p><strong>Note:</strong> <code>Store</code> and <code>Item</code> can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical
+data structure.</p>
+</blockquote>
+<h3 id="2-the-service-ttstore">2. The Service: <code>ttStore</code></h3>
+<p><code>ttStore</code> is the TaskTonic wrapper around a <code>Store</code>. It transforms the store into a <strong>Service</strong> within the TaskTonic
+ecosystem. This adds capabilities such as:</p>
+<ul>
+<li><strong>Event-driven updates:</strong> Automatically notify other Tonics (like UI or controllers) upon changes.</li>
+<li><strong>Service Binding:</strong> Easily linked to other Tonics via <code>self.bind()</code>.</li>
+</ul>
+<hr />
+<h2 id="api-reference-methods">API Reference &amp; Methods</h2>
+<p>Below is an overview of the most important methods for data manipulation and navigation.</p>
+<h3 id="dictionary-access-syntax">Dictionary Access (<code>[]</code> Syntax)</h3>
+<p>For convenience, <code>ttStore</code> and <code>Item</code> support standard Python dictionary syntax.</p>
+<ul>
+<li><strong>Reading:</strong> <code>val = store['path']</code><ul>
+<li>Equivalent to <code>.get('path')</code>.</li>
+<li>Returns <code>None</code> if the path does not exist (unlike standard Python dicts which raise KeyError).</li>
+</ul>
+</li>
+<li><strong>Writing:</strong> <code>store['path'] = val</code><ul>
+<li>Equivalent to <code>.set([('path', val)])</code>.</li>
+<li>Triggers updates immediately (unless inside a <code>group</code>).</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Read</span>
+<span class="n">current_limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="p">[</span><span class="s1">&#39;parameters/temp_limit&#39;</span><span class="p">]</span>
+
+<span class="c1"># Write</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="p">[</span><span class="s1">&#39;parameters/temp_limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">12.0</span>
+</code></pre></div>
+<h3 id="writing-data-set-v-append">Writing Data (<code>set</code>, <code>.v</code>, <code>.append</code>)</h3>
+<h4 id="setdata"><code>set(data)</code></h4>
+<p>Writes one or multiple values to the store. It accepts a <code>dict</code> or an <code>Iterable</code> (list/tuple) of tuples.</p>
+<ul>
+<li><strong>Usage:</strong> Initialization, bulk updates, or when you need to write multiple values atomically.</li>
+<li><strong>Smart Paths:</strong><ul>
+<li><code>#</code>: Creates a new unique entry (auto-increment list).</li>
+<li><code>./</code>: Refers to the last created entry (useful for setting properties of an item).</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Initialize a store with parameters and sensors</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">set</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>     <span class="c1"># Set update frequency to 2</span>
+    <span class="p">(</span><span class="s1">&#39;sensors/#&#39;</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">),</span>             <span class="c1"># Create new sensor &#39;temp&#39;</span>
+    <span class="p">(</span><span class="s1">&#39;sensors/./value&#39;</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">),</span>         <span class="c1"># Set value of THAT sensor</span>
+    <span class="p">(</span><span class="s1">&#39;sensors/./unit&#39;</span><span class="p">,</span> <span class="s1">&#39;℃&#39;</span><span class="p">),</span>           <span class="c1"># Set unit of THAT sensor</span>
+<span class="p">])</span>
+</code></pre></div>
+<h4 id="v-value-property-via-item"><code>.v</code> (Value Property via Item)</h4>
+<p>If you hold an <code>Item</code> object (a pointer to a location), you can read and write directly via the <code>.v</code> property. This is
+the most efficient way to manipulate data if you already have the Item.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assume we have a pointer (Item) to the sensor value</span>
+<span class="n">sensor_val_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors/#0/value&#39;</span><span class="p">)</span>
+
+<span class="c1"># Write a new value</span>
+<span class="n">sensor_val_item</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="mf">22.5</span>
+</code></pre></div>
+<h4 id="appendvalue-via-item-or-appendpath-value-via-store"><code>append(value)</code> (via Item) or <code>append(path, value)</code> (via Store)</h4>
+<p>Adds a new item to a list. This is a cleaner, more pythonic alternative to using the <code>'path/#'</code> syntax when adding
+single items.</p>
+<ul>
+<li><strong>Via Item:</strong> <code>item.append(value)</code></li>
+<li><strong>Via Store:</strong> <code>store.append(path, value)</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Append via Store (adds &#39;System Started&#39; to the &#39;logs&#39; list)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;System Started&#39;</span><span class="p">)</span>
+
+<span class="c1"># Append via Item</span>
+<span class="n">log_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;logs&#39;</span><span class="p">)</span>
+<span class="n">log_item</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;User logged in&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="reading-data-get-at">Reading Data (<code>get</code>, <code>at</code>)</h3>
+<h4 id="getpath-defaultnone"><code>get(path, default=None)</code></h4>
+<p>Retrieves the value of a specific path. If the path does not exist, the <code>default</code> value is returned.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># Default 5 if not found</span>
+</code></pre></div>
+<h4 id="atpath-item"><code>at(path) -&gt; Item</code></h4>
+<p>Returns an <code>Item</code> object pointing to the location <code>path</code>. This is <strong>more powerful</strong> than <code>get</code> because it allows further
+navigation from that point.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get a pointer (Item) to the first sensor</span>
+<span class="n">sensor_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors/#0&#39;</span><span class="p">)</span>
+
+<span class="c1"># Read values via the Item</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sensor_item</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># Prints: 15.0</span>
+</code></pre></div>
+<h3 id="navigation-item-objects">Navigation (<code>Item</code> objects)</h3>
+<p>An <code>Item</code> object acts as a smart window onto your data.</p>
+<ul>
+<li><strong><code>item['child']</code></strong>: Navigate to a sub-item.
+    <div class="highlight"><pre><span></span><code><span class="n">val</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">v</span>
+</code></pre></div></li>
+<li><strong><code>item.parent</code></strong>: Returns an <code>Item</code> to the parent.
+    <div class="highlight"><pre><span></span><code><span class="n">root_sensors</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="o">.</span><span class="n">parent</span> <span class="c1"># Now points to &#39;sensors&#39;</span>
+</code></pre></div></li>
+<li><strong><code>item.list_root</code></strong>: If the item is part of a list (like sensors), this returns the item itself, regardless of how
+  deep you are in the hierarchy.
+    <div class="highlight"><pre><span></span><code><span class="c1"># If located at &#39;sensors/#0/value&#39;, list_root returns &#39;sensors/#0&#39;</span>
+<span class="n">sensor_name</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="o">.</span><span class="n">list_root</span><span class="o">.</span><span class="n">v</span> <span class="c1"># Returns e.g., &#39;temp&#39;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="childrenprefixnone"><code>.children(prefix=None)</code></h4>
+<p>Returns an <strong>iterator</strong> (not a list) of <code>Item</code> objects that are direct children of the current item.</p>
+<ul>
+<li><strong>Why an iterator?</strong> It is memory efficient (lazy evaluation). If you have thousands of items, it doesn't create
+  objects for all of them unless you consume them.</li>
+<li><strong>prefix:</strong> Optional string to filter children (e.g., useful if you have different types of lists in one folder).</li>
+</ul>
+<p><strong>Example 1: Converting to a list</strong>
+If you need index access or the length, convert it to a list explicitly.</p>
+<div class="highlight"><pre><span></span><code><span class="n">sensors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors&#39;</span><span class="p">)</span>
+<span class="n">sensor_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sensors</span><span class="o">.</span><span class="n">children</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Count: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sensor_list</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Example 2: Iterating directly (Efficient)</strong>
+Searching for a specific sensor without creating a full list in memory.</p>
+<div class="highlight"><pre><span></span><code><span class="n">target_sensor</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;humidity&#39;</span><span class="p">:</span>
+        <span class="n">target_sensor</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="k">break</span>
+</code></pre></div>
+<h3 id="reactivity-subscribe">Reactivity (<code>subscribe</code>)</h3>
+<p>Only available in <code>ttStore</code>. This allows subscribing a method to data changes.</p>
+<h4 id="subscribepath-callback"><code>subscribe(path, callback)</code></h4>
+<ul>
+<li><strong>path:</strong> The path to monitor (e.g., <code>'sensors'</code>).</li>
+<li><strong>callback:</strong> The method called upon change.</li>
+</ul>
+<p>The callback receives a list of <code>updates</code>. Each update is a tuple: <code>(path, new_value, old_value, source)</code>.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Listen to anything changing under &#39;sensors&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;sensors&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_sensor_update</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_sensor_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">updates</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sensor update at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">old</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="utilities-dumps-group-source">Utilities (<code>dumps</code>, <code>group</code>, <code>source</code>)</h3>
+<h4 id="dumps"><code>dumps()</code></h4>
+<p>Returns a string representation of the entire store (useful for debugging).</p>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">dumps</span><span class="p">())</span>
+</code></pre></div>
+<h4 id="groupnotifytrue-source_idnone-sourcesource_id"><code>group(notify=True, source_id=None)</code> &amp; <code>source(source_id)</code></h4>
+<p>Context managers to control how updates are processed.</p>
+<ol>
+<li>
+<p><strong><code>group(notify=False)</code></strong>: Performs updates atomically.</p>
+</li>
+<li>
+<p><strong>Usage:</strong> Batch initialization. No events are fired until the block ends (or never if <code>notify=False</code>).</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> 
+</code></pre></div>
+<ol>
+<li>
+<p><strong><code>source(source_id)</code> / <code>group(..., source_id=...)</code></strong>:</p>
+</li>
+<li>
+<p><strong>Usage:</strong> Identifying <em>who</em> made the change. This is crucial for bidirectional sync (e.g., connecting a GUI slider to
+  a value).</p>
+</li>
+<li>If a GUI updates the Store, the Store notifies the GUI. You want the GUI to ignore that notification to prevent an
+  infinite loop.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example: Updating from a specific source (e.g., &#39;GUI&#39;)</span>
+<span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="s1">&#39;GUI&#39;</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="p">[</span><span class="s1">&#39;parameters/speed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="c1"># In the callback, you can check the source:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">updates</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">src</span> <span class="o">==</span> <span class="s1">&#39;GUI&#39;</span><span class="p">:</span>
+            <span class="k">continue</span> <span class="c1"># Ignore changes I made myself</span>
+        <span class="c1"># Update GUI display...</span>
+</code></pre></div>
+<hr />
+<h2 id="performance-best-practices">Performance &amp; Best Practices</h2>
+<p>Although <code>ttStore</code> is powerful, consider the following points for optimal performance and clean code.</p>
+<h3 id="1-batch-updates-with-group">1. Batch Updates with <code>group</code></h3>
+<p>When modifying a lot of data simultaneously (e.g., during startup or reset), always use
+<code>with self.group(notify=False):</code>.</p>
+<ul>
+<li><strong>Reason:</strong> Without this, every single write action triggers all subscribers immediately. <code>group</code> prevents this "
+  update storm".</li>
+</ul>
+<h3 id="2-efficiency-of-item">2. Efficiency of <code>Item</code></h3>
+<p>If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the <code>Item</code> <strong>once</strong> during
+<code>__init__</code> or <code>on_start</code>, and cache it.</p>
+<ul>
+<li><strong>Inefficient:</strong> Calling <code>self.twin.get('sensors/#0/value')</code> in every cycle (must parse the path string every time).</li>
+<li><strong>Efficient:</strong>
+    <div class="highlight"><pre><span></span><code><span class="c1"># In __init__:</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">temp_val_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors/#0/value&#39;</span><span class="p">)</span>
+
+<span class="c1"># In timer loop:</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">temp_val_item</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="mf">0.1</span>
+</code></pre></div></li>
+</ul>
+<h3 id="3-data-types">3. Data Types</h3>
+<p>The Store is not strictly typed (it is Python), but consistency is key. If a path starts as a <code>float</code> (<code>15.0</code>), try to
+keep it that way and do not suddenly change it to a <code>string</code> ("15"), unless your application logic specifically handles
+this.</p>
+<hr />
+<h2 id="example-implementation">Example Implementation</h2>
+<p>Below is a full integration where <code>MyProcess</code> writes data and <code>OperatorInterface</code> reacts to that data via the
+<code>DigitalTwin</code> store.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic.ttTonicStore</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttStore</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+
+<span class="c1"># --- The Data Repository Service ---</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DigitalTwin</span><span class="p">(</span><span class="n">ttStore</span><span class="p">):</span>
+    <span class="n">_tt_is_service</span> <span class="o">=</span> <span class="s2">&quot;digital_twin&quot;</span>  <span class="c1"># Service name for binding</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">my_record</span><span class="p">[</span><span class="s1">&#39;auto_finish&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_post_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_post_action</span><span class="p">()</span>
+        <span class="c1"># Use group(notify=False) for performance during init</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">notify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># Because the set method uses Iterable, both tuples (()) and lists [] are valid.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">((</span>
+                <span class="p">(</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;parameters/temp_limit&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/#&#39;</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">),</span>         <span class="c1"># Create sensor 0</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/./value&#39;</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/./unit&#39;</span><span class="p">,</span> <span class="s1">&#39;℃&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/./high_alarm&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/#&#39;</span><span class="p">,</span> <span class="s1">&#39;humidity&#39;</span><span class="p">),</span>     <span class="c1"># Create sensor 1</span>
+                <span class="p">(</span><span class="s1">&#39;sensors/./value&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Digital Twin is initialized</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dumps</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># --- The Observer (e.g., GUI or Logger) ---</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OperatorInterface</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">catalyst</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">log_mode</span><span class="p">,</span> <span class="n">catalyst</span><span class="p">)</span>
+        <span class="c1"># Bind to the service</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twin</span> <span class="o">=</span> <span class="n">DigitalTwin</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Subscribe to sensor changes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;sensors&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_sensor_update</span><span class="p">)</span>
+        <span class="c1"># Schedule parameter update and end of program</span>
+        <span class="n">ttTimerSingleShot</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">sparkle_back</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_parm_update</span><span class="p">)</span>
+        <span class="n">ttTimerSingleShot</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">sparkle_back</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_end_program</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_sensor_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">updates</span><span class="p">:</span>
+            <span class="c1"># Use .at(path) to get an Item for smart navigation</span>
+            <span class="c1"># .list_root automatically navigates up to the sensor item (e.g., &#39;sensors/#0&#39;)</span>
+            <span class="n">sensor_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">list_root</span>
+
+            <span class="c1"># Retrieve name and value via the item</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">sensor_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UPDATE OF SENSOR </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_parm_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="p">[</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">.5</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_end_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+
+
+<span class="c1"># --- The Controller (Process Logic) ---</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyProcess</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">catalyst</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">log_mode</span><span class="p">,</span> <span class="n">catalyst</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">my_record</span><span class="p">[</span><span class="s1">&#39;auto_finish&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">DigitalTwin</span><span class="p">)</span>
+
+        <span class="c1"># Performance optimization: Cache the item pointer</span>
+        <span class="c1"># This avoids parsing the path string in every loop cycle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp_sens_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;sensors/#0&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_param_update</span><span class="p">)</span>
+        <span class="c1"># Start a timer based on a parameter from the store</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utmr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ttTimerRepeat</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">sparkle_back</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__update_timer</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_param_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">updates</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="o">==</span> <span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">utmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                <span class="c1"># Restart timer with new frequency</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters/update_freq&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">utmr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ttTimerRepeat</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">sparkle_back</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__update_timer</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__update_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmr</span><span class="p">):</span>
+        <span class="c1"># Writing directly via the cached item is very efficient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp_sens_item</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<span class="c1"># --- App Configuration ---</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">myApp</span><span class="p">(</span><span class="n">ttFormula</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">creating_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s1">&#39;tasktonic/log/to&#39;</span><span class="p">,</span> <span class="s1">&#39;screen&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;tasktonic/log/default&#39;</span><span class="p">,</span> <span class="n">ttLog</span><span class="o">.</span><span class="n">FULL</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">creating_starting_tonics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">DigitalTwin</span><span class="p">()</span>
+        <span class="n">OperatorInterface</span><span class="p">()</span>
+        <span class="n">MyProcess</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">myApp</span><span class="p">()</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

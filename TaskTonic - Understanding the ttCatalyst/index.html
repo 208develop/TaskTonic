@@ -1,0 +1,1039 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Refreshing Approach to Python Concurrency">
+      
+      
+      
+      
+        <link rel="prev" href="../TaskTonic%20-%20Sparkling%20Programming/">
+      
+      
+        <link rel="next" href="../TaskTonic%20-%20Depending%20on%20your%20state/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>Understanding ttCatalyst - TaskTonic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-engine-of-tasktonic-understanding-the-ttcatalyst" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TaskTonic" class="md-header__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TaskTonic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Understanding ttCatalyst
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../TaskTonic%20%20-%20The%20introduction/" class="md-tabs__link">
+          
+  
+  
+  Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tasting-the-tonic/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tasting The Tonic
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TaskTonic" class="md-nav__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TaskTonic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20%20-%20The%20introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Sparkling%20Programming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparkling Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-basics-a-catalyst-is-a-tonic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Basics: A Catalyst is a Tonic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-core-tt_main_catalyst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Core: tt_main_catalyst
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-under-the-hood-the-sparkle-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Under the Hood: The sparkle() Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Under the Hood: The sparkle() Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-catalyst-queue-what-exactly-is-in-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Catalyst Queue: What exactly is in it?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-trade-offs-using-multiple-catalysts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Trade-offs: Using Multiple Catalysts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-advanced-creating-a-custom-catalyst-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Advanced: Creating a Custom Catalyst Class
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Advanced: Creating a Custom Catalyst Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-interfacing-with-blockinglong-running-processes-eg-numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Interfacing with Blocking/Long-Running Processes (e.g., Numpy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-high-speed-custom-queues-interfaces-the-selectorhandler-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. High-Speed Custom Queues &amp; Interfaces (The SelectorHandler Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Depending%20on%20your%20state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depending on State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Timers%20without%20waiting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timers Without Waiting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Active%20data%20store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Tasktonic%20-%20At%20your%20service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TaskTonic%20-%20Testing%20in%20the%20ttDistiller/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing in ttDistiller
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasting-the-tonic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tasting The Tonic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-basics-a-catalyst-is-a-tonic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Basics: A Catalyst is a Tonic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-core-tt_main_catalyst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Core: tt_main_catalyst
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-under-the-hood-the-sparkle-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Under the Hood: The sparkle() Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Under the Hood: The sparkle() Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-catalyst-queue-what-exactly-is-in-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Catalyst Queue: What exactly is in it?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-trade-offs-using-multiple-catalysts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Trade-offs: Using Multiple Catalysts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-advanced-creating-a-custom-catalyst-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Advanced: Creating a Custom Catalyst Class
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Advanced: Creating a Custom Catalyst Class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-interfacing-with-blockinglong-running-processes-eg-numpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Interfacing with Blocking/Long-Running Processes (e.g., Numpy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-high-speed-custom-queues-interfaces-the-selectorhandler-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. High-Speed Custom Queues &amp; Interfaces (The SelectorHandler Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="the-engine-of-tasktonic-understanding-the-ttcatalyst">The Engine of TaskTonic: Understanding the <code>ttCatalyst</code></h1>
+<p><img src="../assets/tasktonic-catalyst.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">c</p>
+<p>If a <code>Tonic</code> is a specialized worker on an assembly line, the <code>ttCatalyst</code> is the powerful engine that drives the conveyor belt [1]. Its primary and most crucial function is to make Tonics "sparkle" by continuously processing a shared task queue [1]. </p>
+<p>To master TaskTonic, you need to understand what happens inside this engine, how to configure it, and when to spawn new ones.</p>
+<hr />
+<h2 id="1-the-basics-a-catalyst-is-a-tonic">1. The Basics: A Catalyst <em>is</em> a Tonic</h2>
+<p>An elegant part of the TaskTonic architecture is that <code>ttCatalyst</code> inherits directly from <code>ttTonic</code> [2, 3]. 
+This means a Catalyst is not just a dumb loop; it is a fully-fledged agent. </p>
+<ul>
+<li><strong>It has a lifecycle:</strong> It starts up, can have its own state machine, and shuts down gracefully.</li>
+<li><strong>It can be used as a Tonic:</strong> You can add your own application logic directly to a custom Catalyst [2, 3].</li>
+<li><strong>It cleans up after itself:</strong> When the last Tonic registered to a Catalyst finishes, the Catalyst determines its job is done and automatically initiates its own shutdown sequence [4, 5].</li>
+</ul>
+<h2 id="2-the-core-tt_main_catalyst">2. The Core: <code>tt_main_catalyst</code></h2>
+<p>Every TaskTonic application requires at least one Catalyst, known as the <strong>Main Catalyst</strong>. 
+*   It is strictly identified by the name <code>tt_main_catalyst</code> and always holds <code>id = 0</code> [6, 7]. 
+*   Unlike other Catalysts, the Main Catalyst runs its loop in the <strong>main application thread</strong>, blocking the standard execution flow to keep your application alive [6, 8].
+*   It is defined in your <code>ttFormula</code> via the <code>creating_main_catalyst()</code> method. By default, the Formula simply spawns a standard <code>ttCatalyst</code> [7, 9].</p>
+<h2 id="3-under-the-hood-the-sparkle-loop">3. Under the Hood: The <code>sparkle()</code> Loop</h2>
+<p>When you call <code>start_sparkling()</code>, the Catalyst enters its main <code>while</code> loop [6]. Here is exactly what happens in that loop:</p>
+<ol>
+<li><strong>Timer Check:</strong> It looks at the list of registered timers and calculates <code>next_timer_expire</code>—the exact amount of time until the nearest timer needs to fire [10].</li>
+<li><strong>Queue Wait:</strong> It calls <code>get(timeout=next_timer_expire)</code> on its master queue (<code>catalyst_queue</code>). The thread goes to sleep, consuming 0% CPU, until either a task arrives or the timer expires [10].</li>
+<li><strong>Execution:</strong> If a task (work order) is pulled from the queue, it unpacks the payload and calls the internal <code>_execute_sparkle</code> method on the target Tonic [11, 12].</li>
+<li><strong>Extra Sparkles:</strong> After executing the main task, it rapidly drains any <code>extra_sparkles</code> (like immediate state transitions: <code>on_exit</code> -&gt; <code>on_enter</code>) before returning to the start of the loop [11].</li>
+</ol>
+<h3 id="the-catalyst-queue-what-exactly-is-in-it">The Catalyst Queue: What exactly is in it?</h3>
+<p>The <code>catalyst_queue</code> is a standard Python <code>queue.SimpleQueue</code> [13]. A single "work order" payload placed on this queue contains [10, 14]:
+*   The <code>instance</code> of the target Tonic.
+*   The <code>sparkle</code> method to execute.
+*   The <code>args</code> and <code>kwargs</code> (parameters).
+*   The <code>source</code> (who called this sparkle, tracked via the <code>ttSparkleStack</code>).</p>
+<h2 id="4-trade-offs-using-multiple-catalysts">4. Trade-offs: Using Multiple Catalysts</h2>
+<p>Because any Catalyst created <em>after</em> the Main Catalyst automatically spawns its own background thread, you can easily distribute workloads [8, 15]. </p>
+<p><strong>Why you might want to use your own Catalyst:</strong>
+*   <strong>Thread Independence:</strong> A new Catalyst runs in its own thread. If the <code>tt_main_catalyst</code> is heavily bogged down by UI repaints or a busy Tonic, your independent Catalyst remains hyper-responsive. </p>
+<p><strong>Why you should be careful (The Drawbacks):</strong>
+*   <strong>The Deepcopy Penalty (Slower):</strong> TaskTonic guarantees data immutability. If Thread A calls a Sparkle on a Tonic managed by Thread B (a different Catalyst), the framework detects the thread crossing. To prevent race conditions, it uses <code>copy.deepcopy()</code> on all <code>args</code> and <code>kwargs</code> before placing them on the queue [16-18]. This deep copy is completely safe, but it introduces overhead and is slower than running in the same Catalyst.
+*   <strong>Thread Bloat:</strong> Spawning a new Catalyst for every single Tonic defeats the purpose of the framework. You fall back into the trap of managing a mess of OS threads.</p>
+<p><strong>Best Practice:</strong> Use a separate Catalyst for a self-contained module or Service that manages a whole tree of sub-Tonics (infusions). Do <em>not</em> spawn a new Catalyst for a single, lightweight Tonic.</p>
+<h2 id="5-advanced-creating-a-custom-catalyst-class">5. Advanced: Creating a Custom Catalyst Class</h2>
+<p>Because <code>ttCatalyst</code> is just a class, you can subclass it. Why would you write your own Catalyst engine?</p>
+<h3 id="a-interfacing-with-blockinglong-running-processes-eg-numpy">A. Interfacing with Blocking/Long-Running Processes (e.g., Numpy)</h3>
+<p>Sometimes you <em>have</em> to run a Sparkle that takes a long time (like a heavy Numpy calculation). In a shared Catalyst, this freezes all other Tonics. 
+By creating a dedicated custom Catalyst just for this math module, you can explicitly <em>allow</em> long-running Sparkles. The main application remains fluid. 
+<em>(Warning: Remember that if a Sparkle takes 5 seconds, a <code>finish()</code> command sent to that Tonic will also be delayed by up to 5 seconds because it waits in the same queue!)</em></p>
+<h3 id="b-high-speed-custom-queues-interfaces-the-selectorhandler-pattern">B. High-Speed Custom Queues &amp; Interfaces (The <code>SelectorHandler</code> Pattern)</h3>
+<p>Standard queues use <code>time.sleep</code> or locks to wait. For ultra-fast I/O (like IP communication), you want to use OS-level selectors [19]. </p>
+<p>The TaskTonic framework allows you to override the <code>new_catalyst_queue()</code> method [13, 20]. You can inject a custom queue that bridges the gap between Python queues and OS sockets.</p>
+<p><strong>The IP Communication Example:</strong>
+In <code>examples/ip_communicatie.py</code>, a custom Catalyst named <code>SelectorHandler</code> is used [21]: 
+1.  <strong>Custom Queue:</strong> It overrides <code>new_catalyst_queue</code> with a <code>MyNotifyingQueue</code> [20]. Whenever a Sparkle is put onto this queue, it also sends a single byte of data to a hidden internal socket (<code>_queue_filled_notify_channel</code>) [20].
+2.  <strong>Custom Loop:</strong> The standard <code>sparkle()</code> loop is overridden. Instead of blocking on <code>queue.get()</code>, it blocks on <code>selectors.select()</code> [22]. 
+3.  <strong>Result:</strong> The Catalyst sleeps efficiently at the OS level. It wakes up instantly if <em>either</em> network data arrives on an IP port, <em>or</em> if another Tonic drops a Sparkle into the <code>MyNotifyingQueue</code> [19, 21, 22]. </p>
+<p>This demonstrates the ultimate power of TaskTonic: you can bend the engine entirely to your architectural needs without rewriting the underlying Tonic logic.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
