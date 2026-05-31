@@ -1,0 +1,29 @@
+site_name: TaskTonic
+site_description: A Refreshing Approach to Python Concurrency
+repo_url: https://github.com/208develop/TaskTonic
+repo_name: 208develop/TaskTonic
+
+theme:
+  name: material
+  palette:
+    primary: teal
+    accent: cyan
+  features:
+    - navigation.tabs
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Documentation:
+      - The Introduction: 'TaskTonic  - The introduction.md'
+      - Sparkling Programming: 'TaskTonic - Sparkling Programming.md'
+      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
+      - Depending on State: 'TaskTonic - Depending on your state.md'
+      - Timers Without Waiting: 'TaskTonic - Timers without waiting.md'
+      - Active Data Store: 'TaskTonic - Active data store.md'
+      - At Your Service: 'Tasktonic - At your service.md'
+      - Testing in ttDistiller: 'TaskTonic - Testing in the ttDistiller.md'
+  - Tasting The Tonic: tasting-the-tonic.md
