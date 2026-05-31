@@ -10,8 +10,7 @@ class ttFormula():
         # 1/ INIT, init parameters ----------------------------------------------------------------------------------
         self.ledger = ttLedger()
         sp_stck = ttSparkleStack()
-
-        from .ttLoggers.ttScreenLogger import ttLogService, ttScreenLogService
+        from .ttLoggers import ttLogService, ttScreenLogService, ttIpLogService
         from .ttLogger import ttLog
         self.ledger.update_formula((
             # project parameters
@@ -28,6 +27,9 @@ class ttFormula():
             ('tasktonic/log/service./service', ttLogService), # base class, without logging
             ('tasktonic/log/service#', 'screen'),
             ('tasktonic/log/service./service', ttScreenLogService),
+            ('tasktonic/log/service./arguments', {}),
+            ('tasktonic/log/service#', 'ip'),
+            ('tasktonic/log/service./service', ttIpLogService),
             ('tasktonic/log/service./arguments', {}),
         ))
 

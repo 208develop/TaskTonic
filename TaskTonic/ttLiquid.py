@@ -65,7 +65,7 @@ class __ttLiquidMeta(type):
         is_service = service_name is not None
 
         if is_service:
-            if len(args) >= 1:
+            if len(args) >= 1 and isinstance(args[0], str):
                 name = args[0]
                 args = args[1:]
             else:
@@ -124,7 +124,7 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         # CREATE TONIC and INIT ESSENTIALS
         self.ledger = ledger
         self.id = None
-        given_name = kwargs.get('name', args[0] if len(args) >= 1 else None)
+        given_name = kwargs.get('name', args[0] if len(args) >= 1 and isinstance(args[0], str) else None)
         if given_name: self.id = ledger.check_reservation(given_name)
         if self.id is None: self.id = ledger.make_reservation()
         self.name = given_name if given_name else  f'{self.id:02d}.{cls.__name__}'
@@ -179,8 +179,8 @@ class ttLiquid(metaclass=__ttLiquidMeta):
 
             self.set_log_mode(log_mode)
 
-        self.log(system_flags={
-            'created': True,
+        self.log(lifecycle={
+            'phase': 'creation',
             'id': self.id,
             'name': self.name,
             'base': self.base.id if self.base else -1,
@@ -244,13 +244,15 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         for liquid in self.infusions.copy():
             liquid.ttsc__finish()
 
+        self.log(lifecycle={'phase': 'finished'})
         self.ledger.unregister(self.id)
         self.id = -1  # finished
 
     def ttsc__finish(self): self.finish() # make compatible with tonic calls
 
     # create logger functions for ttLog to overwrite
-    def log(self, line=None, flags=None, system_flags=None, close_log=False):
+    def log(self, line=None, flags=None, lifecycle=None,
+            lane_color=None, marker=None, probe=None, close_log=False):
         """
         Adds a text line and/or (system) flags to the current log entry.
 
@@ -259,47 +261,73 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         dynamically replaced by `set_log_mode` to point to the correct
         log handler (e.g., `_log_full`, `_log_stealth`).
 
-        :param line: The string message to log.
+        Note:
+        possible log colors: white, green, blue, orange, pink, purple, cyan or yellow
+
+        :param line: The string message to log (add ##<log color> for coloring log line).
         :param flags: A dictionary of flags to add to the log entry.
-        :param system_flags: A dictionary of system flags to add.
+        :param lifecycle: A dictionary of framework lifecycle data.
         :param close_log: When true, send the log entry and clear it.
+        :param lane_color: Set color of log lane (id) to a log color
+        :param marker: Add marker to log (for display and filtering) (add ##<log color> for coloring marker).
+        :param probe: Add parameter dict to log to display in the probe list.
+
         """
         pass
 
-    def _log_full(self, line=None, flags=None, system_flags=None, close_log=False):
+    def _log_full(self, line=None, flags=None, lifecycle=None,
+                     lane_color=None, marker=None, probe=None, close_log=False):
         """Internal log handler for the FULL log mode."""
-        if self.id == -1:
-            pass # todo:??
+        # if self.id == -1: pass # todo:??
+
         if self._log is None: self._log = {'id': self.id, 'start@': time.time(), 'log': []}
-        if system_flags: self._log.setdefault('sys', {}).update(system_flags)
+
         if flags: self._log.update(flags)
+        if lifecycle: self._log.setdefault('lifecycle', {}).update(lifecycle)
+        if lane_color or marker or probe:
+            meta = self._log.setdefault('meta', {})
+            if lane_color: meta['lane_color'] = lane_color
+            if marker:     meta.setdefault('marker', []).append(marker)
+            if probe:      meta.setdefault('probe', {}).update(probe)
+
         if line: self._log['log'].append(line)
+
         if close_log:
             self._log['duration'] = time.time() - self._log['start@']
             self._log_push(self._log)
             self._log = None
 
-    def _log_quiet(self, line=None, flags=None, system_flags=None, close_log=False):
+    def _log_quiet(self, line=None, flags=None, lifecycle=None,
+                   lane_color=None, marker=None, probe=None, close_log=False):
         """Internal log handler for the QUIET log mode."""
         if self._log is None: self._log = {'id': self.id, 'start@': time.time(), 'log': []}
-        if system_flags: self._log.setdefault('sys', {}).update(system_flags)
+
+        if lifecycle: self._log.setdefault('lifecycle', {}).update(lifecycle)
         if flags: self._log.update(flags)
+        if lane_color or marker or probe:
+            meta = self._log.setdefault('meta', {})
+            if lane_color: meta['lane_color'] = lane_color
+            if marker:     meta.setdefault('marker', []).append(marker)
+            if probe:      meta.setdefault('probe', {}).update(probe)
+
         if line: self._log['log'].append(line)
         if close_log:
-            if 'log' in self._log or 'sys' in self._log:
+            if self._log['log'] or 'lifecycle' in self._log or 'meta' in self._log:
                 self._log_push(self._log)
             self._log = None
 
-    def _log_off(self, line=None, flags=None, system_flags=None, close_log=False):
+    def _log_off(self, line=None, flags=None, lifecycle=None,
+                 lane_color=None, marker=None, probe=None, close_log=False):
         """Internal log handler for the OFF log mode (lifecycle only)."""
-        if system_flags:
+        if lifecycle:
             if self._log is None: self._log = {'id': self.id, 'start@': time.time()}
-            self._log.setdefault('sys', {}).update(system_flags)
+            self._log.setdefault('lifecycle', {}).update(lifecycle)
         if close_log and self._log:
             self._log_push(self._log)
             self._log = None
 
-    def _log_stealth(self, line=None, flags=None, system_flags=None, close_log=False):
+    def _log_stealth(self, line=None, flags=None, lifecycle=None,
+                     lane_color=None, marker=None, probe=None, close_log=False):
         """Internal log handler for the STEALTH log mode (does nothing)."""
         pass
 

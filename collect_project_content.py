@@ -3,7 +3,7 @@ from pathlib import Path
 
 """
 This script wil put the whole source and documentation in a single .md file (project_content.md)
-Ideal for making AI models (line NotebookLM) awair of the project by uploading one file.
+Ideal for making AI models (like NotebookLM) awair of the project by uploading one file.
 """
 
 def create_project_summary(root_dir, output_file, intro_text=""):

@@ -1,8 +1,8 @@
-# What is TaskTonic?
-
-## Philosophy & Metaphor
+# TaskTonic
 
 TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model.
+
+## Philosophy & Metaphor
 
 The core philosophy is based on the **Tonic**. Think of your running application as a glass of tonic. It comes to life
 through **Sparkles**, the **bubbles** rising in a liquid.

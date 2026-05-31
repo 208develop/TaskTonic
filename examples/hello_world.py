@@ -5,27 +5,23 @@ class HelloWorld(ttTonic):
         super().__init__(name, log_mode)
 
     def ttse__on_start(self):
-        self.tts__hello()
+        ttTimerRepeat(seconds=1.5, name='tm_step')
+        self.to_state('hello')
 
-    def tts__hello(self):
-        self.log('Hello ')
-        self.tts__world()
+    def ttse_hello__on_enter(self):
+        self.log('Hello world')
 
-    def tts__world(self):
-        self.log('world, ')
-        self.tts__welcome()
+    def ttse_hello__on_tm_step(self, tinfo):
+        self.to_state('welcome')
 
-    def tts__welcome(self):
-        self.log('welcome ')
-        self.tts__to()
+    def ttse_welcome__on_enter(self):
+        self.log('Welcome to TaskTonic')
 
-    def tts__to(self):
-        self.log('to ')
-        self.tts__tasktonic()
+    def ttse_welcome__on_tm_step(self, tinfo):
+        self.to_state('ending')
 
-    def tts__tasktonic(self):
-        self.log('TaskTonic!')
-        self.finish()
+    def ttse_welcome__on_tm_step(self, tinfo):
+        self.ttsc__finish()
 
 
 class myApp(ttFormula):
@@ -34,9 +30,6 @@ class myApp(ttFormula):
             ('tasktonic/log/to', 'screen'),
             ('tasktonic/log/default', ttLog.FULL),
         )
-
-    def creating_main_catalyst(self):
-        super().creating_main_catalyst()
 
     def creating_starting_tonics(self):
         HelloWorld()

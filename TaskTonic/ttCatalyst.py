@@ -122,7 +122,7 @@ class ttCatalyst(ttTonic):
         """
         if tonic_id in self.tonics_sparkling:
             self.tonics_sparkling.remove(tonic_id)
-        self.log(f"Tonic {tonic_id} has been removed from Catalyst. (left {self.tonics_sparkling})")
+        # self.log(f"Tonic {tonic_id} has been removed from Catalyst. (left {self.tonics_sparkling})")
 
         # If there are no more active tonics, or active tonics used by catalyst, the catalyst's job is done.
         infusion_ids = {i.id for i in self.infusions}
@@ -131,7 +131,7 @@ class ttCatalyst(ttTonic):
 
     def _ttss__main_catalyst_finished(self):
         # Default: Stop when main catalyst is finished. You can override this method for other behavior
-        self.log('Finish catalyst')
+        # self.log('Finish catalyst')
         self.finish()
 
     def _ttss__on_completion(self):

@@ -25,8 +25,8 @@ class ttLogService(ttCatalyst):
         if set(self.service_bases).issubset(self.infusions):
             self.finish()
 
-    def ttse__on_service_base_completed(self, tonic, srv_left):
-        if srv_left == 0:
+    def ttse__on_service_base_completed(self, tonic, srv_left, finish_on_count=0):
+        if srv_left == finish_on_count:
             self.finish()
         pass
 

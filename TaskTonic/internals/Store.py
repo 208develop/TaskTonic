@@ -14,6 +14,49 @@ DumpData = Iterable[Tuple[str, Any]]
 
 
 # ------------------------------------------------------------------------------
+# Class: StoreLink (The Smart Proxy Node)
+# ------------------------------------------------------------------------------
+class StoreLink:
+    """
+    A smart node that resides inside the Store's storage tree.
+    It acts as a proxy to another path and manages its own subscriptions.
+    """
+    __slots__ = ('store', 'alias_path', 'target_path', 'bubble_events')
+
+    def __init__(self, store: 'Store', alias_path: str, target_path: str, bubble_events: bool = False):
+        self.store = store
+        self.alias_path = alias_path.strip("/")
+        self.target_path = target_path.strip("/")
+        self.bubble_events = bubble_events
+
+    def setup(self):
+        """Called when the link is inserted into the store."""
+        if self.bubble_events:
+            self.store.at(self.target_path).subscribe(self._on_target_change, recursive=True, owner=self)
+
+    def teardown(self):
+        """Called when this link is removed from the store."""
+        if self.bubble_events:
+            self.store.unsubscribe(self)
+
+    def _on_target_change(self, events):
+        """Routes events from the canonical path to the alias path."""
+        for path, new_val, old_val, source_id in events:
+            # If the canonical item is destroyed, self-destruct the link
+            if new_val is None and path == self.target_path:
+                self.store.remove_item(self.alias_path)
+                continue
+
+            # Route the event deeper if the change happened in a sub-property
+            relative_target = path[len(self.target_path):]
+            inject_path = f"{self.alias_path}{relative_target}".strip("/")
+            self.store._inject_event(inject_path, new_val, old_val, source_id)
+
+    def __repr__(self):
+        return f"<StoreLink(bubble_events={self.bubble_events}) {self.alias_path} -> {self.target_path}>"
+
+
+# ------------------------------------------------------------------------------
 # Class: Item (The Cursor/View)
 # ------------------------------------------------------------------------------
 class Item:
@@ -212,31 +255,85 @@ class Item:
     # --- MANIPULATION ---
 
     def remove(self, subpath: str = None) -> None:
+        """
+        Remove Item from store
+        :param subpath: sub path to remove, if empty, remove item
+        :return:
+        """
         target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
         self._store.remove_item(target)
 
     def pop(self, subpath: str = None) -> Any:
+        """
+        Remove Item from store and return its value after that
+        :param subpath: sub path to remove, if empty, remove item
+        :return:
+        """
         target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
         val = self._store.get_value(target)
         self._store.remove_item(target)
         return val
 
     def append(self, prefix: str = None) -> 'Item':
-        """Creates a new child item with an auto-incrementing index (e.g. #0, #1)."""
+        """
+        Creates a new list child item with an auto-incrementing index (e.g. #0, #1).
+        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
+        :return: Item
+        """
         return self._store.create_list_item(self._path, prefix)
 
     def extend(self, data_list: List[Any], prefix: str = None) -> 'Item':
-        """Appends multiple items to the list."""
+        """
+        Appends multiple items to the list.
+        :param data_list: list of data to append
+        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
+        :return: Item with created list
+        """
         if not isinstance(data_list, list):
             raise ValueError("extend() expects a list")
         for data in data_list:
             new_item = self.append(prefix)
             # If data looks like a batch tuple structure, set it as structure
-            if isinstance(data, (list, tuple)) and len(data) > 0 and isinstance(data[0], (list, tuple)) and len(
-                    data[0]) == 2:
+            is_valid_tuple = isinstance(data, (list, tuple)) and len(data) > 0
+            if is_valid_tuple and isinstance(data[0], (list, tuple)) and len(data[0]) == 2:
                 new_item.set(data)
             else:
                 new_item.v = data
+        return self
+
+    def set_each(self, subpath: str, value: Any, prefix: str = None) -> 'Item':
+        """
+        Updates a specific subpath for each child of the current item.
+        Filters children by prefix if provided.
+
+        Args:
+            subpath: The relative path to update (e.g., "brightness" or "state").
+            value: The new value to apply.
+            prefix: Optional filter for children (e.g., "lamp").
+
+        Returns:
+            The current Item instance for method chaining.
+        """
+        with self.group():
+            for child in self.children(prefix=prefix):
+                target_item = child.at(subpath)
+                target_item.v = value
+
+        return self
+
+    def link_to(self, target_path: str, bubble_events: bool = False) -> 'Item':
+        """
+        Creates a StoreLink at the current item's path, pointing to a target path.
+
+        Args:
+            target_path: The canonical path this link should point to.
+            bubble_events: If True, changes on the target will bubble up this alias path.
+
+        Returns:
+            The current Item instance for method chaining.
+        """
+        link_obj = StoreLink(self._store, self._path, target_path, bubble_events=bubble_events)
+        self._store.set_value(self._path, link_obj, notify=True)
         return self
 
     # --- QUERY ---
@@ -249,6 +346,13 @@ class Item:
                 if not key.startswith(target_start):
                     continue
             yield self.at(key)
+
+    @property
+    def key(self) -> str:
+        """Returns the last segment of the path (e.g., '#0' from 'ui/id/#0')."""
+        if not self._path:
+            return ""
+        return self._path.split('/')[-1]
 
     def dump(self) -> DumpData:
         return self._store.get_subtree(self._path)
@@ -264,9 +368,81 @@ class Item:
                 lines.append(f"  {display_key} = {val}")
         return "\n".join(lines)
 
+    # --- CONTEXT MANAGERS ---
+
+    def group(self, source_id: str = None, notify: bool = True):
+        """
+        Proxy to the Store's group context manager.
+        Allows batching updates directly from an Item instance.
+        """
+        return self._store.group(source_id=source_id, notify=notify)
+
+    def source(self, source_id: str):
+        """
+        Proxy to the Store's source context manager.
+        """
+        return self._store.source(source_id=source_id)
+
+    # --- SUBSCRIBING ---
+
+    def subscribe(self, path_or_callback: Union[str, List[str], ListenerCallback],
+                  callback: ListenerCallback = None,
+                  ignore_source: str = None, recursive: bool = False,
+                  exclude: List[str] = None, extract: List[str] = None,
+                  trigger_now: bool = False, owner: object = None) -> 'Item':
+        """
+        Subscribes to changes on this item or its relative sub-paths.
+        """
+        # Logic to handle item.subscribe(callback) vs item.subscribe("path", callback)
+        if callable(path_or_callback):
+            # Case: item.subscribe(callback)
+            target_path = self._path
+            real_callback = path_or_callback
+        else:
+            # Case: item.subscribe("subpath", callback) or item.subscribe(["a", "b"], callback)
+            real_callback = callback
+            if isinstance(path_or_callback, list):
+                target_path = [f"{self._path}/{p}".strip("/") for p in path_or_callback]
+            else:
+                target_path = f"{self._path}/{path_or_callback}".strip("/")
+
+        if real_callback is None:
+            raise ValueError("A callback must be provided to subscribe().")
+
+        self._store.subscribe(
+            target_path,
+            real_callback,
+            ignore_source=ignore_source,
+            recursive=recursive,
+            exclude=exclude,
+            extract=extract,
+            trigger_now=trigger_now,
+            owner=owner  # Pass the owner to the store
+        )
+        return self
+
+    def unsubscribe(self, target: Union[ListenerCallback, object] = None) -> 'Item':
+        """
+        Unsubscribe from this item.
+        If target is None, it removes all subscriptions where THIS item instance is the owner.
+        Otherwise, it removes the specific callback or owner provided.
+        """
+        if target is None:
+            # If no target is given, we assume the user wants to clear
+            # everything linked to this item's specific path
+            self._store.unsubscribe(self._path)
+        else:
+            self._store.unsubscribe(target)
+        return self
+
     # --- MAGIC ---
 
     def at(self, subpath: str) -> 'Item':
+        """
+        Returns Item at subpath. From there you can access the item directly
+        :param subpath: subpath of item
+        :return:
+        """
         full_path = f"{self._path}/{subpath}" if self._path else subpath
         return self._store.at(full_path)
 
@@ -297,6 +473,8 @@ class Store:
     - Pub/Sub with Ancestor Lookup (O(depth) instead of O(subscribers)).
     - Grouped updates (Batching).
     - Silent updates (notify=False) per set or per group.
+    - MQTT-style wildcards (* and **)
+    - Atomic Snapshots via extraction
     """
 
     def __init__(self):
@@ -307,6 +485,40 @@ class Store:
         self._subscribers: Dict[str, List[Dict]] = {}
         # Thread Local Storage for batching contexts
         self._local = threading.local()
+
+    def _resolve_deep_path(self, path: str, visited_links: set = None) -> str:
+        """
+        Resolves paths segment by segment to support deep writing/reading into StoreLinks.
+        Example: 'alias/folder/prop' -> hits link at 'alias/folder' -> returns 'target/device/prop'
+        """
+        if visited_links is None:
+            visited_links = set()
+
+        parts = path.strip("/").split("/")
+        current_path = ""
+
+        for i, part in enumerate(parts):
+            current_path = f"{current_path}/{part}" if current_path else part
+
+            with self._lock:
+                entry = self._storage.get(current_path)
+
+            if entry and isinstance(entry["val"], StoreLink):
+                if current_path in visited_links:
+                    raise ValueError(f"Circular StoreLink detected at {current_path}")
+                visited_links.add(current_path)
+
+                target_base = entry["val"].target_path
+                remaining_parts = parts[i + 1:]
+
+                if remaining_parts:
+                    rest_of_path = "/".join(remaining_parts)
+                    new_full_path = f"{target_base}/{rest_of_path}"
+                    return self._resolve_deep_path(new_full_path, visited_links)
+                else:
+                    return target_base
+
+        return current_path
 
     # --- Context Managers ---
 
@@ -327,7 +539,7 @@ class Store:
         if not hasattr(self._local, "group_notify"):
             self._local.group_notify = True
 
-            # 2. Save previous states
+        # 2. Save previous states
         prev_src = self._local.current_source
         prev_notify = self._local.group_notify
 
@@ -381,26 +593,142 @@ class Store:
     def __delitem__(self, path: str):
         self.remove_item(path)
 
-    def subscribe(self, path: str, callback: ListenerCallback, ignore_source: str = None, recursive: bool = True,
-                  exclude: List[str] = None):
+    def subscribe(self, path: Union[str, List[str]], callback: ListenerCallback,
+                  ignore_source: str = None, recursive: bool = False,
+                  exclude: List[str] = None, extract: List[str] = None,
+                  trigger_now: bool = False, owner: object = None) -> Union[int, List[int]]:
         """
         Register a callback.
-        recursive: If True, trigger on path and descendants.
-        exclude: List of absolute sub-paths to ignore (e.g. ['sensor/current']).
+                recursive: If True, trigger on path and descendants.
+        :param exclude: List of absolute sub-paths to ignore (e.g. ['sensor/current']).
+        :param extract: List of relative fields to return as a flat dict in new_val.
+        :param trigger_now: Immediately fire the callback with current state.
+        :param owner: Optional object instance to link this subscription to.
         """
+
+        # If a list of paths is provided, subscribe to each one individually
+        if isinstance(path, list):
+            for p in path:
+                self.subscribe(p, callback, ignore_source, recursive,
+                               exclude, extract, trigger_now, owner)
+            return
+
         clean_path = path.strip("/")
         clean_exclude = [e.strip("/") for e in exclude] if exclude else []
 
-        with self._lock:
-            if clean_path not in self._subscribers:
-                self._subscribers[clean_path] = []
+        # Determine static prefix for O(1) lookups and compile regex if wildcard is used
+        is_wildcard = "*" in clean_path
+        static_prefix = clean_path
+        pattern = None
 
-            self._subscribers[clean_path].append({
+        if is_wildcard:
+            static_prefix = clean_path.split("*")[0].rstrip("/")
+
+            # Convert MQTT-style to regex safely using a placeholder
+            regex_str = clean_path.replace("**", "\0").replace("*", "[^/]+").replace("\0", ".*")
+            regex_str = "^" + regex_str
+
+            if not recursive:
+                regex_str += "$"
+            pattern = re.compile(regex_str)
+
+        with self._lock:
+            if static_prefix not in self._subscribers:
+                self._subscribers[static_prefix] = []
+
+            # Detect owner if not explicitly provided
+            effective_owner = owner
+            if effective_owner is None and hasattr(callback, "__self__"):
+                effective_owner = callback.__self__
+
+            self._subscribers[static_prefix].append({
                 "cb": callback,
+                "owner": effective_owner,
                 "ignore_source": ignore_source,
                 "recursive": recursive,
-                "exclude": clean_exclude
+                "exclude": clean_exclude,
+                "extract": extract,
+                "pattern": pattern,
+                "raw_path": clean_path
             })
+
+        if trigger_now:
+            self._trigger_init_event(clean_path, callback, extract, pattern)
+
+    def unsubscribe(self, target: Union[ListenerCallback, object, List[Any]]):
+        """
+        Remove subscriptions by callback function or class instance (owner).
+        """
+        if isinstance(target, list):
+            for t in target:
+                self.unsubscribe(t)
+            return
+
+        with self._lock:
+            for path in list(self._subscribers.keys()):
+                # Filter based on callback or owner
+                self._subscribers[path] = [
+                    s for s in self._subscribers[path]
+                    if s["cb"] != target and s["owner"] != target
+                ]
+
+                if not self._subscribers[path]:
+                    del self._subscribers[path]
+
+    def _trigger_init_event(self, path: str, callback: ListenerCallback,
+                            extract: List[str] = None, pattern: re.Pattern = None):
+        """Helper to fire immediate initial state for UI components."""
+        events = []
+
+        if pattern:
+            # --- WILDCARD INIT ---
+            static_prefix = path.split("*")[0].rstrip("/")
+            matched_bases = set()
+
+            # Find all existing paths that match the wildcard pattern
+            with self._lock:
+                for stored_path in self._storage.keys():
+                    if stored_path.startswith(static_prefix) and pattern.match(stored_path):
+                        base_path = pattern.match(stored_path).group(0)
+                        matched_bases.add(base_path)
+
+            if not matched_bases:
+                return
+
+            # Build a snapshot for each matched base path
+            for base_path in matched_bases:
+                if extract:
+                    snapshot = {}
+                    for field in extract:
+                        if field == ".":
+                            snapshot["."] = self.get_value(base_path)
+                        else:
+                            target = f"{base_path}/{field}" if base_path else field
+                            snapshot[field] = self.get_value(target)
+                    events.append((base_path, snapshot, None, "init"))
+                else:
+                    events.append((base_path, self.get_value(base_path), None, "init"))
+        else:
+            # --- STANDARD INIT ---
+            current_val = self.get_value(path)
+
+            if extract:
+                snapshot = {}
+                for field in extract:
+                    if field == ".":
+                        snapshot["."] = current_val
+                    else:
+                        target = f"{path}/{field}" if path else field
+                        snapshot[field] = self.get_value(target)
+                current_val = snapshot
+
+            events.append((path, current_val, None, "init"))
+
+        if events:
+            try:
+                callback(events)
+            except Exception as e:
+                print(f"[Store] Init callback error {path}: {e}")
 
     def dump(self) -> DumpData:
         return self.at("").dump()
@@ -423,59 +751,100 @@ class Store:
             if current_path not in self._storage:
                 self._storage[current_path] = {"val": None, "children": set()}
                 parent_entry = self._storage.get(parent_path)
-                if parent_entry: parent_entry["children"].add(part)
+                if parent_entry:
+                    parent_entry["children"].add(part)
 
     def set_value(self, path: str, value: Any, notify: bool = True):
-        # Optimized Fast Path
+        clean_path = path.strip("/")
+
         with self._lock:
-            if path in self._storage:
-                entry = self._storage[path]
+            # If we are directly storing a StoreLink, assign it at the explicit alias path
+            if isinstance(value, StoreLink):
+                entry = self._storage.get(clean_path)
+                old_val = entry["val"] if entry else None
+                if isinstance(old_val, StoreLink):
+                    old_val.teardown()
+
+                self._ensure_node(clean_path)
+                self._storage[clean_path]["val"] = value
+                value.setup()
+
+                if notify:
+                    self._queue_notification(clean_path, value, old_val)
+                return
+
+            # For normal values, resolve the path to support deep writing into links
+            resolved_path = self._resolve_deep_path(clean_path)
+            entry = self._storage.get(resolved_path)
+
+            if entry:
                 old_value = entry["val"]
                 entry["val"] = value
             else:
-                self._ensure_node(path)
-                entry = self._storage[path]
+                self._ensure_node(resolved_path)
+                entry = self._storage[resolved_path]
                 old_value = entry["val"]
                 entry["val"] = value
 
         if notify and old_value != value:
-            self._queue_notification(path, value, old_value)
+            self._queue_notification(resolved_path, value, old_value)
 
     def get_value(self, path: str) -> Any:
+        resolved_path = self._resolve_deep_path(path.strip("/"))
         with self._lock:
-            if path in self._storage:
-                return self._storage[path]["val"]
+            if resolved_path in self._storage:
+                return self._storage[resolved_path]["val"]
             return None
 
     def remove_item(self, path: str):
         clean_path = path.strip("/")
         if clean_path == "":
-            with self._lock: self._storage[""]["val"] = None
+            with self._lock:
+                self._storage[""]["val"] = None
             return
 
         with self._lock:
-            if clean_path not in self._storage: return
-            self._queue_notification(clean_path, None, self._storage[clean_path]["val"])
-            self._recursive_delete(clean_path)
-
-            if "/" in clean_path:
-                parent_path, child_key = clean_path.rsplit("/", 1)
+            # Check if the exact path itself is a StoreLink.
+            # If it is, we want to remove the link, NOT follow it and delete the target!
+            entry = self._storage.get(clean_path)
+            if entry and isinstance(entry["val"], StoreLink):
+                resolved_path = clean_path
             else:
-                parent_path, child_key = "", clean_path
+                resolved_path = self._resolve_deep_path(clean_path)
+
+            if resolved_path not in self._storage:
+                return
+
+            old_val = self._storage[resolved_path]["val"]
+            if isinstance(old_val, StoreLink):
+                old_val.teardown()
+
+            self._queue_notification(resolved_path, None, old_val)
+            self._recursive_delete(resolved_path)
+
+            if "/" in resolved_path:
+                parent_path, child_key = resolved_path.rsplit("/", 1)
+            else:
+                parent_path, child_key = "", resolved_path
 
             if parent_path in self._storage:
                 self._storage[parent_path]["children"].discard(child_key)
 
     def _recursive_delete(self, path: str):
-        if path not in self._storage: return
+        if path not in self._storage:
+            return
         children = list(self._storage[path]["children"])
         for child_key in children:
             child_path = f"{path}/{child_key}"
             if child_path in self._storage:
-                self._queue_notification(child_path, None, self._storage[child_path]["val"])
+                old_val = self._storage[child_path]["val"]
+                if isinstance(old_val, StoreLink):
+                    old_val.teardown()
+                self._queue_notification(child_path, None, old_val)
             self._recursive_delete(child_path)
 
-        if path in self._subscribers: del self._subscribers[path]
+        if path in self._subscribers:
+            del self._subscribers[path]
         del self._storage[path]
 
     def create_list_item(self, base_path: str, prefix: str = None) -> Item:
@@ -496,7 +865,8 @@ class Store:
                 match = pattern.match(child)
                 if match:
                     idx = int(match.group(1))
-                    if idx > max_idx: max_idx = idx
+                    if idx > max_idx:
+                        max_idx = idx
 
             new_key = f"{prefix}#{max_idx + 1}" if prefix else f"#{max_idx + 1}"
             new_path = f"{clean_path}/{new_key}" if clean_path else new_key
@@ -505,10 +875,10 @@ class Store:
             return self.at(new_path)
 
     def get_children_keys(self, path: str) -> List[str]:
-        clean_path = path.strip("/")
+        resolved_path = self._resolve_deep_path(path.strip("/"))
         with self._lock:
-            if clean_path in self._storage:
-                return sorted(list(self._storage[clean_path]["children"]))
+            if resolved_path in self._storage:
+                return sorted(list(self._storage[resolved_path]["children"]))
             return []
 
     def get_subtree(self, base_path: str) -> DumpData:
@@ -516,8 +886,10 @@ class Store:
         result = []
         with self._lock:
             for path in sorted(self._storage.keys()):
-                if clean_base and len(path) < len(clean_base): continue
-                if path not in self._storage: continue
+                if clean_base and len(path) < len(clean_base):
+                    continue
+                if path not in self._storage:
+                    continue
                 val = self._storage[path]["val"]
                 if val is not None:
                     if clean_base == "":
@@ -526,9 +898,15 @@ class Store:
                     else:
                         is_self = (path == clean_base)
                         is_child = path.startswith(clean_base + "/")
+
                     if is_self or is_child:
                         rel_key = "" if is_self else (path if clean_base == "" else path[len(clean_base) + 1:])
-                        result.append((rel_key, val))
+                        # If exporting a StoreLink, format it so it can be restored later
+                        if isinstance(val, StoreLink):
+                            link_data = {"$link": val.target_path, "bubble_events": val.bubble_events}
+                            result.append((rel_key, link_data))
+                        else:
+                            result.append((rel_key, val))
         return result
 
     def _queue_notification(self, path: str, new_val: Any, old_val: Any):
@@ -537,7 +915,7 @@ class Store:
             self._local.pending_changes = []
             self._local.group_notify = True
 
-            # If group is silent, drop event immediately
+        # If group is silent, drop event immediately
         if hasattr(self._local, "group_notify") and not self._local.group_notify:
             return
 
@@ -550,9 +928,28 @@ class Store:
         if self._local.batch_stack == 0:
             self._flush_notifications()
 
+    def _inject_event(self, path: str, new_val: Any, old_val: Any, source_id: str = None):
+        """Allows StoreLinks to manually inject events into the current batch sequence."""
+        if not hasattr(self._local, "pending_changes"):
+            self._local.batch_stack = 0
+            self._local.pending_changes = []
+            self._local.group_notify = True
+            self._local.current_source = None
+
+        if hasattr(self._local, "group_notify") and not self._local.group_notify:
+            return
+
+        event = (path, new_val, old_val, source_id)
+        self._local.pending_changes.append(event)
+
+        if self._local.batch_stack == 0:
+            self._flush_notifications()
+
     def _flush_notifications(self):
         # OPTIMIZED: Ancestor Lookup Strategy
-        if not hasattr(self._local, "pending_changes") or not self._local.pending_changes: return
+        if not hasattr(self._local, "pending_changes") or not self._local.pending_changes:
+            return
+
         events = self._local.pending_changes
         self._local.pending_changes = []
 
@@ -574,48 +971,83 @@ class Store:
                 if sub_path in self._subscribers:
                     relevant_entries.append((sub_path, self._subscribers[sub_path]))
 
-        # 3. Process events against this filtered subset of subscribers
+        # 3. Process events per subscriber safely through a clean pipeline
         for sub_path, sub_entries in relevant_entries:
-            relevant_events = []
-            for event in events:
-                evt_path = event[0]
-                # Match logic:
-                if evt_path == sub_path:
-                    relevant_events.append(event)
-                elif evt_path.startswith(sub_path + "/"):
-                    relevant_events.append(event)
+            # Get all events relevant to this base lookup path
+            events_in_scope = [e for e in events if e[0] == sub_path or e[0].startswith(sub_path + "/")]
 
-            if relevant_events:
-                for entry in sub_entries:
-                    # A. Recursive Filter
-                    is_recursive = entry["recursive"]
+            if not events_in_scope:
+                continue
 
-                    if not is_recursive:
-                        events_for_sub = [e for e in relevant_events if e[0] == sub_path]
-                    else:
-                        events_for_sub = relevant_events
+            for entry in sub_entries:
+                filtered_events = []
 
-                    # B. Exclude Filter (Subtree pruning)
-                    exclusions = entry["exclude"]
-                    if exclusions and events_for_sub:
-                        filtered_events = []
-                        for e in events_for_sub:
-                            ep = e[0]
-                            is_excluded = False
-                            for ex in exclusions:
-                                if ep == ex or ep.startswith(ex + "/"):
-                                    is_excluded = True
-                                    break
-                            if not is_excluded:
-                                filtered_events.append(e)
-                        events_for_sub = filtered_events
+                # --- A. Apply All Filters ---
+                for e in events_in_scope:
+                    ep = e[0]
 
-                    # C. Source Filter
-                    ignore = entry["ignore_source"]
-                    filtered = [e for e in events_for_sub if ignore is None or e[3] != ignore]
-                    if filtered:
-                        try:
-                            entry["cb"](filtered)
-                        except Exception as e:
-                            print(f"[Store] Callback error {sub_path}: {e}")
+                    # 1. Source filter
+                    if entry["ignore_source"] is not None and e[3] == entry["ignore_source"]:
+                        continue
 
+                    # 2. Wildcard Regex filter
+                    pattern = entry.get("pattern")
+                    if pattern and not pattern.match(ep):
+                        continue
+
+                    # 3. Recursive filter
+                    # If not recursive, the path must match exactly.
+                    # Wildcards handle non-recursive via a $ at the end of the regex.
+                    if not entry["recursive"]:
+                        if pattern:
+                            pass
+                        elif ep != sub_path:
+                            continue
+
+                    # 4. Exclude filter
+                    if entry["exclude"]:
+                        if any(ep == ex or ep.startswith(ex + "/") for ex in entry["exclude"]):
+                            continue
+
+                    filtered_events.append(e)
+
+                if not filtered_events:
+                    continue
+
+                # --- B. Apply Snapshots (extract) ---
+                extract_fields = entry.get("extract")
+                if extract_fields:
+                    final_events = []
+                    seen_bases = set()
+
+                    for e in filtered_events:
+                        # Find the correct base path for the snapshot.
+                        # Wildcards use the dynamically matched regex segment.
+                        if pattern:
+                            base_path = pattern.match(e[0]).group(0)
+                        else:
+                            base_path = sub_path
+
+                        # Deduplicate batch updates for the same snapshot root
+                        if base_path in seen_bases:
+                            continue
+                        seen_bases.add(base_path)
+
+                        # Generate the atomic snapshot
+                        snapshot = {}
+                        for field in extract_fields:
+                            if field == ".":
+                                snapshot["."] = self.get_value(base_path)
+                            else:
+                                target = f"{base_path}/{field}" if base_path else field
+                                snapshot[field] = self.get_value(target)
+
+                        final_events.append((base_path, snapshot, e[2], e[3]))
+                else:
+                    final_events = filtered_events
+
+                # --- C. Emit Callback ---
+                try:
+                    entry["cb"](final_events)
+                except Exception as e:
+                    print(f"[Store] Callback error {sub_path}: {e}")

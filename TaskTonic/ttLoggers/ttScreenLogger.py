@@ -36,8 +36,7 @@ class ttScreenLogService(ttLogService):
         if l_id < 0:
             raise RuntimeError(f'Error in log entry {log}')
 
-        if log.get('sys',{}).get('created', False):
-
+        if log.get('lifecycle',{}).get('phase', '') == 'creation':
             while len(self.log_records) <= l_id:
                 self.log_records.append(None)
             self.log_records[l_id] = log.copy()
@@ -46,15 +45,15 @@ class ttScreenLogService(ttLogService):
         sparkle_state_idx = log.get('state', -1)
 
         if sparkle_name == '_ttinternal_state_change_to':
-            sparkle_name = f" TO STATE [{self.log_records[l_id]['sys']['states'][log['sys']['new_state']]}]"
+            sparkle_name = f" TO STATE [{self.log_records[l_id]['lifecycle']['states'][log['lifecycle']['new_state']]}]"
 
         ts = log['start@']
         lt = time.localtime(ts)
         l_time_start = f'{time.strftime("%H%M%S", lt)}.{int((ts - int(ts)) * 1000):03d}'
 
-        header = f"{self.log_records[l_id]['sys']['name']}"
+        header = f"{self.log_records[l_id]['lifecycle']['name']}"
         if sparkle_state_idx >= 0:
-            header += f"[{self.log_records[l_id]['sys']['states'][sparkle_state_idx]}]"
+            header += f"[{self.log_records[l_id]['lifecycle']['states'][sparkle_state_idx]}]"
         header += f".{sparkle_name}"
 
         dont_print_flags = ['id', 'start@', 'log', 'sparkle', 'state', 'sparkles', 'states', 'duration']

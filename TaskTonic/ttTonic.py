@@ -228,20 +228,20 @@ class ttTonic(ttLiquid):
         if auto_bind: self._auto_bind = auto_bind
 
         # Log the results of the discovery process.
-        self.log(system_flags={'states': self._index_to_state, 'sparkles': self.sparkles})
+        self.log(lifecycle={'states': self._index_to_state, 'sparkles': self.sparkles})
 
     def _noop(self, *args, **kwargs):
         """A do-nothing method used as a default for unbound sparkles."""
         pass
 
-    def to_state(self, state):
+    def to_state(self, state, force_reenter=False):
         """
         Requests a state transition. The change is handled by the _execute_sparkle
         method after the current sparkle finishes.
 
         :param state: The name (str) or index (int) of the target state. When target == -1, stop machine stops
+        :param force_reenter: When True, forces the transition (on_exit and on_enter) even if already in the state.
         """
-        to_state = -1  # no action
         if isinstance(state, str):
             to_state = self._state_to_index.get(state, None)
             if to_state is None: return
@@ -252,6 +252,8 @@ class ttTonic(ttLiquid):
         else:
             return
 
+        if not force_reenter and to_state == self.state: return
+
         if self.state >= 0:
             self.catalyst._execute_extra_sparkle(self, self._direct_execute_ttse__on_exit)
         if to_state >= 0:
@@ -260,12 +262,20 @@ class ttTonic(ttLiquid):
         else:
             self.catalyst._execute_extra_sparkle(self, self._ttinternal_state_machine_stop)
 
+    def reenter_current_state(self):
+        """
+        Forces a reentry of the current state by executing on_exit followed by on_enter.
+        This is useful for resetting the internal logic of the current state.
+        """
+        if self.state >= 0:
+            self.to_state(self.state, force_reenter=True)
+
     def _ttinternal_state_change_to(self, state):
-        self.log(system_flags={'state': self.state, 'new_state': state})
+        self.log(lifecycle={'phase': 'new_state', 'state': self.state, 'new_state': state})
         self.state = state
 
     def _ttinternal_state_machine_stop(self):
-        self.log(system_flags={'state': self.state, 'new_state': None})
+        self.log(lifecycle={'phase': 'new_state', 'state': self.state, 'new_state': None})
         self.state = -1
         pass
 
@@ -295,7 +305,10 @@ class ttTonic(ttLiquid):
         interface_name = sparkle_method.__name__
         sp_stck = ttSparkleStack()
         self.log(flags={'sparkle': interface_name,
-                        'source': f'{sp_stck.source_tonic_name}.{sp_stck.source_sparkle_name}'})
+                        'source': f'{sp_stck.source_tonic_name}.{sp_stck.source_sparkle_name}',
+                        'source_id': sp_stck.source_tonic_id,
+                       },
+                 )
         # Execute the user's actual sparkle code, passing self to bind it.
         sparkle_method(self, *args, **kwargs)
         self.log(close_log=True)
@@ -330,6 +343,10 @@ class ttTonic(ttLiquid):
     def ttse__on_enter(self): pass
     def ttse__on_exit(self): pass
 
+    def ttsc__to_state(self, state, force_reenter=False):
+        """External command to safely transition to a new state via the Catalyst queue."""
+        self.to_state(state, force_reenter=force_reenter)
+
     # --- System Lifecycle Sparkles ---
     def _ttss__on_start(self):
         """System-level sparkle for internal framework setup."""
@@ -342,7 +359,7 @@ class ttTonic(ttLiquid):
 
     def ttsc__finish(self):
         if self.finishing: return
-
+        self.log(lifecycle={'phase': 'finishing'})
         calling_tonic = ttSparkleStack().source_tonic
 
         # check on valid tonic finish
@@ -418,6 +435,7 @@ class ttTonic(ttLiquid):
             #     self._ttss__on_completion()
 
     def _ttss__on_completion(self):
+        self.log(lifecycle={'phase': 'finished'})
         self.catalyst._ttss__remove_tonic_from_catalyst(self.id)
         self.ledger.unregister(self.id)
         self.id = -1  # finished

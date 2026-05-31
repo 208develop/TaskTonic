@@ -164,7 +164,9 @@ class ttDistiller(ttCatalyst):
             if isinstance(liq, ttLiquid): liq.finish()
             elif isinstance(liq, self.ledger.TonicReservation): self.ledger.unregister(liq)
         stat = self.sparkle(timeout=timeout, contract=contract)
-        #todo: reset ledger
+        #Forced reset of the ledger to create a new singleton when distiller is restarted.
+        self.ledger._instance = None
+        self.ledger._singleton_init_done = False
         return stat
 
     def stat_print(self, status, filter=None):

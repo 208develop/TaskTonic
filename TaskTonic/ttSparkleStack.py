@@ -51,8 +51,8 @@ class ttSparkleStack:
             # 2. init if not existing
             instance = super().__new__(cls)
             instance.catalyst = None
-            instance.stack = [(None, "")]
-            instance.source = (None, "")
+            instance.stack = [(None, "", -1)]
+            instance._source = (None, "", -1)
             _sparkle_context.set(instance)
             return instance
 
@@ -60,11 +60,13 @@ class ttSparkleStack:
         """
         Pushes a new execution frame onto the stack.
 
+        note: also push id for when the tonic finished before requesting the data
+
         Args:
             essence: The object instance context.
             sparkle (str): The name of the action/method being invoked.
         """
-        self.stack.append((essence, sparkle))
+        self.stack.append((essence, sparkle, essence.id))
 
     def pop(self):
         """Removes the top execution frame from the stack."""
@@ -84,12 +86,26 @@ class ttSparkleStack:
         return self.stack[pos][1]
 
     @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, src):
+        self._source = src if len(src) == 3 else \
+            ((src[0], src[0].name, src[0].id) if src[0] is not None else
+             (None, "", -1))
+
+    @property
     def source_tonic(self):
         return self.source[0]
 
     @property
     def source_tonic_name(self):
         return "" if self.source[0] is None else self.source[0].name
+
+    @property
+    def source_tonic_id(self):
+        return self.source[2]
 
     @property
     def source_sparkle_name(self):

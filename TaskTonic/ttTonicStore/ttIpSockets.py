@@ -1,9 +1,8 @@
 import struct
 
-from TaskTonic import ttCatalyst, ttTonic, ttLog, ttSparkleStack
+from TaskTonic import ttCatalyst, ttTonic, ttLog, ttSparkleStack, ttTimerSingleShot
 import socket, selectors, errno
 import threading, queue, time
-
 
 '''
 Designer Notes: 
@@ -17,9 +16,11 @@ also signals a notification channel to trigger a selector event. This wakes up t
 it to process the queue and execute the sparkles.
 '''
 
+
 class SelectorHandler(ttCatalyst):
     _tt_is_service = 'selector_handling_service'
     _tt_root_context = True
+
     # _tt_force_stealth_logging = True
 
     def __init__(self, *args, name=None, log_mode=None, **kwargs):
@@ -44,7 +45,7 @@ class SelectorHandler(ttCatalyst):
     def new_catalyst_queue(self):
         class MyNotifyingQueue(queue.SimpleQueue):
             def __init__(self, catalyst, *args, **kwargs):
-                super().__init__( *args, **kwargs)
+                super().__init__(*args, **kwargs)
                 self.catalyst = catalyst
 
             def put(self, item):
@@ -82,19 +83,22 @@ class SelectorHandler(ttCatalyst):
                 for key, mask in events:
                     sock = key.fileobj
                     mode, rd_sparkle, wr_sparkle = key.data  # data contains the callback function
-                    if mode == 1: # connection rd/wr
+                    if mode == 1:  # connection rd/wr
                         if mask & selectors.EVENT_READ:
-                            try: data = sock.recv(65536)
-                            except OSError: data = b''
+                            try:
+                                data = sock.recv(65536)
+                            except OSError:
+                                data = b''
                             if not data: self.unregister(sock=sock)
                             rd_sparkle(data)
                         if mask & selectors.EVENT_WRITE:
                             wr_sparkle()
-                    elif mode == 2: #server accept
+                    elif mode == 2:  # server accept
                         conn, addr = sock.accept()
                         conn.setblocking(False)
                         rd_sparkle(conn, addr)
-            except TimeoutError: pass
+            except TimeoutError:
+                pass
             except OSError as e:
                 # Op Windows: Check op 'bad file descriptor'
                 if getattr(e, 'winerror', 0) == 10038:
@@ -102,7 +106,8 @@ class SelectorHandler(ttCatalyst):
                     pass
                 else:
                     raise e
-            except Exception: raise
+            except Exception:
+                raise
 
             # handle sparkles if any
             try:
@@ -144,10 +149,14 @@ class SelectorHandler(ttCatalyst):
         self.selector.register(sock, mask, (mode, rd_sparkle, wr_sparkle))
 
     def unregister(self, sock=None):
-        try: self.selector.unregister(sock)
-        except: pass
-        try: self.register_data.pop(sock)
-        except: pass
+        try:
+            self.selector.unregister(sock)
+        except:
+            pass
+        try:
+            self.register_data.pop(sock)
+        except:
+            pass
 
     def modify(self, sock, mask=None, rd=None, wr=None):
         if mask is None:
@@ -165,8 +174,12 @@ class SelectorHandler(ttCatalyst):
         self.register_data[sock]['mask'] = mask
 
 
+    def _ttss__main_catalyst_finished(self):
+        pass
+
+
 class SocketHandler(ttTonic):
-    _tt_force_stealth_logging = True
+    # _tt_force_stealth_logging = True
 
     def __init__(self, as_server=None, as_client=None, host=None, port=None, **kwargs):
         # Look for service before calling super init and create if not active
@@ -190,13 +203,15 @@ class SocketHandler(ttTonic):
         self.server_socket = None
         self.comm_socket = None
         self.comm_addr = None
+        self.retry = 0
         self.rcv_buf = b''
         self.send_buf = b''
         self.buffering_send = False
 
     def ttse__on_start(self):
-        self.log('init_server' if self.as_server else 'init_client')
-        self.to_state('init_server' if self.as_server else 'init_client')
+        st_init = 'init_server' if self.as_server else 'init_client'
+        self.log(st_init)
+        self.to_state(st_init)
         self.ttsc__start_init()
 
     def ttse__on_enter(self):
@@ -223,9 +238,6 @@ class SocketHandler(ttTonic):
         self.to_state('connected')
         self.selector_handler.register(self.comm_socket, self, rd=1)
 
-        if self.base and hasattr(self.base, 'ttse__on_socket_connected'):
-            self.base.ttse__on_socket_connected(addr)
-
     def ttsc_init_client__start_init(self):
         self.log(f'Init client: connect to {self.server_addr}')
         self.comm_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -238,19 +250,42 @@ class SocketHandler(ttTonic):
             if e.errno == errno.EINPROGRESS or e.errno == errno.WSAEWOULDBLOCK:
                 self.to_state('client_wait_for_connection')
                 return
-            else: raise e
+            else:
+                raise e
 
         self.comm_addr = f'{self.server_host}:{self.server_port}'
         self.to_state('connected')
         self.selector_handler.modify(self.comm_socket, rd=1, wr=0)
-
 
     def ttse_client_wait_for_connection__on_socket_wr(self):
-        # err = self.connected_socket.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
-        # if err: raise ConnectionRefusedError(f"Connection failed: {os.strerror(err)}")
+        err = self.comm_socket.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+        if err:
+            import os
+            self.log(f"Connection failed: {os.strerror(err)}")
+            self.selector_handler.unregister(self.comm_socket)
+            self.comm_socket.close()
+            self.comm_socket = None
+
+            if self.retry > 3:
+                self.finish()
+            else:
+                self.retry += 1
+                self.to_state('wait_for_retry')
+            return
+
         self.comm_addr = f'{self.server_host}:{self.server_port}'
         self.to_state('connected')
         self.selector_handler.modify(self.comm_socket, rd=1, wr=0)
+
+    def ttse_wait_for_retry__on_enter(self):
+        self.log("Scheduling connection retry in 2 seconds...")
+        ttTimerSingleShot(seconds=2, name='tm_retry')
+
+    def ttse_wait_for_retry__on_tm_retry(self, _):
+        self.log("Attempting to reconnect to the server...")
+        self.to_state('init_client')
+        self.ttsc__start_init()
+
 
     def ttse_connected__on_enter(self):
         if hasattr(self.base, 'ttse__on_socket_status'):
@@ -264,6 +299,12 @@ class SocketHandler(ttTonic):
                 self.base.ttse__on_socket_data(data)
         else:
             self.comm_socket = None
+            if hasattr(self.base, 'ttse__on_socket_status'):
+                self.base.ttse__on_socket_status('disconnected')
+
+            if hasattr(self.base, 'ttse__on_disconnected'):
+                self.base.ttse__on_disconnected()
+
             self.finish()
 
     def ttse_connected__on_socket_wr(self):
@@ -272,12 +313,16 @@ class SocketHandler(ttTonic):
 
     def ttsc_connected__send_data(self, data):
         bdata = self.send_data_conversion(data)
-        if self.buffering_send: self.send_buf += bdata
-        else: self._send(bdata)
+        if self.buffering_send:
+            self.send_buf += bdata
+        else:
+            self._send(bdata)
 
     def _send(self, bdata):
-        try:   sent = self.comm_socket.send(bdata)
-        except BlockingIOError: sent = 0
+        try:
+            sent = self.comm_socket.send(bdata)
+        except BlockingIOError:
+            sent = 0
 
         if sent == len(bdata):
             self.send_buf = b''
@@ -309,6 +354,7 @@ class SocketHandler(ttTonic):
             self.selector_handler.unregister(sock=self.server_socket)
             self.server_socket.close()
 
+
 class StrSocketHandler(SocketHandler):
     def send_data_conversion(self, str_data):
         if not isinstance(str_data, str): raise TypeError('Data must be a string')
@@ -317,120 +363,24 @@ class StrSocketHandler(SocketHandler):
     def rcv_data_conversion(self, bdata):
         return [bdata.decode('utf-8', errors='replace')]
 
+
 import pickle
+
+
 class DictSocketHandler(SocketHandler):
     def send_data_conversion(self, dict_data):
-        if not isinstance(dict_data, str): raise TypeError('Data must be a dict')
+        if not isinstance(dict_data, dict):
+            raise TypeError('Data must be a dict')
         pdict = pickle.dumps(dict_data)
         return b'' + struct.pack('!I', len(pdict)) + pdict
 
     def rcv_data_conversion(self, bdata):
         dicts = []
         self.rcv_buf += bdata
-        while len(self.rcv_buf) > 4: # start check if rcv_buf at least hast length (4 bytes) and dict data
+        while len(self.rcv_buf) > 4:  # start check if rcv_buf at least hast length (4 bytes) and dict data
             plen = struct.unpack('!I', self.rcv_buf[:4])[0]
-            if len(self.rcv_buf) < plen+4: break # not enough data, wait for it
-            dicts.append(pickle.loads(self.rcv_buf[4:plen]))
-            self.rcv_buf = self.rcv_buf[plen+4:]
+            if len(self.rcv_buf) < plen + 4: break  # not enough data, wait for it
+            dicts.append(pickle.loads(self.rcv_buf[4:plen+4]))
+            self.rcv_buf = self.rcv_buf[plen + 4:]
         return dicts
 
-
-
-# --- Usage Example ---
-from TaskTonic import ttTonic, ttFormula, ttTimerRepeat, ttTimerSingleShot
-
-
-class ChatClient(ttTonic):
-    def __init__(self, name=None):
-        super().__init__(name=name)
-        self.cnt = None
-        self.net = None
-        self.bulk_cnt = 0
-
-    def ttse__on_start(self):
-        self.log("Client starting delay...")
-        ttTimerSingleShot(1, sparkle_back=self.ttse__on_delayed_start)
-
-    def ttse__on_delayed_start(self, info):
-        self.log("Starting Client...")
-        # Bind Service: IpService is now a Catalyst running in its own thread
-        self.net = StrSocketHandler(as_client=True, host='localhost', port=9999)
-        self.cnt = 0
-
-    def ttse__on_socket_status(self, status, info=None):
-        self.log(f"Client Status: {status} - {info}")
-
-    def ttse__on_socket_connected(self, addr):
-        self.tmr = ttTimerRepeat(1, name='client_ping_tmr', sparkle_back=self.ttsc__ping)
-        self.to_state('ping')
-
-    def ttsc_ping__ping(self, info):
-        self.cnt += 1
-        self.net.ttsc__send_data(f"Ping {self.cnt}")
-        self.log(f"Ping {self.cnt}")
-
-    def ttse_ping__on_socket_data(self, data):
-        # This method is called safely by the IpService thread!
-        self.log(f"Client received: {data}")
-        if 'STOPPED' in data:
-            self.to_state('bulk')
-            self.tmr.finish()
-
-    def ttse_bulk__on_socket_data(self, data):
-        if not hasattr(self, 'start_bulk'): self.start_bulk = time.time()
-        self.bulk_cnt += len(data)
-        self.log(f"Received: {self.bulk_cnt} bytes total in {(time.time()-self.start_bulk):2.3f} seconds")
-
-    def ttse__on_socket_finished(self):
-        self.finish()
-
-class ChatServer(ttTonic):
-    def ttse__on_start(self):
-        self.log("Starting Server...")
-        self.net = StrSocketHandler(as_server=True, host='localhost', port=9999)
-
-    def ttse__on_socket_status(self, status, info=None):
-        self.log(f"Server Status: {status} - {info}")
-
-    def ttse__on_socket_data(self, data):
-        self.log(f"Server got: {data}")
-        # Simple echo (broadcasts to all connections of this tonic inInfusion completed this simple impl)
-        self.net.ttsc__send_data(f"Echo: {data}")
-
-        if data == 'Ping 4':
-            self.net.ttsc__send_data(f" / STOPPED")
-            ttTimerSingleShot(1, name='server_wait_for_sending_bulk', sparkle_back=self.ttsc__start_sending_bulk)
-
-    def ttsc__start_sending_bulk(self, info):
-        self.ttsc__send_bulk(100)
-
-    def ttsc__send_bulk(self, cnt):
-        if cnt == 0:
-            ttTimerSingleShot(5, name='tmr_pause_before_finishing', sparkle_back=self.ttse__on_pause_over)
-            return
-
-        self.net.ttsc__send_data('1'*1_000_000)
-        self.ttsc__send_bulk(cnt-1)
-
-    def ttse__on_pause_over(self, info):
-        self.finish()
-
-    def ttse__on_socket_finished(self):
-        self.finish()
-
-
-class NetworkApp(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', 'full'),
-        )
-
-    def creating_starting_tonics(self):
-        ChatServer(name="Server")
-        # Give server time to bind (conceptually, though select handles async connect fine)
-        ChatClient(name="Client")
-
-
-if __name__ == "__main__":
-    NetworkApp()
