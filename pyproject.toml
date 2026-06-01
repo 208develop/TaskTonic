@@ -1,6 +1,6 @@
 [project]
 name = "TaskTonic"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
     { name = "Peter", email = "208develop@gmail.com" },
 ]
@@ -19,9 +19,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/208develop/TaskTonicc"
+Homepage = "https://github.com/208develop/TaskTonic"
 Issues = "https://github.com/208develop/TaskTonic/issues"
 Documentation = "https://github.com/208develop/TaskTonic/tree/master/_documents"
+Changelog = "https://github.com/208develop/TaskTonic/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["TaskTonic", "TaskTonic.*"]

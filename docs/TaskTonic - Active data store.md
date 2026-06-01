@@ -2,18 +2,17 @@
 
 <img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
 
-This documentation describes the functionality of the `Store` and `Item` classes and their integration within TaskTonic
-via `ttStore`.
+This documentation describes the complete functionality of the `Store` and `Item` classes, and their integration within TaskTonic via `ttStore`.
 
 ## Introduction
 
-In complex applications, it is essential to share data between different components in a structured and accessible way.
-`ttStore` functions as a **Central Data Repository**. It offers a hierarchical storage structure (comparable to a file
-system or a nested dictionary) that is:
+In complex applications, it is essential to share data between different components in a structured and accessible way. `ttStore` functions as a **Central Data Repository**. It offers a hierarchical storage structure (comparable to a file system or a nested dictionary) that is:
 
 1. **Centralized:** A single source of truth for parameters, sensor values, and configurations.
 2. **Reactive:** Components can subscribe to changes in specific data paths.
 3. **Flexible:** Data can be accessed via absolute paths or relative pointers (`Item`).
+
+By utilizing the Store, you create a clean **separation of concerns** in your application. For example: a hardware processing component simply writes sensor data to the Store, and the UI component receives an automatic notification to update its display, without either component needing to know about the other's existence.
 
 ---
 
@@ -23,41 +22,31 @@ The system consists of two layers that can also be used **independently**.
 
 ### 1. The Core: `Store` and `Item`
 
-The `Store` is the pure data container. It is a standalone class that holds the data and provides methods to read or
-write data via paths (e.g., `'sensors/temp/value'`).
+The `Store` is the pure data container. It is a standalone class that holds the data and provides methods to read or write data via paths (e.g., `'sensors/temp/value'`).
 
-The `Item` is a smart "pointer" or "cursor" to a specific location in the `Store`. It allows for relative navigation
-without needing to know the full absolute path.
+The `Item` is a smart "pointer" or "cursor" to a specific location in the `Store`. It allows for relative navigation without needing to know the full absolute path.
 
-> **Note:** `Store` and `Item` can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical
-data structure.
+> **Note:** `Store` and `Item` can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical data structure. Every node can be a "value" AND a "container" simultaneously.
 
 ### 2. The Service: `ttStore`
 
-`ttStore` is the TaskTonic wrapper around a `Store`. It transforms the store into a **Service** within the TaskTonic
-ecosystem. This adds capabilities such as:
+`ttStore` is the TaskTonic wrapper around a `Store`. It transforms the store into a **Service** within the TaskTonic ecosystem. This adds capabilities such as:
 
-* **Event-driven updates:** Automatically notify other Tonics (like UI or controllers) upon changes.
-* **Service Binding:** Easily linked to other Tonics via `self.bind()`.
+- **Event-driven updates:** Automatically notify other Tonics (like UI or controllers) upon changes.
+- **Service Binding:** Easily linked to other Tonics via `self.bind()`.
 
 ---
 
-## API Reference & Methods
+## The Basics: Reading & Writing Data
 
-Below is an overview of the most important methods for data manipulation and navigation.
+Below is an overview of the foundational methods for data manipulation.
 
 ### Dictionary Access (`[]` Syntax)
 
 For convenience, `ttStore` and `Item` support standard Python dictionary syntax.
 
-* **Reading:** `val = store['path']`
-    * Equivalent to `.get('path')`.
-    * Returns `None` if the path does not exist (unlike standard Python dicts which raise KeyError).
-* **Writing:** `store['path'] = val`
-    * Equivalent to `.set([('path', val)])`.
-    * Triggers updates immediately (unless inside a `group`).
-
-**Example:**
+- **Reading:** `val = store['path']` (Equivalent to `.get('path')`. Returns `None` if not found).
+- **Writing:** `store['path'] = val` (Equivalent to `.set([('path', val)])`. Triggers updates immediately).
 
 ```python
 # Read
@@ -71,31 +60,26 @@ self.twin['parameters/temp_limit'] = 12.0
 
 #### `set(data)`
 
-Writes one or multiple values to the store. It accepts a `dict` or an `Iterable` (list/tuple) of tuples.
+Writes one or multiple values to the store atomically. It accepts a `dict` or an `Iterable` (list/tuple) of tuples.
 
-* **Usage:** Initialization, bulk updates, or when you need to write multiple values atomically.
-* **Smart Paths:**
-    * `#`: Creates a new unique entry (auto-increment list).
-    * `./`: Refers to the last created entry (useful for setting properties of an item).
-
-**Example:**
+- **Usage:** Initialization, bulk updates, or when you need to write multiple values without triggering incomplete notifications.
+- **Smart Paths:**
+  - `#`: Creates a new unique entry (auto-increment list). Finds the highest index and adds 1.
+  - `./`: Refers to the most recently generated index by that specific cursor.
 
 ```python
-# Initialize a store with parameters and sensors
-self.twin.set([
+# Initialize a store with parameters and sensors using smart paths
+self.twin.set((
     ('parameters/update_freq', 2),     # Set update frequency to 2
-    ('sensors/#', 'temp'),             # Create new sensor 'temp'
+    ('sensors/#', 'temp'),             # Create new sensor 'temp' (e.g., sensors/#0)
     ('sensors/./value', 15.0),         # Set value of THAT sensor
-    ('sensors/./unit', '℃'),           # Set unit of THAT sensor
-])
+    ('sensors/./unit', 'C'),           # Set unit of THAT sensor
+))
 ```
 
 #### `.v` (Value Property via Item)
 
-If you hold an `Item` object (a pointer to a location), you can read and write directly via the `.v` property. This is
-the most efficient way to manipulate data if you already have the Item.
-
-**Example:**
+If you hold an `Item` object (a pointer to a location), you can read and write directly via the `.v` property.
 
 ```python
 # Assume we have a pointer (Item) to the sensor value
@@ -105,18 +89,12 @@ sensor_val_item = self.twin.at('sensors/#0/value')
 sensor_val_item.v = 22.5
 ```
 
-#### `append(value)` (via Item) or `append(path, value)` (via Store)
+#### `append(value)` and `append(path, value)`
 
-Adds a new item to a list. This is a cleaner, more pythonic alternative to using the `'path/#'` syntax when adding
-single items.
-
-* **Via Item:** `item.append(value)`
-* **Via Store:** `store.append(path, value)`
-
-**Example:**
+Adds a new item to a list. A cleaner alternative to using the `'path/#'` syntax when adding single items.
 
 ```python
-# Append via Store (adds 'System Started' to the 'logs' list)
+# Append via Store
 self.twin.append('logs', 'System Started')
 
 # Append via Item
@@ -128,9 +106,7 @@ log_item.append('User logged in')
 
 #### `get(path, default=None)`
 
-Retrieves the value of a specific path. If the path does not exist, the `default` value is returned.
-
-**Example:**
+Retrieves the value of a specific path. If the path does not exist, the `default` value is returned. Resolves through `StoreLinks` automatically.
 
 ```python
 freq = self.twin.get('parameters/update_freq', 5)  # Default 5 if not found
@@ -138,59 +114,39 @@ freq = self.twin.get('parameters/update_freq', 5)  # Default 5 if not found
 
 #### `at(path) -> Item`
 
-Returns an `Item` object pointing to the location `path`. This is **more powerful** than `get` because it allows further
-navigation from that point.
-
-**Example:**
+Returns an `Item` cursor pointing to the location `path`. This is **more powerful** than `get` because it allows further navigation.
 
 ```python
 # Get a pointer (Item) to the first sensor
 sensor_item = self.twin.at('sensors/#0')
 
 # Read values via the Item
-print(sensor_item['value'].v)  # Prints: 15.0
+print(sensor_item['value'].v)
 ```
+
+---
+
+## Details & Smart Usage
 
 ### Navigation (`Item` objects)
 
 An `Item` object acts as a smart window onto your data.
 
-* **`item['child']`**: Navigate to a sub-item.
-    ```python
-    val = sensor_item['value'].v
-    ```
-* **`item.parent`**: Returns an `Item` to the parent.
-    ```python
-    root_sensors = sensor_item.parent # Now points to 'sensors'
-    ```
-* **`item.list_root`**: If the item is part of a list (like sensors), this returns the item itself, regardless of how
-  deep you are in the hierarchy.
-    ```python
-    # If located at 'sensors/#0/value', list_root returns 'sensors/#0'
-    sensor_name = sensor_item.list_root.v # Returns e.g., 'temp'
-    ```
+- **`item['child']`**: Navigate to a sub-item.
+- **`item.parent`**: Returns an `Item` to the parent node.
+- **`item.list_root`**: If the item is part of a list, this returns the list item itself (e.g., `#0`), regardless of how deep you are in the hierarchy.
+
+```python
+# If located at 'sensors/#0/value', list_root returns 'sensors/#0'
+sensor_name = sensor_item.list_root.v 
+```
 
 #### `.children(prefix=None)`
 
-Returns an **iterator** (not a list) of `Item` objects that are direct children of the current item.
-
-* **Why an iterator?** It is memory efficient (lazy evaluation). If you have thousands of items, it doesn't create
-  objects for all of them unless you consume them.
-* **prefix:** Optional string to filter children (e.g., useful if you have different types of lists in one folder).
-
-**Example 1: Converting to a list**
-If you need index access or the length, convert it to a list explicitly.
+Returns an **iterator** (lazy evaluation for memory efficiency) of `Item` objects that are direct children.
 
 ```python
-sensors = self.twin.at('sensors')
-sensor_list = list(sensors.children())
-print(f"Count: {len(sensor_list)}")
-```
-
-**Example 2: Iterating directly (Efficient)**
-Searching for a specific sensor without creating a full list in memory.
-
-```python
+# Iterating directly without creating a full list in memory
 target_sensor = None
 for item in self.twin.at('sensors').children():
     if item.v == 'humidity':
@@ -198,113 +154,126 @@ for item in self.twin.at('sensors').children():
         break
 ```
 
+### Graph Navigation (`StoreLinks`)
+
+While strict hierarchy ensures data integrity, `StoreLinks` provide symlinks to solve functional grouping via `.link_to()`.
+
+- **Passive Links (`bubble_events=False`):** Delegates reads/writes. Events do not bubble up the alias tree (prevents UI event storms).
+- **Active Links (`bubble_events=True`):** Two-way connections. If the physical target changes, an event bubbles up the alias tree. Perfect for sensors.
+
+```python
+room_lamp = self.twin.at("house/living/main_light")
+room_lamp.link_to("devices/lamp_1", bubble_events=False)
+
+# Writing to the alias automatically routes to devices/lamp_1
+room_lamp.at("brightness").v = 80 
+```
+
+### Batch Iteration (`set_each`)
+
+Updates a specific sub-property across all children of a node within a single atomic group.
+
+```python
+living_room = self.twin.at("house/living/lamps")
+living_room.set_each("power", "off", prefix="lamp")
+```
+
 ### Reactivity (`subscribe`)
 
-Only available in `ttStore`. This allows subscribing a method to data changes.
+Connects data changes to your Tonic's Sparkles (`ttse__`). The callback receives a list of `updates`. Each update is a tuple: `(path, new_value, old_value, source)`.
 
-#### `subscribe(path, callback)`
+#### Exact, Recursive & Wildcards (`*`, `**`)
 
-* **path:** The path to monitor (e.g., `'sensors'`).
-* **callback:** The method called upon change.
+- **Exact:** Triggers only on the specific path.
+- **Recursive:** Triggers on the path AND any of its children.
+- **`*`:** Matches exactly one path level.
+- **`**`:** Matches all underlying path levels.
 
-The callback receives a list of `updates`. Each update is a tuple: `(path, new_value, old_value, source)`.
+```python
+# Matches 'sensors/kitchen/temp' but NOT 'sensors/kitchen/temp/calibration'
+self.twin.subscribe("sensors/*/temp", self.ttse__on_temp_change)
+```
 
-**Example:**
+#### Atomic Snapshots (`extract` & `trigger_now`)
+
+Fetch a flat dictionary snapshot instantly instead of piecing together single-property events. Easy for grouping data and essential when you need to be certain of all value at the moment on of them changed.
 
 ```python
 def ttse__on_start(self):
-    # Listen to anything changing under 'sensors'
-    self.twin.subscribe("sensors", self.ttse__on_sensor_update)
+    self.twin.subscribe(
+        "ui/widgets/*", 
+        self.ttse__render_widget, 
+        extract=[".", "color", "visible"], 
+        recursive=True,
+        trigger_now=True
+    )
 
-def ttse__on_sensor_update(self, updates):
-    for path, new, old, source in updates:
-        print(f"Sensor update at {path}: {old} -> {new}")
+def ttse__render_widget(self, events):
+    for path, snapshot, old, source in events:
+        color = snapshot.get("color")
 ```
 
-### Utilities (`dumps`, `group`, `source`)
+### Context Managers & Utilities (`group`, `source`, `dumps`)
 
-#### `dumps()`
-
-Returns a string representation of the entire store (useful for debugging).
+- **`dumps()`**: Returns a string representation of the entire store (useful for debugging).
+- **`group(notify=True, source_id=None)`**: Batches multiple updates atomically. `notify=False` silences updates entirely (useful during init).
+- **`source(source_id)`**: Tags updates with an origin ID. Vital for bidirectional UI sync to prevent infinite loops.
 
 ```python
-print(self.twin.dumps())
+# Identifying who made the change
+with self.twin.source('GUI'):
+    self.twin['parameters/speed'] = 50
+
+# In the callback, you can check the source:
+def on_change(self, updates):
+    for path, new, old, src in updates:
+        if src == 'GUI':
+            continue # Ignore changes I made myself
+        # Update GUI display...
 ```
-
-#### `group(notify=True, source_id=None)` & `source(source_id)`
-
-Context managers to control how updates are processed.
-
-1. **`group(notify=False)`**: Performs updates atomically.
-
-* **Usage:** Batch initialization. No events are fired until the block ends (or never if `notify=False`).
-
-  ```python
-  with self.twin.group(notify=False):
-      self.twin.set(...) 
-  ```
-
-2. **`source(source_id)` / `group(..., source_id=...)`**:
-
-* **Usage:** Identifying *who* made the change. This is crucial for bidirectional sync (e.g., connecting a GUI slider to
-  a value).
-* If a GUI updates the Store, the Store notifies the GUI. You want the GUI to ignore that notification to prevent an
-  infinite loop.
-
-  ```python
-  # Example: Updating from a specific source (e.g., 'GUI')
-  with self.twin.source('GUI'):
-      self.twin['parameters/speed'] = 50
-  
-  # In the callback, you can check the source:
-  def on_change(self, updates):
-      for path, new, old, src in updates:
-          if src == 'GUI':
-              continue # Ignore changes I made myself
-          # Update GUI display...
-  ```
 
 ---
 
 ## Performance & Best Practices
 
-Although `ttStore` is powerful, consider the following points for optimal performance and clean code.
+1. **Batch Updates with `group`:** When modifying a lot of data simultaneously (e.g., during startup or reset), always use `with self.group(notify=False):`. This prevents "update storms".
+2. **Efficiency of `Item`:** If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the `Item` **once** during `__init__` or `on_start`, and cache it. Avoid parsing path strings in every cycle.
+3. **Data Types:** The Store is not strictly typed, but consistency is key. If a path starts as a `float` (`15.0`), try to keep it that way.
 
-### 1. Batch Updates with `group`
+---
 
-When modifying a lot of data simultaneously (e.g., during startup or reset), always use
-`with self.group(notify=False):`.
+## API Reference
 
-* **Reason:** Without this, every single write action triggers all subscribers immediately. `group` prevents this "
-  update storm".
+### Core Methods on `Store` & `ttStore`
 
-### 2. Efficiency of `Item`
+- `at(path: str) -> Item`
+- `get(path: str, default: Any = None) -> Any`
+- `set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
+- `append(path: str, value: Any) -> Item`
+- `subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)`
+- `unsubscribe(target: Union[Callable, object])`
+- `dumps() -> str`
 
-If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the `Item` **once** during
-`__init__` or `on_start`, and cache it.
+### Core Methods on `Item` (Cursor)
 
-* **Inefficient:** Calling `self.twin.get('sensors/#0/value')` in every cycle (must parse the path string every time).
-* **Efficient:**
-    ```python
-    # In __init__:
-    self.temp_val_item = self.twin.at('sensors/#0/value')
-
-    # In timer loop:
-    self.temp_val_item.v += 0.1
-    ```
-
-### 3. Data Types
-
-The Store is not strictly typed (it is Python), but consistency is key. If a path starts as a `float` (`15.0`), try to
-keep it that way and do not suddenly change it to a `string` ("15"), unless your application logic specifically handles
-this.
+- `.v` (Property: get/set value)
+- `.path` (Property: absolute path string)
+- `.parent` (Property: parent Item)
+- `.list_root` (Property: nearest auto-increment list ancestor)
+- `.key` (Property: last segment of the path)
+- `set(data, value=None, notify=True)`
+- `append(prefix=None) -> Item`
+- `pop(subpath=None) -> Any`
+- `remove(subpath=None)`
+- `children(prefix=None) -> Iterator['Item']`
+- `link_to(target_path: str, bubble_events: bool = False) -> Item`
+- `set_each(subpath: str, value: Any, prefix: str = None) -> Item`
 
 ---
 
 ## Example Implementation
 
-Below is a full integration where `MyProcess` writes data and `OperatorInterface` reacts to that data via the
-`DigitalTwin` store.
+Below is a full integration where `MyProcess` writes data and `OperatorInterface` reacts to that data via the `DigitalTwin` store.
 
 ```python
 from TaskTonic import *
@@ -324,13 +293,12 @@ class DigitalTwin(ttStore):
         super()._init_post_action()
         # Use group(notify=False) for performance during init
         with self.group(notify=False):
-            # Because the set method uses Iterable, both tuples (()) and lists [] are valid.
             self.set((
                 ('parameters/update_freq', 2),
                 ('parameters/temp_limit', 10),
                 ('sensors/#', 'temp'),         # Create sensor 0
                 ('sensors/./value', 15.0),
-                ('sensors/./unit', '℃'),
+                ('sensors/./unit', 'C'),
                 ('sensors/./high_alarm', False),
                 ('sensors/#', 'humidity'),     # Create sensor 1
                 ('sensors/./value', -1),
@@ -344,7 +312,6 @@ class OperatorInterface(ttTonic):
 
     def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
         super().__init__(name, context, log_mode, catalyst)
-        # Bind to the service
         self.twin = DigitalTwin()
 
     def ttse__on_start(self):
@@ -356,11 +323,9 @@ class OperatorInterface(ttTonic):
 
     def ttse__on_sensor_update(self, updates):
         for path, new, old, source in updates:
-            # Use .at(path) to get an Item for smart navigation
             # .list_root automatically navigates up to the sensor item (e.g., 'sensors/#0')
             sensor_item = self.twin.at(path).list_root
 
-            # Retrieve name and value via the item
             name = sensor_item.v
             val = sensor_item['value'].v
             unit = sensor_item.get('unit', '')
@@ -380,15 +345,13 @@ class MyProcess(ttTonic):
     def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
         super().__init__(name, context, log_mode, catalyst)
         self.my_record['auto_finish'] = True
-        self.twin = self.bind(DigitalTwin)
+        self.twin = DigitalTwin()
 
         # Performance optimization: Cache the item pointer
-        # This avoids parsing the path string in every loop cycle
         self.temp_sens_item = self.twin.at('sensors/#0')
 
     def ttse__on_start(self):
         self.twin.subscribe("parameters", self.ttse__on_param_update)
-        # Start a timer based on a parameter from the store
         freq = self.twin.get('parameters/update_freq', 5)
         self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
 
@@ -396,7 +359,6 @@ class MyProcess(ttTonic):
         for path, new, old, source in updates:
             if path == 'parameters/update_freq':
                 self.utmr.stop()
-                # Restart timer with new frequency
                 freq = self.twin.get('parameters/update_freq', 5)
                 self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
 

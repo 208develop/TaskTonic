@@ -30,4 +30,13 @@ the race conditions and headaches of traditional multi-threading.
 
 ## Documentation
 
-No documentation, no framework. Look into the **\_documents** map and read it all.
+No documentation, no framework. Look into the **\doc** map and read it all.
+Or look at https://208develop.github.io/TaskTonic/
+
+## TaskTonic Projects:
+
+- **TaskTonic Visual Logger**: 
+  - Visual logger for debugging your TT project. 
+  - https://github.com/208develop/tasktonic-visual-logger
+ 
+
