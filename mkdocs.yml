@@ -20,10 +20,10 @@ nav:
   - Documentation:
       - The Introduction: 'TaskTonic  - The introduction.md'
       - Sparkling Programming: 'TaskTonic - Sparkling Programming.md'
-      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
-      - Depending on State: 'TaskTonic - Depending on your state.md'
       - Timers Without Waiting: 'TaskTonic - Timers without waiting.md'
-      - Active Data Store: 'TaskTonic - Active data store.md'
+      - Depending on State: 'TaskTonic - Depending on your state.md'
       - At Your Service: 'Tasktonic - At your service.md'
+      - Active Data Store: 'TaskTonic - Active data store.md'
+      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
       - Testing in ttDistiller: 'TaskTonic - Testing in the ttDistiller.md'
   - Tasting The Tonic: tasting-the-tonic.md

@@ -1,386 +1,352 @@
-# ttStore & Store/Item: Central Data Repository
+# TaskTonic Store for Reactive Data Management
 
 <img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
 
-This documentation describes the complete functionality of the `Store` and `Item` classes, and their integration within TaskTonic via `ttStore`.
 
-## Introduction
+In complex, asynchronous systems, maintaining a consistent, thread-safe application state is one of the greatest challenges. The TaskTonic Store module provides a centralized, hierarchical, and reactive data engine. The module consists of two complementary core components:
 
-In complex applications, it is essential to share data between different components in a structured and accessible way. `ttStore` functions as a **Central Data Repository**. It offers a hierarchical storage structure (comparable to a file system or a nested dictionary) that is:
+1.  **`Store`**: The pure, functional, thread-safe data core. It handles hierarchical storage, lock management, MQTT-style wildcard pub/sub notifications, and atomic updates.
+2.  **`Item`**: A highly powerful, cursor-like view/pointer that references a specific path within the `Store`. This enables relative navigation, local mutations, and isolated subscriptions.
 
-1. **Centralized:** A single source of truth for parameters, sensor values, and configurations.
-2. **Reactive:** Components can subscribe to changes in specific data paths.
-3. **Flexible:** Data can be accessed via absolute paths or relative pointers (`Item`).
-
-By utilizing the Store, you create a clean **separation of concerns** in your application. For example: a hardware processing component simply writes sensor data to the Store, and the UI component receives an automatic notification to update its display, without either component needing to know about the other's existence.
+Within the framework, the store is exposed as a Singleton Service via the **`ttStore`** class, accessible in your Tonics via `self.ledger.formula`.
 
 ---
 
-## Concepts: Store vs. ttStore
+## 1. Core API & Data Access
 
-The system consists of two layers that can also be used **independently**.
+TaskTonic provides multiple ways to interact with data, balancing performance and developer convenience. 
+Using the store is a bit like using a python dictionary but with hierarchical paths and strongly optimised for storing
+and distributing data in een reactive systems.
 
-### 1. The Core: `Store` and `Item`
-
-The `Store` is the pure data container. It is a standalone class that holds the data and provides methods to read or write data via paths (e.g., `'sensors/temp/value'`).
-
-The `Item` is a smart "pointer" or "cursor" to a specific location in the `Store`. It allows for relative navigation without needing to know the full absolute path.
-
-> **Note:** `Store` and `Item` can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical data structure. Every node can be a "value" AND a "container" simultaneously.
-
-### 2. The Service: `ttStore`
-
-`ttStore` is the TaskTonic wrapper around a `Store`. It transforms the store into a **Service** within the TaskTonic ecosystem. This adds capabilities such as:
-
-- **Event-driven updates:** Automatically notify other Tonics (like UI or controllers) upon changes.
-- **Service Binding:** Easily linked to other Tonics via `self.bind()`.
-
----
-
-## The Basics: Reading & Writing Data
-
-Below is an overview of the foundational methods for data manipulation.
-
-### Dictionary Access (`[]` Syntax)
-
-For convenience, `ttStore` and `Item` support standard Python dictionary syntax.
-
-- **Reading:** `val = store['path']` (Equivalent to `.get('path')`. Returns `None` if not found).
-- **Writing:** `store['path'] = val` (Equivalent to `.set([('path', val)])`. Triggers updates immediately).
+### 1.1 Dictionary Syntax (`[]`)
+For quick, intuitive access, both the `Store` and `Item` objects fully support standard Python dictionary bracket syntax. Reading missing paths natively returns `None` instead of raising a `KeyError`.
 
 ```python
-# Read
-current_limit = self.twin['parameters/temp_limit']
+# Writing data
+store["machine/status"] = "operational"
+store["machine/metrics/temperature"] = 22.5
 
-# Write
-self.twin['parameters/temp_limit'] = 12.0
+# Reading data
+current_status = store["machine/status"]
 ```
 
-### Writing Data (`set`, `.v`, `.append`)
-
-#### `set(data)`
-
-Writes one or multiple values to the store atomically. It accepts a `dict` or an `Iterable` (list/tuple) of tuples.
-
-- **Usage:** Initialization, bulk updates, or when you need to write multiple values without triggering incomplete notifications.
-- **Smart Paths:**
-  - `#`: Creates a new unique entry (auto-increment list). Finds the highest index and adds 1.
-  - `./`: Refers to the most recently generated index by that specific cursor.
+### 1.2 The `get` and `set` Method
+If you want to read a value and provide a fallback if the path doesn't exist, use `.get()`.
 
 ```python
-# Initialize a store with parameters and sensors using smart paths
-self.twin.set((
-    ('parameters/update_freq', 2),     # Set update frequency to 2
-    ('sensors/#', 'temp'),             # Create new sensor 'temp' (e.g., sensors/#0)
-    ('sensors/./value', 15.0),         # Set value of THAT sensor
-    ('sensors/./unit', 'C'),           # Set unit of THAT sensor
-))
+# Returns 60 if 'machine/metrics/speed' is not found
+speed = store.get("machine/metrics/speed", default=60)
 ```
 
-#### `.v` (Value Property via Item)
+Setting data, single line or multipole line, can be done using set.
 
-If you hold an `Item` object (a pointer to a location), you can read and write directly via the `.v` property.
-
-```python
-# Assume we have a pointer (Item) to the sensor value
-sensor_val_item = self.twin.at('sensors/#0/value')
-
-# Write a new value
-sensor_val_item.v = 22.5
+``` python
+        # one item
+        self.store.set('setting/ui/background', 'blue')
+        
+        # multiple items by dict
+        self.store.set({
+            'setting/ui/font', 'arial',
+            'setting/ui/font_size', 10,
+        })        
+        
+        # multiple items by tuple of tuples
+        self.store.set((
+            ('setting/ui/font', 'arial'),
+            ('setting/ui/font_size', 10),
+        ))
 ```
 
-#### `append(value)` and `append(path, value)`
+### 1.3 Live Links / Pointers (`Item` Cursors)
+If you need to read or write to the same path repeatedly (e.g., inside a rapid timer loop), parsing the path string every time via `store["path"]` is inefficient. Instead, use `.at()` to generate an `Item` cursor. 
 
-Adds a new item to a list. A cleaner alternative to using the `'path/#'` syntax when adding single items.
-
-```python
-# Append via Store
-self.twin.append('logs', 'System Started')
-
-# Append via Item
-log_item = self.twin.at('logs')
-log_item.append('User logged in')
-```
-
-### Reading Data (`get`, `at`)
-
-#### `get(path, default=None)`
-
-Retrieves the value of a specific path. If the path does not exist, the `default` value is returned. Resolves through `StoreLinks` automatically.
+Storing this `Item` in a variable creates a **live link** to that location in the store. You can read/write its value directly via the `.v` property, or use it to navigate relatively.
 
 ```python
-freq = self.twin.get('parameters/update_freq', 5)  # Default 5 if not found
-```
+from TaskTonic import ttTonic
 
-#### `at(path) -> Item`
-
-Returns an `Item` cursor pointing to the location `path`. This is **more powerful** than `get` because it allows further navigation.
-
-```python
-# Get a pointer (Item) to the first sensor
-sensor_item = self.twin.at('sensors/#0')
-
-# Read values via the Item
-print(sensor_item['value'].v)
+class DisplayTonic(ttTonic):
+    def ttse__on_start(self):
+        # Create a cursor to a specific branch
+        self.ui_settings = self.ledger.formula.at('settings/ui')
+        
+        # Dictionary syntax writes relative to the cursor
+        self.ui_settings['background'] = 'blue'
+        
+        # .v property writes directly to the cursor's path
+        self.ui_settings.at('opacity').v = 0.8
 ```
 
 ---
 
-## Details & Smart Usage
+## 2. Hybrid Nodes & Smart Lists
 
-### Navigation (`Item` objects)
+Traditional data structures force a node to be either a value (a leaf, like a string) or a container (a map or folder). The TaskTonic Store breaks this dogma by introducing **Hybrid Nodes**.
 
-An `Item` object acts as a smart window onto your data.
+Every path in the Store can **simultaneously** hold a direct value and harbor sub-paths (children).
 
-- **`item['child']`**: Navigate to a sub-item.
-- **`item.parent`**: Returns an `Item` to the parent node.
-- **`item.list_root`**: If the item is part of a list, this returns the list item itself (e.g., `#0`), regardless of how deep you are in the hierarchy.
+### 2.1 The Auto-Increment (`#`)
+If you store a standard Python list in the Store and append to it, the Store *will not know* its contents changed, and subscriptions won't trigger. 
+
+TaskTonic uses **Smart Lists** (Dictionaries with auto-incrementing keys). The `#` symbol instructs the Store to scan the active list, determine the highest numeric index, increment it by 1, and create a brand new item. Because every item gets an absolute path (e.g., `users/#1/name`), retrieving deep data is a direct `O(1)` lookup.
+
+### 2.2 The "Sticky" Index (`.`)
+The `.` symbol refers to the **most recently generated index** by that specific cursor. This is essential for adding multiple properties to the exact same newly created list item without looking up its generated index.
+
+### 2.3 Creating Valueless Container Lists
+Often, you want to create a list of complex objects where the index itself (e.g., `#0`) doesn't hold a direct value (its `.v` is `None`), but acts purely as a container for children. 
+
+To achieve this, simply **target the child property directly during creation**, rather than assigning a value to the `#`.
 
 ```python
-# If located at 'sensors/#0/value', list_root returns 'sensors/#0'
-sensor_name = sensor_item.list_root.v 
+class UserManager(ttTonic):
+    def ttsc__add_users(self):
+        users = self.ledger.formula.at('settings/users')
+
+        # METHOD A: Direct assignment to a sub-property
+        # Notice how 'users/#0' has no direct value, but acts as a container for 'name'
+        users.set('#/name', 'Bob')     # Creates index #0
+        users.set('./role', 'Admin')   # Adds 'role' to #0
+        users.set('./age', 32)         # Adds 'age' to #0
+
+        # METHOD B: Atomic batch creation using `set()` and a tuple of tuples
+        # This prevents triggering multiple incomplete notifications during setup
+        users.set((
+           ('emp#', 'New Employee'),   # Creates 'emp#0', where .v = 'New Employee'
+           ('./department', 'Sales'),
+           ('./salary', 50000),
+        ))
 ```
 
-#### `.children(prefix=None)`
-
-Returns an **iterator** (lazy evaluation for memory efficiency) of `Item` objects that are direct children.
-
-```python
-# Iterating directly without creating a full list in memory
-target_sensor = None
-for item in self.twin.at('sensors').children():
-    if item.v == 'humidity':
-        target_sensor = item
-        break
-```
-
-### Graph Navigation (`StoreLinks`)
-
-While strict hierarchy ensures data integrity, `StoreLinks` provide symlinks to solve functional grouping via `.link_to()`.
-
-- **Passive Links (`bubble_events=False`):** Delegates reads/writes. Events do not bubble up the alias tree (prevents UI event storms).
-- **Active Links (`bubble_events=True`):** Two-way connections. If the physical target changes, an event bubbles up the alias tree. Perfect for sensors.
+### 2.4 Custom Prefixes (`prefix#`)
+As seen in Method B above, you can segregate different entities within the same tree branch by placing text before the `#` symbol. Each prefix maintains its own independent counter.
 
 ```python
-room_lamp = self.twin.at("house/living/main_light")
-room_lamp.link_to("devices/lamp_1", bubble_events=False)
-
-# Writing to the alias automatically routes to devices/lamp_1
-room_lamp.at("brightness").v = 80 
-```
-
-### Batch Iteration (`set_each`)
-
-Updates a specific sub-property across all children of a node within a single atomic group.
-
-```python
-living_room = self.twin.at("house/living/lamps")
-living_room.set_each("power", "off", prefix="lamp")
-```
-
-### Reactivity (`subscribe`)
-
-Connects data changes to your Tonic's Sparkles (`ttse__`). The callback receives a list of `updates`. Each update is a tuple: `(path, new_value, old_value, source)`.
-
-#### Exact, Recursive & Wildcards (`*`, `**`)
-
-- **Exact:** Triggers only on the specific path.
-- **Recursive:** Triggers on the path AND any of its children.
-- **`*`:** Matches exactly one path level.
-- **`**`:** Matches all underlying path levels.
-
-```python
-# Matches 'sensors/kitchen/temp' but NOT 'sensors/kitchen/temp/calibration'
-self.twin.subscribe("sensors/*/temp", self.ttse__on_temp_change)
-```
-
-#### Atomic Snapshots (`extract` & `trigger_now`)
-
-Fetch a flat dictionary snapshot instantly instead of piecing together single-property events. Easy for grouping data and essential when you need to be certain of all value at the moment on of them changed.
-
-```python
-def ttse__on_start(self):
-    self.twin.subscribe(
-        "ui/widgets/*", 
-        self.ttse__render_widget, 
-        extract=[".", "color", "visible"], 
-        recursive=True,
-        trigger_now=True
-    )
-
-def ttse__render_widget(self, events):
-    for path, snapshot, old, source in events:
-        color = snapshot.get("color")
-```
-
-### Context Managers & Utilities (`group`, `source`, `dumps`)
-
-- **`dumps()`**: Returns a string representation of the entire store (useful for debugging).
-- **`group(notify=True, source_id=None)`**: Batches multiple updates atomically. `notify=False` silences updates entirely (useful during init).
-- **`source(source_id)`**: Tags updates with an origin ID. Vital for bidirectional UI sync to prevent infinite loops.
-
-```python
-# Identifying who made the change
-with self.twin.source('GUI'):
-    self.twin['parameters/speed'] = 50
-
-# In the callback, you can check the source:
-def on_change(self, updates):
-    for path, new, old, src in updates:
-        if src == 'GUI':
-            continue # Ignore changes I made myself
-        # Update GUI display...
+users.set('guest#/name', 'Charlie')  # Becomes: users/guest#0/name
+users.set('guest#/name', 'Dave')     # Becomes: users/guest#1/name
 ```
 
 ---
 
-## Performance & Best Practices
+## 3. Navigating the Tree (`Item` Methods)
 
-1. **Batch Updates with `group`:** When modifying a lot of data simultaneously (e.g., during startup or reset), always use `with self.group(notify=False):`. This prevents "update storms".
-2. **Efficiency of `Item`:** If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the `Item` **once** during `__init__` or `on_start`, and cache it. Avoid parsing path strings in every cycle.
-3. **Data Types:** The Store is not strictly typed, but consistency is key. If a path starts as a `float` (`15.0`), try to keep it that way.
+Once you hold an `Item` cursor, you can navigate up, down, and across the data tree efficiently.
+
+* **`.parent`**: Returns a new `Item` pointing exactly one level up to the parent container.
+* **`.list_root`**: Recursively navigates up the path tree to identify the nearest list-container (identifiable by the `#` syntax). This is crucial within callbacks to find the surrounding entity of a mutated child property.
+* **`.key`**: Returns the last segment of the path (e.g., `#0` or `brightness`).
+
+### 3.1 The `children` Iterator
+To loop over elements in a container, use the `.children()` method. This returns a memory-efficient **Iterator** of `Item` cursors (lazy evaluation).
+
+```python
+sensor_container = store.at("sensors")
+
+# Efficiently iterate without loading the entire tree into memory
+for child_item in sensor_container.children():
+    if child_item.get("status") == "critical":
+        # Handle critical sensor...
+        pass
+```
 
 ---
 
-## API Reference
+## 4. Graph Navigation (`StoreLinks`)
 
-### Core Methods on `Store` & `ttStore`
+While the strict hierarchical tree is great for data integrity (the "Canonical State"), you often need to view data functionally (as a Graph). TaskTonic provides **Symlinks** to solve this via the `.link_to()` method.
 
-- `at(path: str) -> Item`
-- `get(path: str, default: Any = None) -> Any`
-- `set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
-- `append(path: str, value: Any) -> Item`
-- `subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)`
-- `unsubscribe(target: Union[Callable, object])`
-- `dumps() -> str`
+### 4.1 Passive Links (`bubble_events=False`)
+A passive link acts as a transparent shortcut. It delegates reads and writes to the target. Events bubble up the target's physical tree, but **do not** bubble up the alias tree (preventing UI event storms).
+
+```python
+class HouseController(ttTonic):
+    def ttse__on_start(self):
+        # Canonical state
+        self.ledger.formula.set("devices/lamp#/brightness", 0)  # creating lamp#0
+
+        # Functional grouping (Passive link)
+        room_lamp = self.ledger.formula.at("house/living/main_light")
+        room_lamp.link_to("devices/lamp#0", bubble_events=False)
+
+        # Writing to the alias automatically routes to devices/lamp_1
+        room_lamp["brightness"] = 80 
+```
+
+### 4.2 Active Links (`bubble_events=True`)
+Active links are two-way connections. If the physical target changes, the Store automatically injects a cloned event into the alias tree. **Use this for sensors** where a room-controller needs to be actively notified of hardware triggers happening deep in the device tree.
+
+```python
+sensor_alias = self.ledger.formula.at("security/front_door")
+sensor_alias.link_to("devices/motion_1", bubble_events=True)
+# Now, if devices/motion_1 triggers, the 'security/front_door' path 
+# will also bubble the event to any active subscribers.
+```
+
+---
+
+## 5. Batch Iteration (`set_each`)
+
+When updating a collection, doing it item-by-item triggers redundant pub/sub notifications. `.set_each()` iterates over children and updates them inside a single atomic `group()`.
+
+```python
+class LightingTonic(ttTonic):
+    def ttsc__turn_off_all_lamps(self):
+        living_room = self.ledger.formula.at("house/living/lamps")
+        
+        # Resolves through any StoreLinks and fires ONE batch notification
+        living_room.set_each("power", "off", prefix="lamp")
+```
+
+---
+
+## 6. Advanced Reactivity & Pub/Sub Patterns
+
+The `subscribe` method is the core of TaskTonic's reactivity. It connects data changes to your Tonic's Sparkles (`ttse__`). 
+
+Your event sparkle will receive a list of updates. Each update is a tuple: `(path, new_val, old_val, source_id)`.
+
+### 6.1 Exact vs. Recursive Subscriptions
+* **Exact:** Triggers only on the specific path.
+* **Recursive:** Triggers on the path AND any of its nested children.
+
+```python
+class ProfileWatcher(ttTonic):
+    def ttse__on_start(self):
+        profile = self.ledger.formula.at("user/profile")
+        
+        # Trigger on ANY change inside the profile (name, age, settings)
+        profile.subscribe(self.ttse__on_profile_update, recursive=True)
+```
+
+### 6.2 MQTT-Style Wildcards (`*` and `**`)
+Subscribe to dynamic paths without knowing the exact IDs upfront:
+* `*` (Single-level): Matches exactly **one** path segment.
+* `**` (Multi-level/Recursive): Matches **all** deeper path segments.
+
+```python
+class SensorDashboard(ttTonic):
+    def ttse__on_start(self):
+        store = self.ledger.formula
+        
+        # Matches 'sensors/kitchen/temp' but NOT 'sensors/kitchen/temp/calibration'
+        store.subscribe("sensors/*/temp", self.ttse__on_temp_change)
+
+        # Matches ANY error deep inside the system tree
+        store.subscribe("system/**/error", self.ttse__on_system_error)
+```
+
+### 6.3 Atomic Snapshots (`extract` and `trigger_now`)
+Instead of receiving raw single-property events (which can cause UI stuttering), request a flat dictionary (snapshot). Use `.` inside the extract list to retrieve the value of the base path itself.
+
+* **`extract`**: A list of relative properties to fetch simultaneously.
+* **`trigger_now=True`**: Immediately fires a synthetic `init` event upon subscription. Perfect for rendering UI lists without manually polling the Store first.
+
+```python
+class UIRenderer(ttTonic):
+    def ttse__on_start(self):
+        # Subscribe to all widgets, grab their state instantly, and build snapshots
+        self.ledger.formula.subscribe(
+            "ui/widgets/*", 
+            self.ttse__render_widget, 
+            extract=[".", "color", "visible"], 
+            recursive=True,
+            trigger_now=True
+        )
+
+    def ttse__render_widget(self, events):
+        for path, snapshot, old_val, source in events:
+            # Snapshot is safely pre-assembled: {'.': 'button', 'color': 'red', 'visible': True}
+            widget_type = snapshot.get(".")
+            color = snapshot.get("color")
+            self.log(f"Rendering {widget_type} at {path} in {color}")
+```
+
+### 6.4 Lifecycle Management (Safe Unsubscribing)
+Subscriptions are automatically linked to their `owner` (the instance that created them). **Never** unsubscribe by path; always unsubscribe by `owner` to safely clean up your component.
+
+```python
+    def ttse__on_finished(self):
+        # Removes ALL subscriptions globally where this Tonic is the owner
+        self.ledger.formula.unsubscribe(self)
+```
+
+---
+
+## 7. Context Managers (`group` and `source`)
+
+* **`group(source_id=None, notify=True)`**: Batches multiple updates. Listeners are only notified once the block ends.
+* **`source(source_id)`**: Tags updates with an origin ID. Vital for bidirectional UI sync to prevent infinite loops (listeners can use `ignore_source` to drop events they caused themselves).
+
+```python
+class VolumeSlider(ttTonic):
+    def ttse__on_start(self):
+        vol_item = self.ledger.formula.at("audio/volume")
+        # Listen to the store, but ignore updates tagged with "my_slider"
+        vol_item.subscribe(self.ttse__on_external_change, ignore_source="my_slider")
+
+    def ttse__on_user_drag(self, new_value):
+        # Write to the store, tagging the source so we don't trigger ourselves
+        with self.ledger.formula.source("my_slider"):
+            self.ledger.formula.set("audio/volume", new_value)
+```
+
+---
+
+## 8. Store API Reference
+
+### Core Methods on `Store`
+
+#### `at(path: str) -> Item`
+Returns an `Item` cursor pointing to the specified absolute path.
+
+#### `set(path_or_data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
+Writes data to the root level. Supports single strings, dictionaries, or tuples of tuples.
+* **Returns:** The `Item` cursor of the root.
+
+#### `get(path: str, default: Any = None) -> Any`
+Retrieves a value by its absolute path. Resolves through `StoreLink`s automatically.
+
+#### `subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)`
+Registers a listener.
+* **`path`**: String or list of absolute paths. Supports `*` and `**` wildcards.
+* **`callback`**: The `ttse__` method to execute.
+* **`ignore_source`**: Drops events originating from this `source_id`.
+* **`recursive`**: If `True`, catches changes in all descendant paths. (Required if using `extract`).
+* **`exclude`**: List of absolute sub-paths to ignore.
+* **`extract`**: List of relative child properties to return as a flat snapshot dictionary.
+* **`trigger_now`**: Immediately fires an `init` event with current data.
+* **`owner`**: The object owning this subscription (auto-detected if a bound method is passed).
+
+#### `unsubscribe(target: Union[Callable, object, List[Any]])`
+Removes subscriptions. Pass the specific callback function, or the class instance (`self`) to wipe all subscriptions owned by that instance.
+
+---
 
 ### Core Methods on `Item` (Cursor)
 
-- `.v` (Property: get/set value)
-- `.path` (Property: absolute path string)
-- `.parent` (Property: parent Item)
-- `.list_root` (Property: nearest auto-increment list ancestor)
-- `.key` (Property: last segment of the path)
-- `set(data, value=None, notify=True)`
-- `append(prefix=None) -> Item`
-- `pop(subpath=None) -> Any`
-- `remove(subpath=None)`
-- `children(prefix=None) -> Iterator['Item']`
-- `link_to(target_path: str, bubble_events: bool = False) -> Item`
-- `set_each(subpath: str, value: Any, prefix: str = None) -> Item`
+#### Properties
+* **`.v`**: Property to get/set the value of this path. Writing triggers notifications.
+* **`.path`**: Absolute path string.
+* **`.parent`**: Returns an `Item` pointing one level up.
+* **`.list_root`**: Walks up the path tree to find the nearest ancestor created as an auto-increment list item (`#0`, `user#1`). Returns `None` if not in a list.
+* **`.key`**: Returns the last segment of the path (e.g., `#0` or `brightness`).
 
----
+#### `set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
+Writes data relative to this cursor. Fully supports `#` and `.` smart syntax.
+* **Returns:** Itself, for method chaining.
 
-## Example Implementation
+#### `get(key: str, default: Any = None) -> Any`
+Dictionary-style lookup for children relative to this cursor.
 
-Below is a full integration where `MyProcess` writes data and `OperatorInterface` reacts to that data via the `DigitalTwin` store.
+#### `append(prefix: str = None) -> Item`
+Explicitly creates a new auto-incremented child item.
+* **Returns:** An `Item` pointing to the newly created element.
 
-```python
-from TaskTonic import *
-from TaskTonic.ttTonicStore import ttStore
-import random
+#### `extend(data_list: List[Any], prefix: str = None) -> Item`
+Appends multiple items to the list. If `data_list` contains tuples of length 2, it builds structures instead of flat values.
 
+#### `pop(subpath: str = None) -> Any`
+Removes the node (and all descendants) and returns its base value. Operates relative to the cursor if `subpath` is provided.
 
-# --- The Data Repository Service ---
-class DigitalTwin(ttStore):
-    _tt_is_service = "digital_twin"  # Service name for binding
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.my_record['auto_finish'] = True
-
-    def _init_post_action(self):
-        super()._init_post_action()
-        # Use group(notify=False) for performance during init
-        with self.group(notify=False):
-            self.set((
-                ('parameters/update_freq', 2),
-                ('parameters/temp_limit', 10),
-                ('sensors/#', 'temp'),         # Create sensor 0
-                ('sensors/./value', 15.0),
-                ('sensors/./unit', 'C'),
-                ('sensors/./high_alarm', False),
-                ('sensors/#', 'humidity'),     # Create sensor 1
-                ('sensors/./value', -1),
-            ))
-
-        self.log(f"Digital Twin is initialized\n{self.dumps()}")
-
-
-# --- The Observer (e.g., GUI or Logger) ---
-class OperatorInterface(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        self.twin = DigitalTwin()
-
-    def ttse__on_start(self):
-        # Subscribe to sensor changes
-        self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-        # Schedule parameter update and end of program
-        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
-        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
-
-    def ttse__on_sensor_update(self, updates):
-        for path, new, old, source in updates:
-            # .list_root automatically navigates up to the sensor item (e.g., 'sensors/#0')
-            sensor_item = self.twin.at(path).list_root
-
-            name = sensor_item.v
-            val = sensor_item['value'].v
-            unit = sensor_item.get('unit', '')
-
-            self.log(f"UPDATE OF SENSOR {name}: {val:.3f}{unit}")
-
-    def ttse__on_parm_update(self, tmr):
-        self.twin['parameters/update_freq'] = .5
-
-    def ttse__on_end_program(self, tmr):
-        self.finish()
-
-
-# --- The Controller (Process Logic) ---
-class MyProcess(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        self.my_record['auto_finish'] = True
-        self.twin = DigitalTwin()
-
-        # Performance optimization: Cache the item pointer
-        self.temp_sens_item = self.twin.at('sensors/#0')
-
-    def ttse__on_start(self):
-        self.twin.subscribe("parameters", self.ttse__on_param_update)
-        freq = self.twin.get('parameters/update_freq', 5)
-        self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__on_param_update(self, updates):
-        for path, new, old, source in updates:
-            if path == 'parameters/update_freq':
-                self.utmr.stop()
-                freq = self.twin.get('parameters/update_freq', 5)
-                self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__update_timer(self, tmr):
-        # Writing directly via the cached item is very efficient
-        self.temp_sens_item['value'].v += random.uniform(-2, 2)
-
-
-# --- App Configuration ---
-class myApp(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
-
-    def creating_starting_tonics(self):
-        DigitalTwin()
-        OperatorInterface()
-        MyProcess()
-
-
-if __name__ == '__main__':
-    myApp()
-```
+#### `remove(subpath: str = None)`
+Deletes the node and all descendants without returning the value. Safely handles `StoreLink` cleanup (cascading

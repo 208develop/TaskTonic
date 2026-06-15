@@ -87,13 +87,18 @@ class ConnectionMonitor(ttTonic):
     def ttse__on_start(self):
         # Start a 10-second watchdog
         self.watchdog = ttTimerSingleShot(10.0, name="connection_timeout")
+        self.to_state('collect')
 
-    def ttse__on_data_received(self, data):
+    def ttse_collect__on_data_received(self, data):
         self.log("Data packet received.")
-        # Reset the timer. As long as data flows within 10s, it never hits 0.
+        # process the data
+
+        # Restart the running timer to 10 seconds.
+        # As long as data flows within 10s, it never hits 0.
         self.watchdog.restart()
 
     def ttse__on_connection_timeout(self, timer_info):
+        # timer did hit 0, timeout error!!!
         self.log("ALARM: Connection timed out!")
         self.to_state('error')
 ```

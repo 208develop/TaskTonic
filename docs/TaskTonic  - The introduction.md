@@ -58,8 +58,8 @@ Use `self.to_state('new_state_name')`.
 **State-Specific Sparkles:**
 You can prefix a Sparkle with a state name: `prefix_state__name`.
 
-*   **Specific:** `ttsc_idle__start()` — Only runs if the Tonic is in the `idle` state.
-*   **Generic:** `ttsc__start()` — Runs in any state (unless a specific version exists).
+*   **Specific:** `ttsc_idle__open()` — Only runs if the Tonic is in the `idle` state.
+*   **Generic:** `ttsc__open()` — Runs in any state (unless a specific version exists).
 *   **Fallback:** If called in a state where no handler exists, the call is ignored (the bubble pops harmlessly).
 
 ### 3.3 Lifecycle & Termination
@@ -115,9 +115,9 @@ class Database(ttTonic):
         super().__init__(**kwargs)
         self.connect_db()
 
-    def _init_service(self, context, **kwargs):
+    def _tt_init_service_base(self, context, **kwargs):
         # Runs EVERY time the service is requested
-        self.log(f"Accessed by {context.name}")
+        self.log(f"Accessed by {base.name}")
 ```
 
 **Using a Service:**
