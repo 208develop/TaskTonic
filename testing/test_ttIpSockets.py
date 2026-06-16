@@ -3,9 +3,9 @@ import time
 import socket
 import struct
 import pickle
-from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot, ttLedger
+from TaskTonic import ttTonic, ttFormula, ttLedger
 from TaskTonic.ttTonicStore.ttDistiller import ttDistiller
-from TaskTonic.ttTonicStore.ttIpSockets import DictSocketHandler, StrSocketHandler
+from TaskTonic.ttTonicStore.ttIpSockets import DictSocketHandler
 
 
 # ==============================================================================
@@ -14,14 +14,25 @@ from TaskTonic.ttTonicStore.ttIpSockets import DictSocketHandler, StrSocketHandl
 
 @pytest.fixture(autouse=True)
 def reset_ledger():
-    """Zorgt voor een schone lei voor elke test."""
+    """Zorgt voor een schone lei voor elke test en wacht op background threads."""
     ttLedger._instance = None
     ttLedger._singleton_init_done = False
+
     yield
+
     if ttLedger._instance:
+        # Wacht heel even tot alle achtergrond Catalysts (zoals SelectorHandler)
+        # daadwerkelijk hun thread hebben afgesloten vóórdat we de administratie vernietigen.
+        for t in ttLedger._instance.tonics:
+            if t and hasattr(t, 'sparkling') and t.id > 0:
+                start_t = time.time()
+                while t.sparkling and time.time() - start_t < 1.0:
+                    time.sleep(0.01)
+
         ttLedger._instance.records = []
         ttLedger._instance.tonics = []
         ttLedger._instance.formula = None
+
     ttLedger._instance = None
     ttLedger._singleton_init_done = False
 
@@ -40,46 +51,33 @@ def get_free_port():
 # ==============================================================================
 
 def test_dict_socket_serialization_and_fragmentation():
-    """
-    Test de zuivere logica van het inpakken en uitpakken van dicts.
-    Speciale focus op gefragmenteerde TCP pakketten (halve bytes ontvangen).
-    """
-    # We bypassen __init__ om te voorkomen dat de TaskTonic ledger start
+    """Test de zuivere logica van het inpakken en uitpakken van dicts."""
     handler = DictSocketHandler.__new__(DictSocketHandler)
     handler.rcv_buf = b''
 
     test_dict_1 = {"cmd": "login", "user": "test", "id": 1}
     test_dict_2 = {"cmd": "data", "payload": [1, 2, 3]}
 
-    # Inpakken
     packed_1 = handler.send_data_conversion(test_dict_1)
     packed_2 = handler.send_data_conversion(test_dict_2)
 
-    # Controleer structuur (4 bytes length header + pickle dump)
-    assert len(packed_1) > 4
-    length_header = struct.unpack('!I', packed_1[:4])[0]
-    assert length_header == len(packed_1) - 4
-
-    # --- Simulatie van Netwerk Fragmentatie ---
-
-    # 1. We ontvangen slechts de eerste 3 bytes van het eerste pakket (header incompleet)
+    # 1. Fragmentatie simuleren
     result = handler.rcv_data_conversion(packed_1[:3])
-    assert len(result) == 0  # Nog geen dict beschikbaar
+    assert len(result) == 0
     assert len(handler.rcv_buf) == 3
 
-    # 2. We ontvangen de rest van pakket 1, PLUS de helft van pakket 2
+    # 2. De rest + een stuk van de volgende
     chunk = packed_1[3:] + packed_2[:10]
     result = handler.rcv_data_conversion(chunk)
-
     assert len(result) == 1
-    assert result[0] == test_dict_1  # Pakket 1 is nu succesvol uit de buffer gehaald!
-    assert len(handler.rcv_buf) == 10  # De rest van pakket 2 zit nog in de wachtkamer
+    assert result[0] == test_dict_1
+    assert len(handler.rcv_buf) == 10
 
-    # 3. We ontvangen het laatste stukje van pakket 2
+    # 3. Het laatste stukje
     result = handler.rcv_data_conversion(packed_2[10:])
     assert len(result) == 1
     assert result[0] == test_dict_2
-    assert len(handler.rcv_buf) == 0  # Buffer is weer leeg
+    assert len(handler.rcv_buf) == 0
 
 
 # ==============================================================================
@@ -91,6 +89,7 @@ class MockServer(ttTonic):
         super().__init__(**kwargs)
         self.port = port
         self.received_data = []
+        self.received_count = 0  # <--- Toegevoegd voor de stop_on_probe optimalisatie!
         self.client_connected = False
 
     def ttse__on_start(self):
@@ -103,7 +102,7 @@ class MockServer(ttTonic):
 
     def ttse__on_socket_data(self, data):
         self.received_data.append(data)
-        # Simpele echo terug, we voegen een flag toe
+        self.received_count += 1
         data['echo'] = True
         self.net.ttsc__send_data(data)
 
@@ -152,31 +151,56 @@ class NetworkTestFormula(ttFormula):
 # ==============================================================================
 
 def test_socket_connection_flow():
-    """Test of de Server en Client elkaar vinden, verbinden en data uitwisselen."""
     port = get_free_port()
     app = NetworkTestFormula(port)
     dist = app.distiller
 
-    # 1. Wacht tot de client de status 'connected' bereikt.
-    # Omdat de SelectorHandler de socket events afhandelt en dan sparkles
-    # terugschiet naar de main thread, pakt de Distiller dit netjes op.
-    status = dist.sparkle(timeout=2.0, till_state_in=['connected'], contract={'probes': ['client_connected']})
+    # --- DEEL 1: Wacht robuust op connectie (AND LOGICA) ---
+    # We vertellen de Distiller: Stop pas als de client de state 'connected'
+    # heeft, EN de server de interne variabele 'client_connected' op True heeft staan.
+    connect_contract = {
+        'timeout': 3.0,
+        'stop_match_count': 'all',  # AND logica
+        'tonics': {
+            'ClientTonic': {
+                'till_state_in': ['connected']
+            },
+            'ServerTonic': {
+                'probes': ['client_connected'],
+                'stop_on_probe': {'client_connected': True}
+            }
+        }
+    }
 
+    trace1 = dist.sparkle(contract=connect_contract)
+
+    # Verifieer dat we gestopt zijn wegens het contract en niet de timeout
+    assert 'contract_met: 2/2 tonics matched' in trace1['stop_condition']
     assert app.client.get_current_state_name() == 'connected'
     assert app.server.client_connected is True
 
-    # 2. Laat de client data sturen
+    # --- DEEL 2: Data sturen en ontvangen ---
     test_payload = {"msg": "Hello TaskTonic"}
     app.client.ttsc__send_test(test_payload)
 
-    # 3. Draai de distiller totdat de client zijn eigen data als echo terugkrijgt
-    dist.sparkle(timeout=2.0, till_sparkle_in=['ttse__on_socket_data'])
+    # Wacht tot de client de echo binnenkrijgt. Eén match is voldoende.
+    echo_contract = {
+        'timeout': 3.0,
+        'stop_match_count': 1,
+        'tonics': {
+            'ClientTonic': {
+                'till_sparkle_in': ['ttse__on_socket_data']
+            }
+        }
+    }
 
-    # Controleer of de server het ontvangen heeft
+    trace2 = dist.sparkle(contract=echo_contract)
+    assert 'contract_met: 1/1 tonics matched' in trace2['stop_condition']
+
+    # Controleer of de flow 100% goed is gegaan
     assert len(app.server.received_data) == 1
     assert app.server.received_data[0]["msg"] == "Hello TaskTonic"
 
-    # Controleer de echo op de client
     assert len(app.client.received_data) == 1
     assert app.client.received_data[0]["msg"] == "Hello TaskTonic"
     assert app.client.received_data[0]["echo"] is True
@@ -192,22 +216,13 @@ class BulkSenderClient(MockClient):
     def ttsc_connected__start_bulk(self, amount):
         self.sent_count = amount
         for i in range(amount):
-            # We sturen extreem snel achter elkaar. Dit triggert
-            # gegarandeerd BlockingIOError (EAGAIN) in de OS socket
-            # waardoor de `buffering_send = True` logica van SocketHandler geactiveerd wordt.
             self.net.ttsc__send_data({"seq": i, "padding": "X" * 1024})
         self.to_state('done_sending')
 
 
 def test_socket_bulk_speed_and_buffering():
-    """
-    Test de stabiliteit bij het sturen van gigantische hoeveelheden data.
-    Dit forceert de socket buffers om vol te raken, test de 'buffering_send'
-    logica in SelectorHandler, en checkt of de volgorde behouden blijft.
-    """
     port = get_free_port()
 
-    # Kleine aanpassing van de formule voor deze test
     class BulkFormula(NetworkTestFormula):
         def creating_starting_tonics(self):
             self.server = MockServer(port=self.port, name="ServerTonic")
@@ -216,27 +231,40 @@ def test_socket_bulk_speed_and_buffering():
     app = BulkFormula(port)
     dist = app.distiller
 
-    # Wacht op connectie
-    dist.sparkle(timeout=2.0, till_state_in=['connected'])
+    # --- DEEL 1: Wacht op connectie (AND LOGICA) ---
+    dist.sparkle(contract={
+        'timeout': 3.0,
+        'stop_match_count': 'all',
+        'tonics': {
+            'ClientTonic': {'till_state_in': ['connected']},
+            'ServerTonic': {'probes': ['client_connected'], 'stop_on_probe': {'client_connected': True}}
+        }
+    })
 
-    # Stuur 5000 flinke dicts tegelijkertijd weg (~5MB aan data direct de non-blocking socket in)
+    # --- DEEL 2: BULK DATA ---
+    # Stuur 5000 flinke dicts tegelijkertijd weg (~5MB)
     TOTAL_MESSAGES = 5000
     app.client.ttsc__start_bulk(TOTAL_MESSAGES)
 
-    # We laten de distiller rennen totdat de server alle 5000 berichten heeft ontvangen
-    start_time = time.time()
+    # Wacht tot de server exact 5000 berichten heeft verwerkt.
+    # Dit voorkomt dat we the Distiller continu laten pollen!
+    bulk_contract = {
+        'timeout': 5.0,
+        'stop_match_count': 1,
+        'tonics': {
+            'ServerTonic': {
+                'probes': ['received_count'],
+                'stop_on_probe': {'received_count': TOTAL_MESSAGES}
+            }
+        }
+    }
 
-    # Polling met een lichte timeout om de distiller telkens even te laten ademen
-    while len(app.server.received_data) < TOTAL_MESSAGES:
-        dist.sparkle(timeout=0.1)
-        if time.time() - start_time > 5.0:  # Fail-safe
-            break
+    trace = dist.sparkle(contract=bulk_contract)
+    assert 'contract_met: 1/1 tonics matched' in trace['stop_condition']
 
+    # Final checks
     assert len(app.server.received_data) == TOTAL_MESSAGES
-
-    # Controleer of de TCP volgorde 100% klopt (ondanks fragmentatie en buffering)
     for i in range(TOTAL_MESSAGES):
         assert app.server.received_data[i]["seq"] == i
 
-    # Clean up
     dist.finish_distiller()

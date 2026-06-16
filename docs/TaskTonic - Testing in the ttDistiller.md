@@ -46,8 +46,11 @@ trace = distiller.sparkle(sparkle_count=5)
 ```
 This allows you to freeze the universe mid-execution and inspect the state of your application.
 
-### Sparkling Until a Condition
-Often, you don't know *exactly* how many Sparkles it takes to finish a complex network handshake. You just want to run the engine until a specific event happens.
+### Condition Triggers (Single-Tonic vs. Multi-Tonic)
+Often, you don't know *exactly* how many Sparkles it takes to finish a complex network handshake. You just want to run the engine until a specific event happens. 
+
+**A. Single-Tonic Tests (Direct Parameters)**
+If you are unit testing an isolated Tonic, you can pass stop conditions directly as arguments. The Distiller will pause as soon as *any* active Tonic hits the requirement.
 
 ```python
 # Run the engine until the Tonic enters the 'finished' state
@@ -57,18 +60,30 @@ trace = distiller.sparkle(till_state_in=['finished'])
 trace = distiller.sparkle(till_sparkle_in=['ttse__on_data_received'])
 ```
 
-### Data Probing (The `contract` Parameter)
-While running the engine, you can instruct the Distiller to "probe" your Tonic and extract internal variables exactly before and after every Sparkle. You define these probes using the `contract` parameter. 
+**B. Integration Tests (The `contract` Dictionary)**
+When testing multiple Tonics interacting (e.g., a Client and a Server), the direct parameters fall short because you often need to wait until *both* systems reach a specific state. For this, you use the declarative `contract` dictionary. 
 
-The Distiller uses a `_freeze_value` mechanism to safely create static snapshots of complex objects (like dictionaries, lists, or even Tonics) at that exact microsecond.
+The contract allows you to define strict **AND/OR logic**, assign independent conditions per Tonic, and "probe" internal variables without polluting the global trace. The Distiller uses a `_freeze_value` mechanism to safely create static snapshots of complex objects precisely before and after every Sparkle.
 
 ```python
-# Tell the Distiller to track the internal 'download_count' and 'is_connected' variables
-trace = distiller.sparkle(
-    timeout=5.0, 
-    till_state_in=['saving'],
-    contract={'probes': ['download_count', 'is_connected']}
-)
+# Tell the Distiller to stop ONLY when the Client is connected 
+# AND the Server has registered exactly 1 active connection internally.
+integration_contract = {
+    'timeout': 5.0,
+    'stop_match_count': 'all',  # 'all' = AND logic. Use '1' for OR logic.
+    'tonics': {
+        'ClientTonic': {
+            'till_state_in': ['connected'],
+            'probes': ['retry_attempts']  # Snapshot this variable on every sparkle
+        },
+        'ServerTonic': {
+            'probes': ['active_connections'],
+            'stop_on_probe': {'active_connections': 1} # Pause when probe hits this value
+        }
+    }
+}
+
+trace = distiller.sparkle(contract=integration_contract)
 ```
 
 ---
@@ -83,7 +98,7 @@ The returned dictionary contains metadata about the execution run:
 * **`status`**: The final status of the engine (`'running'` or `'catalyst finished'`).
 * **`start@` / `end@`**: Absolute timestamps of when the sparkle run started and ended.
 * **`stop_condition`**: A list explaining *why* the Distiller paused. 
-    * *Values can include:* `'timeout'`, `'sparkle_count'`, `'state_trigger: [state_name]'`, `'sparkle_trigger: [sparkle_name]'`, or `'catalyst finished'`.
+    * *Values can include:* `'timeout'`, `'sparkle_count'`, `'state_trigger: [state_name]'`, `'sparkle_trigger: [sparkle_name]'`, `'contract_met: X/Y tonics matched'`, or `'catalyst finished'`.
 * **`sparkle_trace`**: A detailed list of every single Sparkle that was executed.
 
 ### The `sparkle_trace` List
@@ -96,7 +111,7 @@ Each item in the `sparkle_trace` list is a dictionary describing a single atomic
 * **`at_enter` / `at_exit`**: Sub-dictionaries capturing the exact state *before* and *after* the Sparkle. They contain:
     * `@`: The precise timestamp (useful for profiling).
     * `state`: The name of the Tonic's state machine state.
-    * `probes`: A dictionary containing the frozen values of any requested probes.
+    * `probes`: A dictionary containing the frozen values of any requested probes for this specific Tonic.
     * `sparkling`: (Only in `at_exit`) Boolean indicating if the engine is still running.
 
 ### Examples: Writing Assertions with the Trace
@@ -105,10 +120,15 @@ Each item in the `sparkle_trace` list is a dictionary describing a single atomic
 Ensure your logic stopped because it reached the desired state, not because it timed out.
 
 ```python
-trace = distiller.sparkle(timeout=2.0, till_state_in=['authenticated'])
+# Using a contract for an integration test
+trace = distiller.sparkle(contract={
+    'timeout': 2.0,
+    'stop_match_count': 'all',
+    'tonics': {'ClientTonic': {'till_state_in': ['authenticated']}}
+})
 
 # Check why the distiller stopped
-assert 'state_trigger: [authenticated]' in trace['stop_condition']
+assert 'contract_met: 1/1 tonics matched' in trace['stop_condition'][0]
 assert 'timeout' not in trace['stop_condition']
 ```
 
@@ -118,7 +138,11 @@ Verify that internal variables were updated correctly during the Sparkle executi
 ```python
 trace = distiller.sparkle(
     sparkle_count=1, 
-    contract={'probes': ['retry_attempts']}
+    contract={
+        'tonics': {
+            'ClientTonic': {'probes': ['retry_attempts']}
+        }
+    }
 )
 
 # Grab the last executed sparkle from the trace
@@ -177,4 +201,4 @@ Because all Tonics in the same Formula share the same Catalyst engine, the Disti
 ---
 
 ### Summary
-Tith TaskTonic and the `ttDistiller`, you gain the power to freeze time, inspect memory, profile execution speeds, and lock down your application's behavior with deterministic contracts.
+With TaskTonic and the `ttDistiller`, you gain the power to freeze time, inspect memory, profile execution speeds, and lock down your application's behavior with deterministic contracts.

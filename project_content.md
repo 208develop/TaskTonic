@@ -14,6 +14,8 @@ TaskTonic/
     collect_project_content.py
     project_content.md
     Kopie van project_content.md
+    mkdocs.yml
+    CHANGELOG.md
     TaskTonic/
         __init__.py
         ttLedger.py
@@ -65,29 +67,12 @@ TaskTonic/
         test_distiller.py
         test_store.py
         test_ttTonic.py
-    _documents/
-        TaskTonic  - The introduction.md
-        TaskTonic - Sparkling Programming.md
-        TaskTonic - Understanding the ttCatalyst.md
-        TaskTonic - Timers without waiting.md
-        TaskTonic - Testing in the ttDistiller.md
-        TaskTonic - Depending on your state.md
-        Tasktonic - At you Service.md
-        TaskTonic - Active data store.md
-        Store API.md
-        TaskTonic Store & Item API Documentation.md
-        old_documents_not_matching_the_code/
-            ttDataShare.md
-            ttTonic.md
-            ttCatalyst.md
-            _introduction.md
-            Tonic Services.md
-            finisching flow.md
-            ttStore.md
-            developer documentation.md
+        test_ttIpSockets.py
     .github/
         workflows/
             tests.yml
+            publish.yml
+            webdos.yml
     TaskTonic.egg-info/
         dependency_links.txt
         top_level.txt
@@ -123,8 +108,19 @@ TaskTonic/
                     ttTkinterUi.py
                     ttTkinterWidget.py
         bdist.win-amd64/
-    doc/
-        new Store doc.md
+    docs/
+        TaskTonic  - The introduction.md
+        TaskTonic - Active data store.md
+        TaskTonic - Depending on your state.md
+        TaskTonic - Sparkling Programming.md
+        TaskTonic - Testing in the ttDistiller.md
+        TaskTonic - Timers without waiting.md
+        TaskTonic - Understanding the ttCatalyst.md
+        Tasktonic - At your service.md
+        documentation.md
+        index.md
+        tasting-the-tonic.md
+        assets/
 ```
 
 ---
@@ -164,11 +160,21 @@ the race conditions and headaches of traditional multi-threading.
 
 ## Documentation
 
-No documentation, no framework. Look into the **\_documents** map and read it all.## `File: pyproject.toml`
+No documentation, no framework. Look into the **\doc** map and read it all.
+Or look at https://208develop.github.io/TaskTonic/
+
+## TaskTonic Projects:
+
+- **TaskTonic Visual Logger**: 
+  - Visual logger for debugging your TT project. 
+  - https://github.com/208develop/tasktonic-visual-logger
+ 
+
+## `File: pyproject.toml`
 ```toml
 [project]
 name = "TaskTonic"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
     { name = "Peter", email = "208develop@gmail.com" },
 ]
@@ -187,9 +193,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/208develop/TaskTonicc"
+Homepage = "https://github.com/208develop/TaskTonic"
 Issues = "https://github.com/208develop/TaskTonic/issues"
 Documentation = "https://github.com/208develop/TaskTonic/tree/master/_documents"
+Changelog = "https://github.com/208develop/TaskTonic/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["TaskTonic", "TaskTonic.*"]
@@ -9638,6 +9645,75 @@ TaskTonic/ttTonicStore/ttTkinterUi.py
 TaskTonic/ttTonicStore/ttTkinterWidget.py
 ```
 
+## `File: mkdocs.yml`
+```yaml
+site_name: TaskTonic
+site_description: A Refreshing Approach to Python Concurrency
+repo_url: https://github.com/208develop/TaskTonic
+repo_name: 208develop/TaskTonic
+
+theme:
+  name: material
+  palette:
+    primary: teal
+    accent: cyan
+  features:
+    - navigation.tabs
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Documentation:
+      - The Introduction: 'TaskTonic  - The introduction.md'
+      - Sparkling Programming: 'TaskTonic - Sparkling Programming.md'
+      - Timers Without Waiting: 'TaskTonic - Timers without waiting.md'
+      - Depending on State: 'TaskTonic - Depending on your state.md'
+      - At Your Service: 'Tasktonic - At your service.md'
+      - Active Data Store: 'TaskTonic - Active data store.md'
+      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
+      - Testing in ttDistiller: 'TaskTonic - Testing in the ttDistiller.md'
+  - Tasting The Tonic: tasting-the-tonic.md
+
+```
+
+## `File: CHANGELOG.md`
+# Changelog
+
+## [0.2.0]
+🎉 **First Stable Release of TaskTonic (v0.2.0)**
+
+TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model. It allows you to write highly responsive, concurrent applications (like UIs or IoT controllers) without the race conditions and headaches of traditional multi-threading.
+
+### ✨ Key Features in this release:
+* **Sparkling Programming:** You figure it out, cheers!!
+* **Non-blocking Timers:** Built-in scheduling components (`ttTimerSingleShot`, `ttTimerEveryDay`, etc.) that never freeze your application.
+* **Built-in State Machines:** Easy to use, clears up your code.
+* **Testing Concurrency:** Yes, really. Look up the `ttDistiller` and find out.
+* **UI Integrations:** Optional, ready-to-use wrappers for PySide6 (ready!!) and Tkinter (under construction) (`ttPyside6Ui`, `ttTkinterUi`).
+* **Developer Ready:** I hope. It's just out in the open now, please help out. However, it is tested and compatible with `pytest`.
+
+### 🚀 Getting Started
+Full documentation and practical use cases can be found in the `_documents` and `examples` directories. 
+*(PyPI package installation via `pip install TaskTonic` will be available shortly!)*
+
+## [0.2.1] - 2026-06-01
+
+Refining api after using it in the first project so everything feels like expected 
+and redesign of the `Store` for smart central data and state distribution.
+
+### New
+- IP logger support, to use with TaskTonic Visual Logger (https://github.com/208develop/tasktonic-visual-logger), for tracking concurrent tasks.
+
+### Changed
+- Store and ttStore
+   - `ttStore` is a `ttTonic` now, for active store management.
+   - Extended subscribing (/room/sensors/*/temp)
+   - `StoreLink`, relative path to a `Store` `Item`. You can reach the same `Item` from multiple paths.
+   - Some api updates
+
 ## `File: TaskTonic\__init__.py`
 ```python
 from .ttLedger import ttLedger
@@ -11481,6 +11557,1064 @@ DumpData = Iterable[Tuple[str, Any]]
 
 
 # ------------------------------------------------------------------------------
+# Class: StoreLink (The Smart Proxy Node)
+# ------------------------------------------------------------------------------
+class StoreLink:
+    """
+    A smart node that resides inside the Store's storage tree.
+    It acts as a proxy to another path and manages its own subscriptions.
+    """
+    __slots__ = ('store', 'alias_path', 'target_path', 'bubble_events')
+
+    def __init__(self, store: 'Store', alias_path: str, target_path: str, bubble_events: bool = False):
+        self.store = store
+        self.alias_path = alias_path.strip("/")
+        self.target_path = target_path.strip("/")
+        self.bubble_events = bubble_events
+
+    def setup(self):
+        """Called when the link is inserted into the store."""
+        if self.bubble_events:
+            self.store.at(self.target_path).subscribe(self._on_target_change, recursive=True, owner=self)
+
+    def teardown(self):
+        """Called when this link is removed from the store."""
+        if self.bubble_events:
+            self.store.unsubscribe(self)
+
+    def _on_target_change(self, events):
+        """Routes events from the canonical path to the alias path."""
+        for path, new_val, old_val, source_id in events:
+            # If the canonical item is destroyed, self-destruct the link
+            if new_val is None and path == self.target_path:
+                self.store.remove_item(self.alias_path)
+                continue
+
+            # Route the event deeper if the change happened in a sub-property
+            relative_target = path[len(self.target_path):]
+            inject_path = f"{self.alias_path}{relative_target}".strip("/")
+            self.store._inject_event(inject_path, new_val, old_val, source_id)
+
+    def __repr__(self):
+        return f"<StoreLink(bubble_events={self.bubble_events}) {self.alias_path} -> {self.target_path}>"
+
+
+# ------------------------------------------------------------------------------
+# Class: Item (The Cursor/View)
+# ------------------------------------------------------------------------------
+class Item:
+    """
+    Represents a specific cursor/view on a path in the Store.
+    Acts like a pointer to a specific location in the data tree.
+    """
+    __slots__ = ('_store', '_path')
+
+    def __init__(self, store: 'Store', path: PathStr):
+        self._store = store
+        self._path = path.strip("/")
+
+    @property
+    def path(self) -> str:
+        """Returns the absolute path of this item."""
+        return self._path
+
+    @property
+    def v(self) -> Any:
+        """
+        Property for direct value access.
+        Writing to .v ALWAYS sends a notification (notify=True), unless inside a silent group.
+        """
+        return self._store.get_value(self._path)
+
+    @v.setter
+    def v(self, value: Any):
+        self._store.set_value(self._path, value, notify=True)
+
+    # --- NAVIGATION HELPERS ---
+
+    @property
+    def parent(self) -> 'Item':
+        """
+        Returns an Item cursor pointing to the direct parent container.
+        Example: "users/#0/name" -> "users/#0"
+        """
+        if "/" not in self._path:
+            # Already at root or top-level, return root
+            return self._store.at("")
+
+        parent_path, _ = self._path.rsplit("/", 1)
+        return self._store.at(parent_path)
+
+    @property
+    def list_root(self) -> Optional['Item']:
+        """
+        Walks up the path tree to find the nearest List Item ancestor.
+        Identifies ancestors by the '#' syntax (e.g., '#0', 'user#1').
+
+        Use this when a deep property changes (e.g. 'users/#0/address/street')
+        and you need the context of the user record ('users/#0').
+
+        Returns None if no list index is found in the path.
+        """
+        parts = self._path.split("/")
+
+        # Iterate backwards to find the deepest list index
+        for i in range(len(parts) - 1, -1, -1):
+            part = parts[i]
+            # Check syntax: contains '#' and ends with digit (e.g. "#0" or "name#1")
+            if "#" in part and part[-1].isdigit():
+                root_path = "/".join(parts[:i + 1])
+                return self._store.at(root_path)
+
+        return None
+
+    # --- VALUE ACCESS ---
+
+    def val(self, default: Any = None) -> Any:
+        """
+        Retrieves the value of THIS item (self).
+        Returns 'default' if the value is None or item doesn't exist.
+        """
+        value = self.v
+        return value if value is not None else default
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Dictionary-style lookup for CHILDREN.
+        Retrieves the value of a child item relative to this item.
+
+        Args:
+            key: Relative path/key to the child.
+            default: Value to return if child doesn't exist.
+        """
+        target_path = f"{self._path}/{key}" if self._path else key
+        val = self._store.get_value(target_path)
+        return val if val is not None else default
+
+    # --- SET LOGIC ---
+
+    def set(self, data: Union[DumpData, str, dict, tuple], value: Any = None, notify: bool = True) -> 'Item':
+        """
+        Versatile setter method.
+
+        Args:
+            data:
+                - str: Relative path/key to set 'value' to.
+                - dict: Batch update {key: val}.
+                - list/tuple: Batch update [(key, val)] OR Value if not pairs.
+            value: The value to set (only used if data is a string).
+            notify: If False, this update will NOT trigger callbacks (Silent Mode).
+        """
+
+        # 1. Dictionary Batch
+        if isinstance(data, dict):
+            with self._store.group(notify=notify):
+                for k, v in data.items():
+                    self.set(str(k), v, notify=notify)
+            return self
+
+        # 2. List or Tuple Batch (STRUCTURAL UPDATE)
+        # We only treat it as a batch if it contains pairs.
+        if isinstance(data, (list, tuple)):
+            # Check if it looks like a batch of pairs
+            is_batch = len(data) > 0 and isinstance(data[0], (list, tuple)) and len(data[0]) == 2
+
+            if is_batch:
+                with self._store.group(notify=notify):
+                    for entry in data:
+                        k, v = entry
+                        self.set(k, v, notify=notify)
+                return self
+
+            # If not a batch of pairs, it falls through to be treated as a VALUE (list assignment)
+
+        # 3. Single Key (String) -> WRITE VALUE
+        if isinstance(data, str):
+            path_str = data
+
+            # Check for Dynamic Syntax (# or .) which needs parsing
+            if "#" in path_str or "." in path_str:
+                self._smart_set_path(path_str, value, notify)
+            else:
+                # Static Path -> Fast Write
+                if path_str == "" or path_str == ".":
+                    self._store.set_value(self._path, value, notify=notify)
+                else:
+                    target_path = f"{self._path}/{path_str}" if self._path else path_str
+                    self._store.set_value(target_path.strip("/"), value, notify=notify)
+            return self
+
+        raise ValueError(f"Invalid arguments for set(). Got type: {type(data)}")
+
+    def _smart_set_path(self, relative_path: str, value: Any, notify: bool):
+        """Parses path strings with special characters (#, .)."""
+        parts = relative_path.split("/")
+        cursor = self
+
+        for i, part in enumerate(parts):
+            is_last_part = (i == len(parts) - 1)
+
+            if part == "":
+                continue
+            elif part == "#":
+                cursor = cursor.append(None)
+            elif part == ".":
+                cursor = self._get_last_list_item(cursor, prefix=None)
+            elif part.endswith("#"):
+                cursor = cursor.append(part[:-1])
+            elif part.endswith("."):
+                prefix = part[:-1]
+                children_keys = cursor._store.get_children_keys(cursor.path)
+                if prefix in children_keys:
+                    cursor = cursor.at(prefix)
+                    cursor = self._get_last_list_item(cursor, prefix=None)
+                else:
+                    cursor = self._get_last_list_item(cursor, prefix=prefix)
+            else:
+                cursor = cursor.at(part)
+
+            if is_last_part:
+                cursor._store.set_value(cursor.path, value, notify=notify)
+                return
+
+    def _get_last_list_item(self, cursor: 'Item', prefix: str = None) -> 'Item':
+        children = cursor._store.get_children_keys(cursor.path)
+        if prefix:
+            pattern = re.compile(r"^" + re.escape(prefix) + r"#(\d+)$")
+        else:
+            pattern = re.compile(r"^#(\d+)$")
+
+        max_idx = -1
+        last_key = None
+        for key in children:
+            match = pattern.match(key)
+            if match:
+                idx = int(match.group(1))
+                if idx > max_idx:
+                    max_idx = idx
+                    last_key = key
+        return cursor.at(last_key) if last_key else cursor
+
+    # --- MANIPULATION ---
+
+    def remove(self, subpath: str = None) -> None:
+        """
+        Remove Item from store
+        :param subpath: sub path to remove, if empty, remove item
+        :return:
+        """
+        target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
+        self._store.remove_item(target)
+
+    def pop(self, subpath: str = None) -> Any:
+        """
+        Remove Item from store and return its value after that
+        :param subpath: sub path to remove, if empty, remove item
+        :return:
+        """
+        target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
+        val = self._store.get_value(target)
+        self._store.remove_item(target)
+        return val
+
+    def append(self, prefix: str = None) -> 'Item':
+        """
+        Creates a new list child item with an auto-incrementing index (e.g. #0, #1).
+        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
+        :return: Item
+        """
+        return self._store.create_list_item(self._path, prefix)
+
+    def extend(self, data_list: List[Any], prefix: str = None) -> 'Item':
+        """
+        Appends multiple items to the list.
+        :param data_list: list of data to append
+        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
+        :return: Item with created list
+        """
+        if not isinstance(data_list, list):
+            raise ValueError("extend() expects a list")
+        for data in data_list:
+            new_item = self.append(prefix)
+            # If data looks like a batch tuple structure, set it as structure
+            is_valid_tuple = isinstance(data, (list, tuple)) and len(data) > 0
+            if is_valid_tuple and isinstance(data[0], (list, tuple)) and len(data[0]) == 2:
+                new_item.set(data)
+            else:
+                new_item.v = data
+        return self
+
+    def set_each(self, subpath: str, value: Any, prefix: str = None) -> 'Item':
+        """
+        Updates a specific subpath for each child of the current item.
+        Filters children by prefix if provided.
+
+        Args:
+            subpath: The relative path to update (e.g., "brightness" or "state").
+            value: The new value to apply.
+            prefix: Optional filter for children (e.g., "lamp").
+
+        Returns:
+            The current Item instance for method chaining.
+        """
+        with self.group():
+            for child in self.children(prefix=prefix):
+                target_item = child.at(subpath)
+                target_item.v = value
+
+        return self
+
+    def link_to(self, target_path: str, bubble_events: bool = False) -> 'Item':
+        """
+        Creates a StoreLink at the current item's path, pointing to a target path.
+
+        Args:
+            target_path: The canonical path this link should point to.
+            bubble_events: If True, changes on the target will bubble up this alias path.
+
+        Returns:
+            The current Item instance for method chaining.
+        """
+        link_obj = StoreLink(self._store, self._path, target_path, bubble_events=bubble_events)
+        self._store.set_value(self._path, link_obj, notify=True)
+        return self
+
+    # --- QUERY ---
+
+    def children(self, prefix: str = None) -> Iterator['Item']:
+        """Iterates over children keys."""
+        for key in self._store.get_children_keys(self._path):
+            if prefix is not None:
+                target_start = f"{prefix}#"
+                if not key.startswith(target_start):
+                    continue
+            yield self.at(key)
+
+    @property
+    def key(self) -> str:
+        """Returns the last segment of the path (e.g., '#0' from 'ui/id/#0')."""
+        if not self._path:
+            return ""
+        return self._path.split('/')[-1]
+
+    def dump(self) -> DumpData:
+        return self._store.get_subtree(self._path)
+
+    def dumps(self) -> str:
+        data = self.dump()
+        lines = [f"Dump of <{self._path or 'ROOT'}>:"]
+        if not data:
+            lines.append("  (empty)")
+        else:
+            for key, val in data:
+                display_key = key if key else "."
+                lines.append(f"  {display_key} = {val}")
+        return "\n".join(lines)
+
+    # --- CONTEXT MANAGERS ---
+
+    def group(self, source_id: str = None, notify: bool = True):
+        """
+        Proxy to the Store's group context manager.
+        Allows batching updates directly from an Item instance.
+        """
+        return self._store.group(source_id=source_id, notify=notify)
+
+    def source(self, source_id: str):
+        """
+        Proxy to the Store's source context manager.
+        """
+        return self._store.source(source_id=source_id)
+
+    # --- SUBSCRIBING ---
+
+    def subscribe(self, path_or_callback: Union[str, List[str], ListenerCallback],
+                  callback: ListenerCallback = None,
+                  ignore_source: str = None, recursive: bool = False,
+                  exclude: List[str] = None, extract: List[str] = None,
+                  trigger_now: bool = False, owner: object = None) -> 'Item':
+        """
+        Subscribes to changes on this item or its relative sub-paths.
+        """
+        # Logic to handle item.subscribe(callback) vs item.subscribe("path", callback)
+        if callable(path_or_callback):
+            # Case: item.subscribe(callback)
+            target_path = self._path
+            real_callback = path_or_callback
+        else:
+            # Case: item.subscribe("subpath", callback) or item.subscribe(["a", "b"], callback)
+            real_callback = callback
+            if isinstance(path_or_callback, list):
+                target_path = [f"{self._path}/{p}".strip("/") for p in path_or_callback]
+            else:
+                target_path = f"{self._path}/{path_or_callback}".strip("/")
+
+        if real_callback is None:
+            raise ValueError("A callback must be provided to subscribe().")
+
+        self._store.subscribe(
+            target_path,
+            real_callback,
+            ignore_source=ignore_source,
+            recursive=recursive,
+            exclude=exclude,
+            extract=extract,
+            trigger_now=trigger_now,
+            owner=owner  # Pass the owner to the store
+        )
+        return self
+
+    def unsubscribe(self, target: Union[ListenerCallback, object] = None) -> 'Item':
+        """
+        Unsubscribe from this item.
+        If target is None, it removes all subscriptions where THIS item instance is the owner.
+        Otherwise, it removes the specific callback or owner provided.
+        """
+        if target is None:
+            # If no target is given, we assume the user wants to clear
+            # everything linked to this item's specific path
+            self._store.unsubscribe(self._path)
+        else:
+            self._store.unsubscribe(target)
+        return self
+
+    # --- MAGIC ---
+
+    def at(self, subpath: str) -> 'Item':
+        """
+        Returns Item at subpath. From there you can access the item directly
+        :param subpath: subpath of item
+        :return:
+        """
+        full_path = f"{self._path}/{subpath}" if self._path else subpath
+        return self._store.at(full_path)
+
+    def __getitem__(self, key: str) -> 'Item':
+        return self.at(key)
+
+    def __setitem__(self, key: str, value: Any):
+        self.set(key, value)
+
+    def __delitem__(self, key: str):
+        self.remove(key)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._store.get_children_keys(self._path))
+
+    def __repr__(self):
+        val = self.v
+        return f"<Item '{self._path}': {val}>" if val is not None else f"<Item '{self._path}'>"
+
+
+# ------------------------------------------------------------------------------
+# Class: Store (Base Functionality)
+# ------------------------------------------------------------------------------
+class Store:
+    """
+    Thread-safe, hierarchical data store (Functional Core).
+    Supports:
+    - Pub/Sub with Ancestor Lookup (O(depth) instead of O(subscribers)).
+    - Grouped updates (Batching).
+    - Silent updates (notify=False) per set or per group.
+    - MQTT-style wildcards (* and **)
+    - Atomic Snapshots via extraction
+    """
+
+    def __init__(self):
+        self._lock = threading.RLock()
+        self._storage: Dict[str, Dict[str, Any]] = {}
+        # Pre-allocate root
+        self._storage[""] = {"val": None, "children": set()}
+        self._subscribers: Dict[str, List[Dict]] = {}
+        # Thread Local Storage for batching contexts
+        self._local = threading.local()
+
+    def _resolve_deep_path(self, path: str, visited_links: set = None) -> str:
+        """
+        Resolves paths segment by segment to support deep writing/reading into StoreLinks.
+        Example: 'alias/folder/prop' -> hits link at 'alias/folder' -> returns 'target/device/prop'
+        """
+        if visited_links is None:
+            visited_links = set()
+
+        parts = path.strip("/").split("/")
+        current_path = ""
+
+        for i, part in enumerate(parts):
+            current_path = f"{current_path}/{part}" if current_path else part
+
+            with self._lock:
+                entry = self._storage.get(current_path)
+
+            if entry and isinstance(entry["val"], StoreLink):
+                if current_path in visited_links:
+                    raise ValueError(f"Circular StoreLink detected at {current_path}")
+                visited_links.add(current_path)
+
+                target_base = entry["val"].target_path
+                remaining_parts = parts[i + 1:]
+
+                if remaining_parts:
+                    rest_of_path = "/".join(remaining_parts)
+                    new_full_path = f"{target_base}/{rest_of_path}"
+                    return self._resolve_deep_path(new_full_path, visited_links)
+                else:
+                    return target_base
+
+        return current_path
+
+    # --- Context Managers ---
+
+    @contextlib.contextmanager
+    def group(self, source_id: str = None, notify: bool = True):
+        """
+        Context manager to group multiple changes.
+        Args:
+            source_id: Optional source tag.
+            notify: If False, ALL changes inside are silent (overrides set()).
+        """
+        # 1. Init Locals
+        if not hasattr(self._local, "batch_stack"):
+            self._local.batch_stack = 0
+            self._local.pending_changes = []
+        if not hasattr(self._local, "current_source"):
+            self._local.current_source = None
+        if not hasattr(self._local, "group_notify"):
+            self._local.group_notify = True
+
+        # 2. Save previous states
+        prev_src = self._local.current_source
+        prev_notify = self._local.group_notify
+
+        # 3. Apply new context
+        if source_id is not None:
+            self._local.current_source = source_id
+
+        # Combine parent silence with current request
+        self._local.group_notify = prev_notify and notify
+
+        self._local.batch_stack += 1
+
+        try:
+            yield
+        finally:
+            self._local.batch_stack -= 1
+
+            # 4. Flush only if notifying and root/end of batch
+            if self._local.batch_stack == 0 and self._local.group_notify:
+                self._flush_notifications()
+
+            # 5. Restore
+            if source_id is not None:
+                self._local.current_source = prev_src
+            self._local.group_notify = prev_notify
+
+    @contextlib.contextmanager
+    def source(self, source_id: str):
+        with self.group(source_id=source_id):
+            yield
+
+    # --- Core Access ---
+
+    def at(self, path: str) -> Item:
+        return Item(self, path)
+
+    def set(self, path_or_data: Union[str, DumpData, dict], value: Any = None, notify: bool = True) -> Item:
+        return self.at("").set(path_or_data, value, notify=notify)
+
+    def get(self, path: str, default: Any = None) -> Any:
+        """Shortcut to retrieve value by absolute path."""
+        val = self.get_value(path)
+        return val if val is not None else default
+
+    def __getitem__(self, path: str) -> Item:
+        return self.at(path)
+
+    def __setitem__(self, path: str, value: Any):
+        self.at("").set(path, value)
+
+    def __delitem__(self, path: str):
+        self.remove_item(path)
+
+    def subscribe(self, path: Union[str, List[str]], callback: ListenerCallback,
+                  ignore_source: str = None, recursive: bool = False,
+                  exclude: List[str] = None, extract: List[str] = None,
+                  trigger_now: bool = False, owner: object = None) -> Union[int, List[int]]:
+        """
+        Register a callback.
+                recursive: If True, trigger on path and descendants.
+        :param exclude: List of absolute sub-paths to ignore (e.g. ['sensor/current']).
+        :param extract: List of relative fields to return as a flat dict in new_val.
+        :param trigger_now: Immediately fire the callback with current state.
+        :param owner: Optional object instance to link this subscription to.
+        """
+
+        # If a list of paths is provided, subscribe to each one individually
+        if isinstance(path, list):
+            for p in path:
+                self.subscribe(p, callback, ignore_source, recursive,
+                               exclude, extract, trigger_now, owner)
+            return
+
+        clean_path = path.strip("/")
+        clean_exclude = [e.strip("/") for e in exclude] if exclude else []
+
+        # Determine static prefix for O(1) lookups and compile regex if wildcard is used
+        is_wildcard = "*" in clean_path
+        static_prefix = clean_path
+        pattern = None
+
+        if is_wildcard:
+            static_prefix = clean_path.split("*")[0].rstrip("/")
+
+            # Convert MQTT-style to regex safely using a placeholder
+            regex_str = clean_path.replace("**", "\0").replace("*", "[^/]+").replace("\0", ".*")
+            regex_str = "^" + regex_str
+
+            if not recursive:
+                regex_str += "$"
+            pattern = re.compile(regex_str)
+
+        with self._lock:
+            if static_prefix not in self._subscribers:
+                self._subscribers[static_prefix] = []
+
+            # Detect owner if not explicitly provided
+            effective_owner = owner
+            if effective_owner is None and hasattr(callback, "__self__"):
+                effective_owner = callback.__self__
+
+            self._subscribers[static_prefix].append({
+                "cb": callback,
+                "owner": effective_owner,
+                "ignore_source": ignore_source,
+                "recursive": recursive,
+                "exclude": clean_exclude,
+                "extract": extract,
+                "pattern": pattern,
+                "raw_path": clean_path
+            })
+
+        if trigger_now:
+            self._trigger_init_event(clean_path, callback, extract, pattern)
+
+    def unsubscribe(self, target: Union[ListenerCallback, object, List[Any]]):
+        """
+        Remove subscriptions by callback function or class instance (owner).
+        """
+        if isinstance(target, list):
+            for t in target:
+                self.unsubscribe(t)
+            return
+
+        with self._lock:
+            for path in list(self._subscribers.keys()):
+                # Filter based on callback or owner
+                self._subscribers[path] = [
+                    s for s in self._subscribers[path]
+                    if s["cb"] != target and s["owner"] != target
+                ]
+
+                if not self._subscribers[path]:
+                    del self._subscribers[path]
+
+    def _trigger_init_event(self, path: str, callback: ListenerCallback,
+                            extract: List[str] = None, pattern: re.Pattern = None):
+        """Helper to fire immediate initial state for UI components."""
+        events = []
+
+        if pattern:
+            # --- WILDCARD INIT ---
+            static_prefix = path.split("*")[0].rstrip("/")
+            matched_bases = set()
+
+            # Find all existing paths that match the wildcard pattern
+            with self._lock:
+                for stored_path in self._storage.keys():
+                    if stored_path.startswith(static_prefix) and pattern.match(stored_path):
+                        base_path = pattern.match(stored_path).group(0)
+                        matched_bases.add(base_path)
+
+            if not matched_bases:
+                return
+
+            # Build a snapshot for each matched base path
+            for base_path in matched_bases:
+                if extract:
+                    snapshot = {}
+                    for field in extract:
+                        if field == ".":
+                            snapshot["."] = self.get_value(base_path)
+                        else:
+                            target = f"{base_path}/{field}" if base_path else field
+                            snapshot[field] = self.get_value(target)
+                    events.append((base_path, snapshot, None, "init"))
+                else:
+                    events.append((base_path, self.get_value(base_path), None, "init"))
+        else:
+            # --- STANDARD INIT ---
+            current_val = self.get_value(path)
+
+            if extract:
+                snapshot = {}
+                for field in extract:
+                    if field == ".":
+                        snapshot["."] = current_val
+                    else:
+                        target = f"{path}/{field}" if path else field
+                        snapshot[field] = self.get_value(target)
+                current_val = snapshot
+
+            events.append((path, current_val, None, "init"))
+
+        if events:
+            try:
+                callback(events)
+            except Exception as e:
+                print(f"[Store] Init callback error {path}: {e}")
+
+    def dump(self) -> DumpData:
+        return self.at("").dump()
+
+    def dumps(self) -> str:
+        return self.at("").dumps()
+
+    # --- Implementation Details ---
+
+    def _ensure_node(self, path: str):
+        parts = path.split("/")
+        current_path = ""
+        for i, part in enumerate(parts):
+            parent_path = current_path
+            if i > 0:
+                current_path = f"{current_path}/{part}"
+            else:
+                current_path = part
+
+            if current_path not in self._storage:
+                self._storage[current_path] = {"val": None, "children": set()}
+                parent_entry = self._storage.get(parent_path)
+                if parent_entry:
+                    parent_entry["children"].add(part)
+
+    def set_value(self, path: str, value: Any, notify: bool = True):
+        clean_path = path.strip("/")
+
+        with self._lock:
+            # If we are directly storing a StoreLink, assign it at the explicit alias path
+            if isinstance(value, StoreLink):
+                entry = self._storage.get(clean_path)
+                old_val = entry["val"] if entry else None
+                if isinstance(old_val, StoreLink):
+                    old_val.teardown()
+
+                self._ensure_node(clean_path)
+                self._storage[clean_path]["val"] = value
+                value.setup()
+
+                if notify:
+                    self._queue_notification(clean_path, value, old_val)
+                return
+
+            # For normal values, resolve the path to support deep writing into links
+            resolved_path = self._resolve_deep_path(clean_path)
+            entry = self._storage.get(resolved_path)
+
+            if entry:
+                old_value = entry["val"]
+                entry["val"] = value
+            else:
+                self._ensure_node(resolved_path)
+                entry = self._storage[resolved_path]
+                old_value = entry["val"]
+                entry["val"] = value
+
+        if notify and old_value != value:
+            self._queue_notification(resolved_path, value, old_value)
+
+    def get_value(self, path: str) -> Any:
+        resolved_path = self._resolve_deep_path(path.strip("/"))
+        with self._lock:
+            if resolved_path in self._storage:
+                return self._storage[resolved_path]["val"]
+            return None
+
+    def remove_item(self, path: str):
+        clean_path = path.strip("/")
+        if clean_path == "":
+            with self._lock:
+                self._storage[""]["val"] = None
+            return
+
+        with self._lock:
+            # Check if the exact path itself is a StoreLink.
+            # If it is, we want to remove the link, NOT follow it and delete the target!
+            entry = self._storage.get(clean_path)
+            if entry and isinstance(entry["val"], StoreLink):
+                resolved_path = clean_path
+            else:
+                resolved_path = self._resolve_deep_path(clean_path)
+
+            if resolved_path not in self._storage:
+                return
+
+            old_val = self._storage[resolved_path]["val"]
+            if isinstance(old_val, StoreLink):
+                old_val.teardown()
+
+            self._queue_notification(resolved_path, None, old_val)
+            self._recursive_delete(resolved_path)
+
+            if "/" in resolved_path:
+                parent_path, child_key = resolved_path.rsplit("/", 1)
+            else:
+                parent_path, child_key = "", resolved_path
+
+            if parent_path in self._storage:
+                self._storage[parent_path]["children"].discard(child_key)
+
+    def _recursive_delete(self, path: str):
+        if path not in self._storage:
+            return
+        children = list(self._storage[path]["children"])
+        for child_key in children:
+            child_path = f"{path}/{child_key}"
+            if child_path in self._storage:
+                old_val = self._storage[child_path]["val"]
+                if isinstance(old_val, StoreLink):
+                    old_val.teardown()
+                self._queue_notification(child_path, None, old_val)
+            self._recursive_delete(child_path)
+
+        if path in self._subscribers:
+            del self._subscribers[path]
+        del self._storage[path]
+
+    def create_list_item(self, base_path: str, prefix: str = None) -> Item:
+        clean_path = base_path.strip("/")
+        with self._lock:
+            if clean_path not in self._storage:
+                self._ensure_node(clean_path)
+
+            children = self._storage[clean_path]["children"]
+            max_idx = -1
+
+            if prefix:
+                pattern = re.compile(r"^" + re.escape(prefix) + r"#(\d+)$")
+            else:
+                pattern = re.compile(r"^#(\d+)$")
+
+            for child in children:
+                match = pattern.match(child)
+                if match:
+                    idx = int(match.group(1))
+                    if idx > max_idx:
+                        max_idx = idx
+
+            new_key = f"{prefix}#{max_idx + 1}" if prefix else f"#{max_idx + 1}"
+            new_path = f"{clean_path}/{new_key}" if clean_path else new_key
+
+            self.set_value(new_path, None)
+            return self.at(new_path)
+
+    def get_children_keys(self, path: str) -> List[str]:
+        resolved_path = self._resolve_deep_path(path.strip("/"))
+        with self._lock:
+            if resolved_path in self._storage:
+                return sorted(list(self._storage[resolved_path]["children"]))
+            return []
+
+    def get_subtree(self, base_path: str) -> DumpData:
+        clean_base = base_path.strip("/")
+        result = []
+        with self._lock:
+            for path in sorted(self._storage.keys()):
+                if clean_base and len(path) < len(clean_base):
+                    continue
+                if path not in self._storage:
+                    continue
+                val = self._storage[path]["val"]
+                if val is not None:
+                    if clean_base == "":
+                        is_self = (path == "")
+                        is_child = (path != "")
+                    else:
+                        is_self = (path == clean_base)
+                        is_child = path.startswith(clean_base + "/")
+
+                    if is_self or is_child:
+                        rel_key = "" if is_self else (path if clean_base == "" else path[len(clean_base) + 1:])
+                        # If exporting a StoreLink, format it so it can be restored later
+                        if isinstance(val, StoreLink):
+                            link_data = {"$link": val.target_path, "bubble_events": val.bubble_events}
+                            result.append((rel_key, link_data))
+                        else:
+                            result.append((rel_key, val))
+        return result
+
+    def _queue_notification(self, path: str, new_val: Any, old_val: Any):
+        if not hasattr(self._local, "batch_stack"):
+            self._local.batch_stack = 0
+            self._local.pending_changes = []
+            self._local.group_notify = True
+
+        # If group is silent, drop event immediately
+        if hasattr(self._local, "group_notify") and not self._local.group_notify:
+            return
+
+        if not hasattr(self._local, "current_source"):
+            self._local.current_source = None
+
+        event = (path, new_val, old_val, self._local.current_source)
+        self._local.pending_changes.append(event)
+
+        if self._local.batch_stack == 0:
+            self._flush_notifications()
+
+    def _inject_event(self, path: str, new_val: Any, old_val: Any, source_id: str = None):
+        """Allows StoreLinks to manually inject events into the current batch sequence."""
+        if not hasattr(self._local, "pending_changes"):
+            self._local.batch_stack = 0
+            self._local.pending_changes = []
+            self._local.group_notify = True
+            self._local.current_source = None
+
+        if hasattr(self._local, "group_notify") and not self._local.group_notify:
+            return
+
+        event = (path, new_val, old_val, source_id)
+        self._local.pending_changes.append(event)
+
+        if self._local.batch_stack == 0:
+            self._flush_notifications()
+
+    def _flush_notifications(self):
+        # OPTIMIZED: Ancestor Lookup Strategy
+        if not hasattr(self._local, "pending_changes") or not self._local.pending_changes:
+            return
+
+        events = self._local.pending_changes
+        self._local.pending_changes = []
+
+        # 1. Identify all relevant paths (the path itself + all ancestors)
+        relevant_sub_paths = set()
+        for event in events:
+            path = event[0]
+            relevant_sub_paths.add(path)
+            while "/" in path:
+                path, _ = path.rsplit("/", 1)
+                relevant_sub_paths.add(path)
+            if path != "":
+                relevant_sub_paths.add("")  # Root always relevant
+
+        # 2. Retrieve only subscribers on those paths (O(1) lookups)
+        with self._lock:
+            relevant_entries = []
+            for sub_path in relevant_sub_paths:
+                if sub_path in self._subscribers:
+                    relevant_entries.append((sub_path, self._subscribers[sub_path]))
+
+        # 3. Process events per subscriber safely through a clean pipeline
+        for sub_path, sub_entries in relevant_entries:
+            # Get all events relevant to this base lookup path
+            events_in_scope = [e for e in events if e[0] == sub_path or e[0].startswith(sub_path + "/")]
+
+            if not events_in_scope:
+                continue
+
+            for entry in sub_entries:
+                filtered_events = []
+
+                # --- A. Apply All Filters ---
+                for e in events_in_scope:
+                    ep = e[0]
+
+                    # 1. Source filter
+                    if entry["ignore_source"] is not None and e[3] == entry["ignore_source"]:
+                        continue
+
+                    # 2. Wildcard Regex filter
+                    pattern = entry.get("pattern")
+                    if pattern and not pattern.match(ep):
+                        continue
+
+                    # 3. Recursive filter
+                    # If not recursive, the path must match exactly.
+                    # Wildcards handle non-recursive via a $ at the end of the regex.
+                    if not entry["recursive"]:
+                        if pattern:
+                            pass
+                        elif ep != sub_path:
+                            continue
+
+                    # 4. Exclude filter
+                    if entry["exclude"]:
+                        if any(ep == ex or ep.startswith(ex + "/") for ex in entry["exclude"]):
+                            continue
+
+                    filtered_events.append(e)
+
+                if not filtered_events:
+                    continue
+
+                # --- B. Apply Snapshots (extract) ---
+                extract_fields = entry.get("extract")
+                if extract_fields:
+                    final_events = []
+                    seen_bases = set()
+
+                    for e in filtered_events:
+                        # Find the correct base path for the snapshot.
+                        # Wildcards use the dynamically matched regex segment.
+                        if pattern:
+                            base_path = pattern.match(e[0]).group(0)
+                        else:
+                            base_path = sub_path
+
+                        # Deduplicate batch updates for the same snapshot root
+                        if base_path in seen_bases:
+                            continue
+                        seen_bases.add(base_path)
+
+                        # Generate the atomic snapshot
+                        snapshot = {}
+                        for field in extract_fields:
+                            if field == ".":
+                                snapshot["."] = self.get_value(base_path)
+                            else:
+                                target = f"{base_path}/{field}" if base_path else field
+                                snapshot[field] = self.get_value(target)
+
+                        final_events.append((base_path, snapshot, e[2], e[3]))
+                else:
+                    final_events = filtered_events
+
+                # --- C. Emit Callback ---
+                try:
+                    entry["cb"](final_events)
+                except Exception as e:
+                    print(f"[Store] Callback error {sub_path}: {e}")
+
+```
+
+## `File: TaskTonic\internals\Store - kopie.py`
+```python
+import threading
+import re
+import contextlib
+from typing import Any, Dict, List, Optional, Union, Iterator, Tuple, Callable, Iterable
+
+# ------------------------------------------------------------------------------
+# Type definitions
+# ------------------------------------------------------------------------------
+PathStr = str
+# ChangeEvent: (path, new_value, old_value, source_id)
+ChangeEvent = Tuple[str, Any, Any, Optional[str]]
+ListenerCallback = Callable[[List[ChangeEvent]], None]
+DumpData = Iterable[Tuple[str, Any]]
+
+
+# ------------------------------------------------------------------------------
 # Class: Item (The Cursor/View)
 # ------------------------------------------------------------------------------
 class Item:
@@ -11725,7 +12859,7 @@ class Item:
                 new_item.set(data)
             else:
                 new_item.v = data
-        return self 
+        return self
 
     # --- QUERY ---
 
@@ -12351,657 +13485,6 @@ class Store:
 
 ```
 
-## `File: TaskTonic\internals\Store - kopie.py`
-```python
-import threading
-import re
-import contextlib
-from typing import Any, Dict, List, Optional, Union, Iterator, Tuple, Callable, Iterable
-
-# ------------------------------------------------------------------------------
-# Type definitions
-# ------------------------------------------------------------------------------
-PathStr = str
-# ChangeEvent: (path, new_value, old_value, source_id)
-ChangeEvent = Tuple[str, Any, Any, Optional[str]]
-ListenerCallback = Callable[[List[ChangeEvent]], None]
-DumpData = Iterable[Tuple[str, Any]]
-
-
-# ------------------------------------------------------------------------------
-# Class: Item (The Cursor/View)
-# ------------------------------------------------------------------------------
-class Item:
-    """
-    Represents a specific cursor/view on a path in the Store.
-    Acts like a pointer to a specific location in the data tree.
-    """
-    __slots__ = ('_store', '_path')
-
-    def __init__(self, store: 'Store', path: PathStr):
-        self._store = store
-        self._path = path.strip("/")
-
-    @property
-    def path(self) -> str:
-        """Returns the absolute path of this item."""
-        return self._path
-
-    @property
-    def v(self) -> Any:
-        """
-        Property for direct value access.
-        Writing to .v ALWAYS sends a notification (notify=True), unless inside a silent group.
-        """
-        return self._store.get_value(self._path)
-
-    @v.setter
-    def v(self, value: Any):
-        self._store.set_value(self._path, value, notify=True)
-
-    # --- NAVIGATION HELPERS ---
-
-    @property
-    def parent(self) -> 'Item':
-        """
-        Returns an Item cursor pointing to the direct parent container.
-        Example: "users/#0/name" -> "users/#0"
-        """
-        if "/" not in self._path:
-            # Already at root or top-level, return root
-            return self._store.at("")
-
-        parent_path, _ = self._path.rsplit("/", 1)
-        return self._store.at(parent_path)
-
-    @property
-    def list_root(self) -> Optional['Item']:
-        """
-        Walks up the path tree to find the nearest List Item ancestor.
-        Identifies ancestors by the '#' syntax (e.g., '#0', 'user#1').
-
-        Use this when a deep property changes (e.g. 'users/#0/address/street')
-        and you need the context of the user record ('users/#0').
-
-        Returns None if no list index is found in the path.
-        """
-        parts = self._path.split("/")
-
-        # Iterate backwards to find the deepest list index
-        for i in range(len(parts) - 1, -1, -1):
-            part = parts[i]
-            # Check syntax: contains '#' and ends with digit (e.g. "#0" or "name#1")
-            if "#" in part and part[-1].isdigit():
-                root_path = "/".join(parts[:i + 1])
-                return self._store.at(root_path)
-
-        return None
-
-    # --- VALUE ACCESS ---
-
-    def val(self, default: Any = None) -> Any:
-        """
-        Retrieves the value of THIS item (self).
-        Returns 'default' if the value is None or item doesn't exist.
-        """
-        value = self.v
-        return value if value is not None else default
-
-    def get(self, key: str, default: Any = None) -> Any:
-        """
-        Dictionary-style lookup for CHILDREN.
-        Retrieves the value of a child item relative to this item.
-
-        Args:
-            key: Relative path/key to the child.
-            default: Value to return if child doesn't exist.
-        """
-        target_path = f"{self._path}/{key}" if self._path else key
-        val = self._store.get_value(target_path)
-        return val if val is not None else default
-
-    # --- SET LOGIC ---
-
-    def set(self, data: Union[DumpData, str, dict, tuple], value: Any = None, notify: bool = True) -> 'Item':
-        """
-        Versatile setter method.
-
-        Args:
-            data:
-                - str: Relative path/key to set 'value' to.
-                - dict: Batch update {key: val}.
-                - list/tuple: Batch update [(key, val)] OR Value if not pairs.
-            value: The value to set (only used if data is a string).
-            notify: If False, this update will NOT trigger callbacks (Silent Mode).
-        """
-
-        # 1. Dictionary Batch
-        if isinstance(data, dict):
-            with self._store.group(notify=notify):
-                for k, v in data.items():
-                    self.set(str(k), v, notify=notify)
-            return self
-
-        # 2. List or Tuple Batch (STRUCTURAL UPDATE)
-        # We only treat it as a batch if it contains pairs.
-        if isinstance(data, (list, tuple)):
-            # Check if it looks like a batch of pairs
-            is_batch = len(data) > 0 and isinstance(data[0], (list, tuple)) and len(data[0]) == 2
-
-            if is_batch:
-                with self._store.group(notify=notify):
-                    for entry in data:
-                        k, v = entry
-                        self.set(k, v, notify=notify)
-                return self
-
-            # If not a batch of pairs, it falls through to be treated as a VALUE (list assignment)
-
-        # 3. Single Key (String) -> WRITE VALUE
-        if isinstance(data, str):
-            path_str = data
-
-            # Check for Dynamic Syntax (# or .) which needs parsing
-            if "#" in path_str or "." in path_str:
-                self._smart_set_path(path_str, value, notify)
-            else:
-                # Static Path -> Fast Write
-                if path_str == "" or path_str == ".":
-                    self._store.set_value(self._path, value, notify=notify)
-                else:
-                    target_path = f"{self._path}/{path_str}" if self._path else path_str
-                    self._store.set_value(target_path.strip("/"), value, notify=notify)
-            return self
-
-        raise ValueError(f"Invalid arguments for set(). Got type: {type(data)}")
-
-    def _smart_set_path(self, relative_path: str, value: Any, notify: bool):
-        """Parses path strings with special characters (#, .)."""
-        parts = relative_path.split("/")
-        cursor = self
-
-        for i, part in enumerate(parts):
-            is_last_part = (i == len(parts) - 1)
-
-            if part == "":
-                continue
-            elif part == "#":
-                cursor = cursor.append(None)
-            elif part == ".":
-                cursor = self._get_last_list_item(cursor, prefix=None)
-            elif part.endswith("#"):
-                cursor = cursor.append(part[:-1])
-            elif part.endswith("."):
-                prefix = part[:-1]
-                children_keys = cursor._store.get_children_keys(cursor.path)
-                if prefix in children_keys:
-                    cursor = cursor.at(prefix)
-                    cursor = self._get_last_list_item(cursor, prefix=None)
-                else:
-                    cursor = self._get_last_list_item(cursor, prefix=prefix)
-            else:
-                cursor = cursor.at(part)
-
-            if is_last_part:
-                cursor._store.set_value(cursor.path, value, notify=notify)
-                return
-
-    def _get_last_list_item(self, cursor: 'Item', prefix: str = None) -> 'Item':
-        children = cursor._store.get_children_keys(cursor.path)
-        if prefix:
-            pattern = re.compile(r"^" + re.escape(prefix) + r"#(\d+)$")
-        else:
-            pattern = re.compile(r"^#(\d+)$")
-
-        max_idx = -1
-        last_key = None
-        for key in children:
-            match = pattern.match(key)
-            if match:
-                idx = int(match.group(1))
-                if idx > max_idx:
-                    max_idx = idx
-                    last_key = key
-        return cursor.at(last_key) if last_key else cursor
-
-    # --- MANIPULATION ---
-
-    def remove(self, subpath: str = None) -> None:
-        """
-        Remove Item from store
-        :param subpath: sub path to remove, if empty, remove item
-        :return:
-        """
-        target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
-        self._store.remove_item(target)
-
-    def pop(self, subpath: str = None) -> Any:
-        """
-        Remove Item from store and return its value after that
-        :param subpath: sub path to remove, if empty, remove item
-        :return:
-        """
-        target = f"{self._path}/{subpath}".strip("/") if subpath else self._path
-        val = self._store.get_value(target)
-        self._store.remove_item(target)
-        return val
-
-    def append(self, prefix: str = None) -> 'Item':
-        """
-        Creates a new list child item with an auto-incrementing index (e.g. #0, #1).
-        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
-        :return: Item
-        """
-        return self._store.create_list_item(self._path, prefix)
-
-    def extend(self, data_list: List[Any], prefix: str = None) -> 'Item':
-        """
-        Appends multiple items to the list.
-        :param data_list: ???
-        :param prefix: List prefix (e.g. sensor, because sensor#0 etc)
-        :return: Item with created list
-        """
-
-        if not isinstance(data_list, list):
-            raise ValueError("extend() expects a list")
-        for data in data_list:
-            new_item = self.append(prefix)
-            # If data looks like a batch tuple structure, set it as structure
-            if isinstance(data, (list, tuple)) and len(data) > 0 and isinstance(data[0], (list, tuple)) and len(
-                    data[0]) == 2:
-                new_item.set(data)
-            else:
-                new_item.v = data
-        return self
-
-    # --- QUERY ---
-
-    def children(self, prefix: str = None) -> Iterator['Item']:
-        """Iterates over children keys."""
-        for key in self._store.get_children_keys(self._path):
-            if prefix is not None:
-                target_start = f"{prefix}#"
-                if not key.startswith(target_start):
-                    continue
-            yield self.at(key)
-
-    def dump(self) -> DumpData:
-        return self._store.get_subtree(self._path)
-
-    def dumps(self) -> str:
-        data = self.dump()
-        lines = [f"Dump of <{self._path or 'ROOT'}>:"]
-        if not data:
-            lines.append("  (empty)")
-        else:
-            for key, val in data:
-                display_key = key if key else "."
-                lines.append(f"  {display_key} = {val}")
-        return "\n".join(lines)
-
-    # --- MAGIC ---
-
-    def at(self, subpath: str) -> 'Item':
-        """
-        Returns Item at subpath. From there you can acces the item directly
-        :param subpath: subpath of item
-        :return:
-        """
-        full_path = f"{self._path}/{subpath}" if self._path else subpath
-        return self._store.at(full_path)
-
-    def __getitem__(self, key: str) -> 'Item':
-        return self.at(key)
-
-    def __setitem__(self, key: str, value: Any):
-        self.set(key, value)
-
-    def __delitem__(self, key: str):
-        self.remove(key)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._store.get_children_keys(self._path))
-
-    def __repr__(self):
-        val = self.v
-        return f"<Item '{self._path}': {val}>" if val is not None else f"<Item '{self._path}'>"
-
-
-# ------------------------------------------------------------------------------
-# Class: Store (Base Functionality)
-# ------------------------------------------------------------------------------
-class Store:
-    """
-    Thread-safe, hierarchical data store (Functional Core).
-    Supports:
-    - Pub/Sub with Ancestor Lookup (O(depth) instead of O(subscribers)).
-    - Grouped updates (Batching).
-    - Silent updates (notify=False) per set or per group.
-    """
-
-    def __init__(self):
-        self._lock = threading.RLock()
-        self._storage: Dict[str, Dict[str, Any]] = {}
-        # Pre-allocate root
-        self._storage[""] = {"val": None, "children": set()}
-        self._subscribers: Dict[str, List[Dict]] = {}
-        # Thread Local Storage for batching contexts
-        self._local = threading.local()
-
-    # --- Context Managers ---
-
-    @contextlib.contextmanager
-    def group(self, source_id: str = None, notify: bool = True):
-        """
-        Context manager to group multiple changes.
-        Args:
-            source_id: Optional source tag.
-            notify: If False, ALL changes inside are silent (overrides set()).
-        """
-        # 1. Init Locals
-        if not hasattr(self._local, "batch_stack"):
-            self._local.batch_stack = 0
-            self._local.pending_changes = []
-        if not hasattr(self._local, "current_source"):
-            self._local.current_source = None
-        if not hasattr(self._local, "group_notify"):
-            self._local.group_notify = True
-
-            # 2. Save previous states
-        prev_src = self._local.current_source
-        prev_notify = self._local.group_notify
-
-        # 3. Apply new context
-        if source_id is not None:
-            self._local.current_source = source_id
-
-        # Combine parent silence with current request
-        self._local.group_notify = prev_notify and notify
-
-        self._local.batch_stack += 1
-
-        try:
-            yield
-        finally:
-            self._local.batch_stack -= 1
-
-            # 4. Flush only if notifying and root/end of batch
-            if self._local.batch_stack == 0 and self._local.group_notify:
-                self._flush_notifications()
-
-            # 5. Restore
-            if source_id is not None:
-                self._local.current_source = prev_src
-            self._local.group_notify = prev_notify
-
-    @contextlib.contextmanager
-    def source(self, source_id: str):
-        with self.group(source_id=source_id):
-            yield
-
-    # --- Core Access ---
-
-    def at(self, path: str) -> Item:
-        return Item(self, path)
-
-    def set(self, path_or_data: Union[str, DumpData, dict], value: Any = None, notify: bool = True) -> Item:
-        return self.at("").set(path_or_data, value, notify=notify)
-
-    def get(self, path: str, default: Any = None) -> Any:
-        """Shortcut to retrieve value by absolute path."""
-        val = self.get_value(path)
-        return val if val is not None else default
-
-    def __getitem__(self, path: str) -> Item:
-        return self.at(path)
-
-    def __setitem__(self, path: str, value: Any):
-        self.at("").set(path, value)
-
-    def __delitem__(self, path: str):
-        self.remove_item(path)
-
-    def subscribe(self, path: str, callback: ListenerCallback, ignore_source: str = None, recursive: bool = True,
-                  exclude: List[str] = None):
-        """
-        Register a callback.
-        recursive: If True, trigger on path and descendants.
-        exclude: List of absolute sub-paths to ignore (e.g. ['sensor/current']).
-        """
-        clean_path = path.strip("/")
-        clean_exclude = [e.strip("/") for e in exclude] if exclude else []
-
-        with self._lock:
-            if clean_path not in self._subscribers:
-                self._subscribers[clean_path] = []
-
-            self._subscribers[clean_path].append({
-                "cb": callback,
-                "ignore_source": ignore_source,
-                "recursive": recursive,
-                "exclude": clean_exclude
-            })
-
-    def dump(self) -> DumpData:
-        return self.at("").dump()
-
-    def dumps(self) -> str:
-        return self.at("").dumps()
-
-    # --- Implementation Details ---
-
-    def _ensure_node(self, path: str):
-        parts = path.split("/")
-        current_path = ""
-        for i, part in enumerate(parts):
-            parent_path = current_path
-            if i > 0:
-                current_path = f"{current_path}/{part}"
-            else:
-                current_path = part
-
-            if current_path not in self._storage:
-                self._storage[current_path] = {"val": None, "children": set()}
-                parent_entry = self._storage.get(parent_path)
-                if parent_entry: parent_entry["children"].add(part)
-
-    def set_value(self, path: str, value: Any, notify: bool = True):
-        # Optimized Fast Path
-        with self._lock:
-            if path in self._storage:
-                entry = self._storage[path]
-                old_value = entry["val"]
-                entry["val"] = value
-            else:
-                self._ensure_node(path)
-                entry = self._storage[path]
-                old_value = entry["val"]
-                entry["val"] = value
-
-        if notify and old_value != value:
-            self._queue_notification(path, value, old_value)
-
-    def get_value(self, path: str) -> Any:
-        with self._lock:
-            if path in self._storage:
-                return self._storage[path]["val"]
-            return None
-
-    def remove_item(self, path: str):
-        clean_path = path.strip("/")
-        if clean_path == "":
-            with self._lock: self._storage[""]["val"] = None
-            return
-
-        with self._lock:
-            if clean_path not in self._storage: return
-            self._queue_notification(clean_path, None, self._storage[clean_path]["val"])
-            self._recursive_delete(clean_path)
-
-            if "/" in clean_path:
-                parent_path, child_key = clean_path.rsplit("/", 1)
-            else:
-                parent_path, child_key = "", clean_path
-
-            if parent_path in self._storage:
-                self._storage[parent_path]["children"].discard(child_key)
-
-    def _recursive_delete(self, path: str):
-        if path not in self._storage: return
-        children = list(self._storage[path]["children"])
-        for child_key in children:
-            child_path = f"{path}/{child_key}"
-            if child_path in self._storage:
-                self._queue_notification(child_path, None, self._storage[child_path]["val"])
-            self._recursive_delete(child_path)
-
-        if path in self._subscribers: del self._subscribers[path]
-        del self._storage[path]
-
-    def create_list_item(self, base_path: str, prefix: str = None) -> Item:
-        clean_path = base_path.strip("/")
-        with self._lock:
-            if clean_path not in self._storage:
-                self._ensure_node(clean_path)
-
-            children = self._storage[clean_path]["children"]
-            max_idx = -1
-
-            if prefix:
-                pattern = re.compile(r"^" + re.escape(prefix) + r"#(\d+)$")
-            else:
-                pattern = re.compile(r"^#(\d+)$")
-
-            for child in children:
-                match = pattern.match(child)
-                if match:
-                    idx = int(match.group(1))
-                    if idx > max_idx: max_idx = idx
-
-            new_key = f"{prefix}#{max_idx + 1}" if prefix else f"#{max_idx + 1}"
-            new_path = f"{clean_path}/{new_key}" if clean_path else new_key
-
-            self.set_value(new_path, None)
-            return self.at(new_path)
-
-    def get_children_keys(self, path: str) -> List[str]:
-        clean_path = path.strip("/")
-        with self._lock:
-            if clean_path in self._storage:
-                return sorted(list(self._storage[clean_path]["children"]))
-            return []
-
-    def get_subtree(self, base_path: str) -> DumpData:
-        clean_base = base_path.strip("/")
-        result = []
-        with self._lock:
-            for path in sorted(self._storage.keys()):
-                if clean_base and len(path) < len(clean_base): continue
-                if path not in self._storage: continue
-                val = self._storage[path]["val"]
-                if val is not None:
-                    if clean_base == "":
-                        is_self = (path == "")
-                        is_child = (path != "")
-                    else:
-                        is_self = (path == clean_base)
-                        is_child = path.startswith(clean_base + "/")
-                    if is_self or is_child:
-                        rel_key = "" if is_self else (path if clean_base == "" else path[len(clean_base) + 1:])
-                        result.append((rel_key, val))
-        return result
-
-    def _queue_notification(self, path: str, new_val: Any, old_val: Any):
-        if not hasattr(self._local, "batch_stack"):
-            self._local.batch_stack = 0
-            self._local.pending_changes = []
-            self._local.group_notify = True
-
-            # If group is silent, drop event immediately
-        if hasattr(self._local, "group_notify") and not self._local.group_notify:
-            return
-
-        if not hasattr(self._local, "current_source"):
-            self._local.current_source = None
-
-        event = (path, new_val, old_val, self._local.current_source)
-        self._local.pending_changes.append(event)
-
-        if self._local.batch_stack == 0:
-            self._flush_notifications()
-
-    def _flush_notifications(self):
-        # OPTIMIZED: Ancestor Lookup Strategy
-        if not hasattr(self._local, "pending_changes") or not self._local.pending_changes: return
-        events = self._local.pending_changes
-        self._local.pending_changes = []
-
-        # 1. Identify all relevant paths (the path itself + all ancestors)
-        relevant_sub_paths = set()
-        for event in events:
-            path = event[0]
-            relevant_sub_paths.add(path)
-            while "/" in path:
-                path, _ = path.rsplit("/", 1)
-                relevant_sub_paths.add(path)
-            if path != "":
-                relevant_sub_paths.add("")  # Root always relevant
-
-        # 2. Retrieve only subscribers on those paths (O(1) lookups)
-        with self._lock:
-            relevant_entries = []
-            for sub_path in relevant_sub_paths:
-                if sub_path in self._subscribers:
-                    relevant_entries.append((sub_path, self._subscribers[sub_path]))
-
-        # 3. Process events against this filtered subset of subscribers
-        for sub_path, sub_entries in relevant_entries:
-            relevant_events = []
-            for event in events:
-                evt_path = event[0]
-                # Match logic:
-                if evt_path == sub_path:
-                    relevant_events.append(event)
-                elif evt_path.startswith(sub_path + "/"):
-                    relevant_events.append(event)
-
-            if relevant_events:
-                for entry in sub_entries:
-                    # A. Recursive Filter
-                    is_recursive = entry["recursive"]
-
-                    if not is_recursive:
-                        events_for_sub = [e for e in relevant_events if e[0] == sub_path]
-                    else:
-                        events_for_sub = relevant_events
-
-                    # B. Exclude Filter (Subtree pruning)
-                    exclusions = entry["exclude"]
-                    if exclusions and events_for_sub:
-                        filtered_events = []
-                        for e in events_for_sub:
-                            ep = e[0]
-                            is_excluded = False
-                            for ex in exclusions:
-                                if ep == ex or ep.startswith(ex + "/"):
-                                    is_excluded = True
-                                    break
-                            if not is_excluded:
-                                filtered_events.append(e)
-                        events_for_sub = filtered_events
-
-                    # C. Source Filter
-                    ignore = entry["ignore_source"]
-                    filtered = [e for e in events_for_sub if ignore is None or e[3] != ignore]
-                    if filtered:
-                        try:
-                            entry["cb"](filtered)
-                        except Exception as e:
-                            print(f"[Store] Callback error {sub_path}: {e}")
-
-
-```
-
 ## `File: TaskTonic\ttLoggers\__init__.py`
 ```python
 from .ttScreenLogger import ttLogService, ttScreenLogService
@@ -13208,17 +13691,19 @@ class ttDistiller(ttCatalyst):
                 till_sparkle_in=None,
                 contract=None):
 
-        status={}
+        status = {}
         sp_stck = ttSparkleStack()
         if self.sparkling:
-            if contract is None: contract = {}
+            if contract is None:
+                contract = {}
 
             def ccheck(item, default, ext=None, force_list=False):
-                c = ext if ext else contract.get(item, default)
-                if force_list and not isinstance(c, list): c=[c]
+                c = ext if ext is not None else contract.get(item, default)
+                if force_list and not isinstance(c, list):
+                    c = [c]
                 contract[item] = c
 
-            ccheck('timeout', 3600, timeout)
+            ccheck('timeout', 3600.0, timeout)
             ccheck('till_state_in', [], till_state_in, force_list=True)
             ccheck('till_sparkle_in', [], till_sparkle_in, force_list=True)
             ccheck('probes', [], force_list=True)
@@ -13234,33 +13719,42 @@ class ttDistiller(ttCatalyst):
                 reference = time.time()
                 next_timer_expire = 0.0
                 while next_timer_expire == 0.0:
-                    next_timer_expire = self.timers[0].check_on_expiration(reference) if self.timers else 60
-                if reference+next_timer_expire > ending_at:
+                    next_timer_expire = self.timers[0].check_on_expiration(reference) if self.timers else 60.0
+                if reference + next_timer_expire > ending_at:
                     next_timer_expire = ending_at - reference
-                    if next_timer_expire < 0.0: next_timer_expire = 0.0
+                    if next_timer_expire < 0.0:
+                        next_timer_expire = 0.0
                 try:
-                    instance, sparkle, args, kwargs, sp_stck.source = self.catalyst_queue.get(timeout=next_timer_expire)
-                    sp_name = sparkle.__name__
+                    item = self.catalyst_queue.get(timeout=next_timer_expire)
+                    instance, sparkle, args, kwargs, sp_stck.source = item
+
                     self.execute_with_testlog(instance, sparkle, args, kwargs, status, contract)
-                    if sparkle_count: sparkle_count -= 1
+
+                    if sparkle_count:
+                        sparkle_count -= 1
+
+                    # State transitions MOGEN NOOIT onderbroken worden!
+                    # Drain de extra_sparkles altijd volledig af.
                     while self.extra_sparkles:
                         instance, sparkle, args, kwargs = self.extra_sparkles.pop(0)
-                        self.execute_with_testlog(instance, sparkle, args, kwargs,
-                                                  status, contract)
-                        if sparkle_count: sparkle_count -= 1
+                        self.execute_with_testlog(instance, sparkle, args, kwargs, status, contract)
+                        if sparkle_count:
+                            sparkle_count -= 1
+
+
                 except queue.Empty:
                     pass
 
                 if time.time() >= ending_at:
                     status.setdefault('stop_condition', []).append('timeout')
-                if (sparkle_count is not None and sparkle_count <= 0):
+                if sparkle_count is not None and sparkle_count <= 0:
                     status.setdefault('stop_condition', []).append('sparkle_count')
 
         if not self.sparkling:
             status.update({'status': 'catalyst finished'})
             status.setdefault('stop_condition', []).append('catalyst finished')
-        status.update({'end@': time.time()})
 
+        status.update({'end@': time.time()})
         return status
 
     def execute_with_testlog(self, instance, sparkle, args, kwargs, status, contract):
@@ -13270,35 +13764,40 @@ class ttDistiller(ttCatalyst):
             Zorgt ervoor dat dynamische objecten (zoals ttLiquid) worden omgezet
             naar hun huidige string-representatie.
             """
-            # 1. Specifieke types die we direct als string willen vastleggen
-            # Check op type naam is veiliger tegen circulaire imports dan isinstance
             type_name = type(value).__name__
             if type_name == 'ttLiquid':
                 return str(value)
 
-            # 2. Dictionaries recursief doorlopen
             if isinstance(value, dict):
                 return {k: _freeze_value(v) for k, v in value.items()}
 
-            # 3. Lists en Tuples recursief doorlopen
             if isinstance(value, (list, tuple)):
                 return [_freeze_value(v) for v in value]
 
-            # 4. Primitives (int, float, bool, str, None) mogen door
             if isinstance(value, (int, float, bool, str, type(None))):
                 return value
 
-            # 5. ttLiquid
             if isinstance(value, ttLiquid):
                 return value.__str__()
 
-            # 6. Fallback: probeer deepcopy, anders string representatie
             try:
                 return copy.deepcopy(value)
             except:
                 return str(value)
 
+        # 1. Determine requested probes (tonic specific OR global fallback)
+        tonic_contract = contract.get('tonics', {}).get(instance.name, {})
+        requested_probes = tonic_contract.get('probes', contract.get('probes', []))
+
         sp_stck = ttSparkleStack()
+
+        # 2. Freeze probes BEFORE sparkle execution
+        probes_at_enter = {
+            p: _freeze_value(getattr(instance, p))
+            for p in requested_probes
+            if hasattr(instance, p)
+        }
+
         status['sparkle_trace'].append({
             'id': instance.id,
             'tonic': instance.name,
@@ -13309,40 +13808,108 @@ class ttDistiller(ttCatalyst):
             'at_enter': {
                 '@': time.time(),
                 'state': instance.get_current_state_name(),
-                'probes': {
-                    p: _freeze_value(getattr(instance, p))
-                    for p in contract.get('probes', [])
-                    if hasattr(instance, p)
-                },
+                'probes': probes_at_enter,
             }
         })
+
+        # 3. Execute the Sparkle
         sp_stck.push(instance, sparkle.__name__)
         instance._execute_sparkle(sparkle, *args, **kwargs)
         sp_stck.pop()
+
+        # 4. Freeze probes AFTER sparkle execution
+        probes_at_exit = {
+            p: _freeze_value(getattr(instance, p))
+            for p in requested_probes
+            if hasattr(instance, p)
+        }
+
         status['sparkle_trace'][-1].update({
             'at_exit': {
                 '@': time.time(),
                 'state': instance.get_current_state_name(),
-                'probes': {
-                    p: _freeze_value(getattr(instance, p))
-                    for p in contract.get('probes', [])
-                    if hasattr(instance, p)
-                },
+                'probes': probes_at_exit,
                 'sparkling': self.sparkling,
             }
         })
-        if sparkle.__name__ in contract['till_sparkle_in']:
-            status.setdefault('stop_condition', []).append(f'sparkle_trigger: [{sparkle.__name__}]')
-        if instance.get_current_state_name() in contract['till_state_in']:
-            status.setdefault('stop_condition', []).append(f'state_trigger: [{instance.get_current_state_name()}]')
 
+        # 5. Evaluate stop conditions
+        just_executed = {
+            'tonic': instance.name,
+            'sparkle': sparkle.__name__
+        }
+        self._evaluate_contract(contract, status, just_executed)
 
-    def finish_distiller(self, timeout=.5, contract=None):
+    def _evaluate_contract(self, contract, status, just_executed):
+        """
+        Evaluates both global legacy conditions and the new per-tonic conditions.
+        """
+        # --- Legacy Global Conditions ---
+        if just_executed['sparkle'] in contract.get('till_sparkle_in', []):
+            status.setdefault('stop_condition', []).append(f"sparkle_trigger: [{just_executed['sparkle']}]")
+            return True
+
+        instance = self.ledger.get_tonic_by_name(just_executed['tonic'])
+        if instance and instance.get_current_state_name() in contract.get('till_state_in', []):
+            status.setdefault('stop_condition', []).append(f"state_trigger: [{instance.get_current_state_name()}]")
+            return True
+
+        # --- New Per-Tonic Advanced Conditions ---
+        tonics_dict = contract.get('tonics', {})
+        if not tonics_dict:
+            return False
+
+        matched_tonics = 0
+
+        for tonic_name, rules in tonics_dict.items():
+            tonic = self.ledger.get_tonic_by_name(tonic_name)
+            if not tonic:
+                continue
+
+            is_match = False
+
+            # Condition 1: State Match
+            if 'till_state_in' in rules:
+                if tonic.get_current_state_name() in rules['till_state_in']:
+                    is_match = True
+
+            # Condition 2: Sparkle Match
+            if not is_match and 'till_sparkle_in' in rules:
+                if tonic_name == just_executed['tonic'] and just_executed['sparkle'] in rules['till_sparkle_in']:
+                    is_match = True
+
+            # Condition 3: Probe Match
+            if not is_match and 'stop_on_probe' in rules:
+                for probe_name, expected_val in rules['stop_on_probe'].items():
+                    if hasattr(tonic, probe_name) and getattr(tonic, probe_name) == expected_val:
+                        is_match = True
+                        break
+
+            if is_match:
+                matched_tonics += 1
+
+        # Determine target count (AND vs OR logic)
+        target_count = contract.get('stop_match_count', 1)
+        if target_count == 'all':
+            target_count = len(tonics_dict)
+
+        if matched_tonics >= target_count:
+            condition_msg = f'contract_met: {matched_tonics}/{target_count} tonics matched'
+            status.setdefault('stop_condition', []).append(condition_msg)
+            return True
+
+        return False
+
+    def finish_distiller(self, timeout=0.5, contract=None):
         for liq in self.ledger.tonics:
-            if isinstance(liq, ttLiquid): liq.finish()
-            elif isinstance(liq, self.ledger.TonicReservation): self.ledger.unregister(liq)
+            if isinstance(liq, ttLiquid):
+                liq.finish()
+            elif isinstance(liq, self.ledger.TonicReservation):
+                self.ledger.unregister(liq)
+
         stat = self.sparkle(timeout=timeout, contract=contract)
-        #Forced reset of the ledger to create a new singleton when distiller is restarted.
+
+        # Forced reset of the ledger to create a new singleton when distiller is restarted.
         self.ledger._instance = None
         self.ledger._singleton_init_done = False
         return stat
@@ -13384,9 +13951,9 @@ class ttDistiller(ttCatalyst):
                 for key in p:
                     print(f"   {str(pe.get(key, '-')):.<40} {str(px.get(key, '-')):.<40} < {key}")
                 print()
-        print(
-            f'>> stopped : {status["stop_condition"]}, duration {(status["end@"] - status["start@"]):2.03f}s, Catalyst Status {status["status"]}')
 
+        dur = status["end@"] - status["start@"]
+        print(f'>> stopped : {status["stop_condition"]}, duration {dur:2.03f}s, Catalyst Status {status["status"]}')
 ```
 
 ## `File: TaskTonic\ttTonicStore\__init__.py`
@@ -16401,18 +16968,48 @@ def reset_ledger():
 
 ## `File: testing\test_distiller.py`
 ```python
-# test_distiller.py
 import pytest
 import time
-from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot
-from TaskTonic.ttTonicStore import ttDistiller
+from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot, ttLedger
+from TaskTonic.ttTonicStore.ttDistiller import ttDistiller
 
 
-# --- Definitie van de Device Under Test (DUT) ---
+# ==============================================================================
+# FIXTURES
+# ==============================================================================
+
+@pytest.fixture(autouse=True)
+def reset_ledger():
+    """Zorgt voor een schone lei voor elke test en wacht op background threads."""
+    ttLedger._instance = None
+    ttLedger._singleton_init_done = False
+
+    yield
+
+    if ttLedger._instance:
+        for t in ttLedger._instance.tonics:
+            if t and hasattr(t, 'sparkling') and t.id > 0:
+                start_t = time.time()
+                while t.sparkling and time.time() - start_t < 1.0:
+                    time.sleep(0.01)
+
+        ttLedger._instance.records = []
+        ttLedger._instance.tonics = []
+        ttLedger._instance.formula = None
+
+    ttLedger._instance = None
+    ttLedger._singleton_init_done = False
+
+
+# ==============================================================================
+# TONICS VOOR TESTS
+# ==============================================================================
+
 class DUT(ttTonic):
     def __init__(self, name=None, log_mode=None, catalyst=None):
         super().__init__(name, log_mode, catalyst)
         self.tm = None
+        self.cycle_count = 0  # Toegevoegd voor de stop_on_probe test
 
     def ttse__on_start(self):
         self.to_state('init')
@@ -16420,13 +17017,14 @@ class DUT(ttTonic):
     def ttse_init__on_enter(self):
         self.to_state('paused')
 
-    def ttsc_paused__start_timer(self):
-        # Start een timer van 2 seconden
-        self.tm = ttTimerSingleShot(seconds=2)
+    def ttsc_paused__start_timer(self, delay=2.0):
+        # Start een timer, variabel gemaakt voor de OR-logica test
+        self.tm = ttTimerSingleShot(seconds=delay)
         self.to_state('wait_on_timer')
 
     def ttse_wait_on_timer__on_timer(self, info):
-        # Wordt aangeroepen als de timer afloopt (default handler)
+        # Wordt aangeroepen als de timer afloopt
+        self.cycle_count += 1
         self.to_state('finished_cycle')
 
     def ttse_finished_cycle__on_enter(self):
@@ -16436,73 +17034,138 @@ class DUT(ttTonic):
         self.ttsc__finish()
 
 
-# --- Definitie van de Test Formula ---
 class TestRecipe(ttFormula):
     def creating_formula(self):
         return {
             'tasktonic/log/to': 'off',  # Geen output tijdens tests
-            'tasktonic/log/default': 'full',
+            'tasktonic/log/default': 'stealth',
         }
 
     def creating_main_catalyst(self):
         # We gebruiken de Distiller in plaats van de standaard Catalyst
-        ttDistiller(name='tt_main_catalyst')
+        self.distiller = ttDistiller(name='tt_main_catalyst')
 
     def creating_starting_tonics(self):
         DUT(name="MyDevice")
 
 
-# --- De Test ---
-def test_dut_flow_with_timer():
-    # 1. Initialiseer de applicatie
-    recipe = TestRecipe()
+# ==============================================================================
+# TEST 1: BACKWARDS COMPATIBILITY (Legacy Syntax)
+# ==============================================================================
 
-    # 2. Haal de referenties op via de Ledger
+def test_dut_flow_with_timer():
+    recipe = TestRecipe()
     ledger = recipe.ledger
-    distiller = ledger.get_tonic_by_name('tt_main_catalyst')
+    distiller = recipe.distiller
     dut = ledger.get_tonic_by_name("MyDevice")
 
     assert isinstance(distiller, ttDistiller)
     assert dut is not None
     assert set(dut._index_to_state) == {'init', 'paused', 'wait_on_timer', 'finished_cycle'}
 
-    # 3. STAP 1: Start de distiller en run tot de DUT in 'paused' komt.
-    # Dit test de initiële flow: on_start -> init -> paused
-    status = distiller.sparkle(timeout=1, till_state_in=['paused'])
-
-    # Verifieer dat we gestopt zijn vanwege de state trigger, niet door timeout
-    stop_conditions = status.get('stop_condition', [])
-    assert 'state_trigger: [paused]' in stop_conditions
+    # STAP 1: Oude platte syntax
+    status = distiller.sparkle(timeout=1.0, till_state_in=['paused'])
+    assert 'state_trigger: [paused]' in status.get('stop_condition', [])
     assert dut.get_current_state_name() == 'paused'
 
-    # 4. STAP 2: Vuur handmatig een commando af (start timer)
-    dut.ttsc__start_timer()
-
-    # Run de distiller tot de status verandert naar 'wait_on_timer'
-    status = distiller.sparkle(timeout=1, till_state_in=['wait_on_timer'])
+    # STAP 2: Vuur handmatig een commando af
+    dut.ttsc__start_timer(delay=2.0)
+    status = distiller.sparkle(timeout=1.0, till_state_in=['wait_on_timer'])
     assert dut.get_current_state_name() == 'wait_on_timer'
 
-    # 5. STAP 3: Wacht op de timer.
-    # De Distiller spoelt de tijd automatisch vooruit als er geen sparkles zijn,
-    # maar er wel actieve timers zijn.
-    status = distiller.sparkle(timeout=5, till_sparkle_in=['ttse__on_timer'])
-
-    # Check of de timer event daadwerkelijk is afgegaan
+    # STAP 3: Wacht op de timer via de oude global sparkle_in check
+    status = distiller.sparkle(timeout=5.0, till_sparkle_in=['ttse__on_timer'])
     assert 'sparkle_trigger: [ttse__on_timer]' in status.get('stop_condition', [])
-
-    # Check of de logica na de timer de state heeft aangepast
     assert dut.get_current_state_name() == 'finished_cycle'
 
-    # finish DUT
+    # Finish
     dut.ttsc__dut_finish()
-    status = distiller.sparkle(timeout=.5)
+    status = distiller.sparkle(timeout=0.5)
     assert 'catalyst finished' in status['stop_condition']
-    assert dut.id == -1
 
-    # 6. Opruimen
     distiller.finish_distiller()
-    assert distiller.sparkling == False
 
+
+# ==============================================================================
+# TEST 2: ADVANCED CONTRACTS (Multi-Tonic, AND/OR logic, Probes)
+# ==============================================================================
+
+class MultiDeviceRecipe(TestRecipe):
+    def creating_starting_tonics(self):
+        # We spawnen er nu TWEE om AND/OR logica te testen
+        DUT(name="Device_Fast")
+        DUT(name="Device_Slow")
+
+
+def test_advanced_distiller_contracts():
+    recipe = MultiDeviceRecipe()
+    ledger = recipe.ledger
+    distiller = recipe.distiller
+    dev_fast = ledger.get_tonic_by_name("Device_Fast")
+    dev_slow = ledger.get_tonic_by_name("Device_Slow")
+
+    # --- DEEL 1: De 'AND' Conditie (stop_match_count: 'all') ---
+    # We wachten expliciet tot BEIDE devices gepauzeerd zijn
+    trace1 = distiller.sparkle(contract={
+        'timeout': 2.0,
+        'stop_match_count': 'all',
+        'tonics': {
+            'Device_Fast': {'till_state_in': ['paused']},
+            'Device_Slow': {'till_state_in': ['paused']}
+        }
+    })
+
+    assert 'contract_met: 2/2 tonics matched' in trace1['stop_condition']
+    assert dev_fast.get_current_state_name() == 'paused'
+    assert dev_slow.get_current_state_name() == 'paused'
+
+    # --- DEEL 2: De 'OR' Conditie met Probes (stop_match_count: 1) ---
+    # We geven ze ongelijke timers
+    dev_fast.ttsc__start_timer(delay=0.5)
+    dev_slow.ttsc__start_timer(delay=2.5)
+
+    # We vertellen de Distiller te stoppen zodra de ALLEREERSTE Tonic klaar is.
+    # We checken dit puur op basis van de interne variabele via 'stop_on_probe'.
+    trace2 = distiller.sparkle(contract={
+        'timeout': 5.0,
+        'stop_match_count': 1,  # Stop als er 1 matcht!
+        'tonics': {
+            'Device_Fast': {
+                'probes': ['cycle_count'],
+                'stop_on_probe': {'cycle_count': 1}
+            },
+            'Device_Slow': {
+                'probes': ['cycle_count'],
+                'stop_on_probe': {'cycle_count': 1}
+            }
+        }
+    })
+
+    assert 'contract_met: 1/1 tonics matched' in trace2['stop_condition']
+
+    # Omdat Device_Fast een timer van 0.5 had, moet deze klaar zijn
+    assert dev_fast.cycle_count == 1
+    assert dev_fast.get_current_state_name() == 'finished_cycle'
+
+    # Device_Slow is trager en moet nog steeds wachten
+    assert dev_slow.cycle_count == 0
+    assert dev_slow.get_current_state_name() == 'wait_on_timer'
+
+    # --- DEEL 3: Wacht op de trage ---
+    distiller.sparkle(contract={
+        'timeout': 5.0,
+        'stop_match_count': 1,
+        'tonics': {
+            'Device_Slow': {'till_state_in': ['finished_cycle']}
+        }
+    })
+
+    assert dev_slow.cycle_count == 1
+
+    # Cleanup
+    dev_fast.ttsc__dut_finish()
+    dev_slow.ttsc__dut_finish()
+    distiller.finish_distiller()
 ```
 
 ## `File: testing\test_store.py`
@@ -17342,6 +18005,308 @@ class TestStoreNewFeatures:
         item.v = "closed"
         assert count_a == 1
         assert count_b == 1
+
+
+# ======================================================================================================================
+# PART 3: Proxy Nodes (StoreLink) & Batch Iteration (set_each)
+# ======================================================================================================================
+
+class TestStoreLinkAndSetEach:
+    """
+    Tests for the StoreLink proxy pattern (aliasing) via the .link_to() method
+    and the set_each batching method.
+    """
+
+    @pytest.fixture
+    def store(self):
+        """Fixture to provide a clean Store instance for every test method."""
+        return Store()
+
+    def test_storelink_passive_read_write(self, store):
+        """
+        Test if a passive link (bubble_events=False) correctly redirects basic reads
+        and writes to the canonical target path.
+        """
+        # 1. Setup canonical data
+        store.set("devices/lamp_1", {"state": "off", "brightness": 0})
+
+        # 2. Create a passive link via Item method
+        store.at("house/living/main_light").link_to("devices/lamp_1", bubble_events=False)
+
+        # 3. Test reading via alias
+        alias_item = store.at("house/living/main_light")
+        assert alias_item.v["state"] == "off"
+
+        # 4. Test writing via alias
+        alias_item.set("brightness", 100)
+
+        # 5. Verify the canonical path was updated
+        assert store.get("devices/lamp_1/brightness") == 100
+
+    def test_storelink_deep_path_resolution(self, store):
+        """
+        Test if the Store correctly resolves paths segment by segment when
+        writing to or reading from a sub-property of a link.
+        """
+        store.set("devices/thermostat_1/temperature", 21.5)
+
+        store.at("rooms/kitchen/climate").link_to("devices/thermostat_1", bubble_events=False)
+
+        # Access deep property through the link
+        deep_item = store.at("rooms/kitchen/climate/temperature")
+        assert deep_item.v == 21.5
+
+        # Modify deep property through the link
+        deep_item.v = 22.0
+
+        # Verify the physical device was updated
+        assert store.get("devices/thermostat_1/temperature") == 22.0
+
+    def test_storelink_active_event_bubbling(self, store):
+        """
+        Test if an active link (bubble_events=True) intercepts changes from the canonical path
+        and injects an event into its own alias path so subscribers are notified.
+        """
+        events = []
+
+        def callback(e):
+            events.extend(e)
+
+        store.set("devices/sensor_1/motion", False)
+
+        store.at("security/zones/front_door").link_to("devices/sensor_1", bubble_events=True)
+
+        # Subscribe to the alias path sub-property
+        store.subscribe("security/zones/front_door/motion", callback)
+
+        # Change the canonical path
+        store.set("devices/sensor_1/motion", True)
+
+        # The active link should have injected an event for the alias
+        assert len(events) == 1
+        path, new_val, old_val, source = events[0]
+        assert path == "security/zones/front_door/motion"
+        assert new_val is True
+
+    def test_storelink_cascading_delete(self, store):
+        """
+        Test if deleting a canonical item automatically destroys the link
+        and propagates a 'None' event to alias subscribers.
+        """
+        events = []
+
+        def callback(e):
+            events.extend(e)
+
+        store.set("system/users/u1", {"name": "Alice"})
+
+        store.at("ui/current_user").link_to("system/users/u1", bubble_events=True)
+        store.subscribe("ui/current_user", callback)
+
+        # Remove canonical item
+        store.remove_item("system/users/u1")
+
+        # Link should be destroyed and None propagated to alias
+        assert store.get("ui/current_user") is None
+
+        # Check the events. One should be the removal of the alias.
+        removal_events = [e for e in events if e[0] == "ui/current_user" and e[1] is None]
+        assert len(removal_events) == 1
+
+    def test_storelink_circular_prevention(self, store):
+        """
+        Test if the deep path resolution catches circular links and raises
+        a ValueError to prevent infinite recursion/loops.
+        """
+        store.at("folder_a").link_to("folder_b")
+        store.at("folder_b").link_to("folder_a")
+
+        with pytest.raises(ValueError) as excinfo:
+            store.get("folder_a/prop")
+
+        assert "Circular StoreLink detected" in str(excinfo.value)
+
+    def test_storelink_dump_format(self, store):
+        """
+        Test if links are serialized correctly during a store dump,
+        allowing them to be restored later.
+        """
+        store.set("devices/dummy", 123)
+        store.at("alias/dummy").link_to("devices/dummy", bubble_events=True)
+
+        dump_data = dict(store.dump())
+
+        assert dump_data["devices/dummy"] == 123
+
+        alias_dump = dump_data["alias/dummy"]
+        assert isinstance(alias_dump, dict)
+        assert alias_dump["$link"] == "devices/dummy"
+        assert alias_dump["bubble_events"] is True
+
+    def test_item_set_each_with_prefix(self, store):
+        """
+        Test the set_each method with a prefix filter.
+        It should update matching children and ignore others.
+        """
+        store.set([
+            ("room/lamp#0/brightness", 0),
+            ("room/lamp#1/brightness", 0),
+            ("room/fan#0/speed", 0)
+        ])
+
+        room = store.at("room")
+
+        # Use set_each with a prefix to target only lamps
+        room.set_each("brightness", 100, prefix="lamp")
+
+        assert store.get("room/lamp#0/brightness") == 100
+        assert store.get("room/lamp#1/brightness") == 100
+
+        # Fan should remain unaffected and not have a brightness property
+        assert store.get("room/fan#0/speed") == 0
+        assert store.get("room/fan#0/brightness") is None
+
+    def test_item_set_each_without_prefix(self, store):
+        """
+        Test the set_each method without a prefix filter.
+        It should update all immediate children.
+        """
+        store.set([
+            ("ui/widgets/#/disabled", False),
+            ("ui/widgets/#/disabled", False),
+            ("ui/widgets/#/disabled", False)
+        ])
+
+        assert store.get("ui/widgets/#0/disabled") is False
+        assert store.get("ui/widgets/#1/disabled") is False
+        assert store.get("ui/widgets/#2/disabled") is False
+
+        widgets = store.at("ui/widgets")
+
+        # Apply to all children
+        widgets.set_each("disabled", True)
+
+        assert store.get("ui/widgets/#0/disabled") is True
+        assert store.get("ui/widgets/#1/disabled") is True
+        assert store.get("ui/widgets/#2/disabled") is True
+
+    def test_set_each_through_storelink(self, store):
+        """
+        Complex scenario: Test if set_each works correctly when the children
+        it iterates over are actually links pointing elsewhere.
+        """
+        store.set("devices/l1/power", "off")
+        store.set("devices/l2/power", "off")
+
+        store.at("house/lamps/l1").link_to("devices/l1")
+        store.at("house/lamps/l2").link_to("devices/l2")
+
+        # Perform set_each on the alias folder
+        store.at("house/lamps").set_each("power", "on")
+
+        # Check if canonical devices were updated via deep resolution
+        assert store.get("devices/l1/power") == "on"
+        assert store.get("devices/l2/power") == "on"
+
+
+# ======================================================================================================================
+# PART 4: Event Routing Scenarios
+# ======================================================================================================================
+
+class TestEventRoutingScenarios:
+
+    @pytest.fixture
+    def store(self):
+        return Store()
+
+    def test_event_routing_passive_link(self, store):
+        """
+        Scenario 1: Passive Link (bubble_events=False)
+        Proves that a physical change ONLY bubbles up the physical tree,
+        and leaves the alias tree completely silent (no event storms).
+        """
+        store.set("devices/l1/power", "off")
+        store.at("house/lamps/l1").link_to("devices/l1", bubble_events=False)
+
+        device_events = []
+        house_events = []
+
+        store.subscribe("devices", lambda e: device_events.extend(e), recursive=True, owner=self)
+        store.subscribe("house/lamps", lambda e: house_events.extend(e), recursive=True, owner=self)
+
+        store.set("devices/l1/power", "on")
+
+        assert len(device_events) == 1, "The physical tree should receive the event."
+        assert device_events[0][0] == "devices/l1/power"
+
+        assert len(house_events) == 0, "A passive link should NOT bubble events to its alias tree."
+
+    def test_event_routing_active_link(self, store):
+        """
+        Scenario 2: Active Link (bubble_events=True)
+        Proves that a physical change bubbles up the physical tree,
+        AND is actively injected into the alias tree so context-listeners are notified.
+        """
+        store.set("devices/motion_1/detected", False)
+        store.at("house/living/motion").link_to("devices/motion_1", bubble_events=True)
+
+        device_events = []
+        house_events = []
+
+        store.subscribe("devices", lambda e: device_events.extend(e), recursive=True, owner=self)
+        store.subscribe("house/living", lambda e: house_events.extend(e), recursive=True, owner=self)
+
+        store.set("devices/motion_1/detected", True)
+
+        assert len(device_events) == 1, "The physical tree should receive the event."
+        assert device_events[0][0] == "devices/motion_1/detected"
+
+        assert len(house_events) == 1, "An active link MUST bubble events to its alias tree."
+        assert house_events[0][0] == "house/living/motion/detected"
+        assert house_events[0][1] is True
+
+    def test_wildcard_combined_with_active_storelink(self, store):
+        """
+        Scenario 3: Wildcards over Active Links
+        Proves that a wildcard subscription on an alias folder correctly catches
+        injected events from multiple active StoreLinks inside that folder.
+        """
+        # 1. Setup physical devices
+        store["devices/sw_1/state"] = "off"
+        store["devices/sw_2/state"] = "off"
+        store["devices/sensor/temp"] = 20   # Unrelated device
+
+        # 2. Setup the functional room layout with active links
+        # We explicitly want to hear about changes to these switches in this room
+        store.at("house/living/switches/main").link_to("devices/sw_1", bubble_events=True)
+        store.at("house/living/switches/reading").link_to("devices/sw_2", bubble_events=True)
+
+        events_caught = []
+
+        def callback(e):
+            events_caught.extend(e)
+
+        # 3. Subscribe to ALL switches in the living room
+        # Using recursive=True so we also catch the '/state' sub-property
+        store.subscribe("house/living/switches/*", callback, recursive=True, owner=self)
+
+        # 4. Trigger changes on the physical devices
+        store.set("devices/sw_1/state", "on")
+        store.set("devices/sensor/temp", 21)  # Should NOT trigger the wildcard
+        store.set("devices/sw_2/state", "on")
+
+        # 5. Assertions
+        # We expect exactly 2 events (the two switches). The temp sensor is ignored.
+        assert len(events_caught) == 2, "Wildcard should have caught exactly 2 injected alias events."
+
+        # Verify the paths were correctly translated to the alias paths
+        paths_caught = [e[0] for e in events_caught]
+        assert "house/living/switches/main/state" in paths_caught
+        assert "house/living/switches/reading/state" in paths_caught
+
+        # Verify the values
+        assert events_caught[0][1] == "on"
+        assert events_caught[1][1] == "on"
 ```
 
 ## `File: testing\test_ttTonic.py`
@@ -17567,4156 +18532,279 @@ def test_cleanup_infusions_on_finish(setup_distiller):
 
 ```
 
-## `File: _documents\TaskTonic  - The introduction.md`
-# TaskTonic Framework: Developer Documentation
-
-## 1. Philosophy & Metaphor
-
-TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model.
-
-The core philosophy is based on the **Tonic**. Think of your running application as a glass of tonic. It comes to life through **Sparkles**, the **bubbles** rising in a liquid.
-
-*   **The Flow:** Code is executed in small, atomic units called *Sparkles*.
-*   **The Fizz:** When these Sparkles flow continuously, the application "fizzes" with activity. It feels like a single, cohesive whole, even though it may be performing multiple logical processes simultaneously.
-*   **The Rule:** A Sparkle must be short-lived. If one bubble takes too long to rise (blocking code), the flow stops, and the fizz goes flat. In practice, this is rarely an issue, as most software processes are reactive chains of short events.
-
-This architecture allows you to write highly responsive, concurrent applications (like UIs or IoT controllers) without the race conditions and headaches of traditional multi-threading.
-
----
-
-## 2. Core Architecture
-
-The framework is built on a strict hierarchy of classes.
-
-| Component | Class | Description |
-| :--- | :--- | :--- |
-| **Liquid** | `ttLiquid` | The base substance. It handles identity, hierarchy (parent/child relationships), and lifecycle management in the `Ledger`. It is the passive foundation. |
-| **Tonic** | `ttTonic` | The active ingredient. Inherits from `ttLiquid`. It adds the ability to "sparkle" (execute code), manage state (State Machines), and log activity. |
-| **Catalyst** | `ttCatalyst` | The engine that makes the Tonic fizz. It owns the execution thread and the queue. It pulls Sparkles one by one and executes them. |
-| **Formula** | `ttFormula` | The recipe. The entry point of your application where you define the initial mix of Tonics and configuration settings. |
-
----
-
-## 3. The Tonic (`ttTonic`)
-
-The `ttTonic` is where you write your application logic. It uses **introspection** to automatically bind your methods to the execution queue based on their names.
-
-### 3.1 Sparkle Naming Convention
-
-You do not register callbacks manually. You simply name your methods using specific prefixes. Every prefix starts with **tts**, it is a TaskTonic Sparkle.
-
-*   **`ttsc__` (Command):** *Public Command.* Call this to request an action from outside the class.
-    *   *Example:* `my_tonic.ttsc__start_process()`
-*   **`ttse__` (Event):** *Public Event.* Call this to react to an event (like a timer or UI click).
-    *   *Example:* `ttse__on_timer(info)`
-*   **`tts__` , or `_tts__`(Sparkle):** *Internal.* Private logic chunks used to break up large tasks.
-    *   *Example:* `self.tts__step_two()`
-*   **`_ttss__` (System):** Reserved for framework lifecycle hooks (startup/shutdown).
-
-> **Important:** When you call a sparkle method (e.g., `self.tts__calculate()`), it does **not** execute immediately. It places a "bubble" (work order) on the Catalyst queue. It will be executed when the Catalyst reaches it in the stream.
-
-### 3.2 State Machines
-
-Every `ttTonic` is a built-in State Machine. You can organize your code by defining which Sparkles are valid in which state.
-
-**Changing State:**
-Use `self.to_state('new_state_name')`.
-
-**State-Specific Sparkles:**
-You can prefix a Sparkle with a state name: `prefix_state__name`.
-
-*   **Specific:** `ttsc_idle__start()` — Only runs if the Tonic is in the `idle` state.
-*   **Generic:** `ttsc__start()` — Runs in any state (unless a specific version exists).
-*   **Fallback:** If called in a state where no handler exists, the call is ignored (the bubble pops harmlessly).
-
-### 3.3 Lifecycle & Termination
-
-To ensure proper cleanup and hierarchy management, you must use the framework's lifecycle methods.
-
-*   **`ttsc__finish(self)`**: **The Stop Command.** Call this to stop the Tonic. It initiates the graceful shutdown sequence:
-    1.  Stops the State Machine (transitions to `-1`).
-    2.  Sets the Tonic to "Finishing Mode" (ignoring new standard sparkles).
-    3.  Triggers the `ttse__on_finished` event.
-    4.  Cleans up children/infusions and removes the Tonic from the Ledger.
-*   **`ttse__on_start(self)`**: Called immediately after the Tonic is created and initialized.
-*   **`ttse__on_enter(self)`**: Called whenever entering a new state.
-*   **`ttse__on_exit(self)`**: Called whenever leaving a state.
-*   **`ttse__on_finished(self)`**: Called *during* the shutdown sequence (triggered by `ttsc__finish`). Use this to close resources like files or sockets before the object is destroyed.
-
----
-
-## 4. Timers and Flow Control
-
-Since Sparkles must be short to keep the "fizz" alive, you cannot use `time.sleep()`. Instead, use the built-in Timers to handle time-bound logic.
-
+## `File: testing\test_ttIpSockets.py`
 ```python
-from TaskTonic import ttTonic, ttTimerSingleShot
+import pytest
+import time
+import socket
+import struct
+import pickle
+from TaskTonic import ttTonic, ttFormula, ttLedger
+from TaskTonic.ttTonicStore.ttDistiller import ttDistiller
+from TaskTonic.ttTonicStore.ttIpSockets import DictSocketHandler
 
-class MyProcess(ttTonic):
-    def ttse__on_start(self):
-        self.log("Starting process...")
-        # Don't sleep! Schedule a sparkle for later.
-        ttTimerSingleShot(seconds=2.5, sparkle_back=self.ttsc__continue)
 
-    def ttsc__continue(self, info):
-        self.log("2.5 seconds have passed. Continuing...")
-        # Done with work? Stop the tonic.
-        self.ttsc__finish()
-```
+# ==============================================================================
+# FIXTURES
+# ==============================================================================
 
----
+@pytest.fixture(autouse=True)
+def reset_ledger():
+    """Zorgt voor een schone lei voor elke test en wacht op background threads."""
+    ttLedger._instance = None
+    ttLedger._singleton_init_done = False
 
-## 5. Services (Singletons)
+    yield
 
-The framework uses the `ttLiquid` metaclass to manage Singleton Services effortlessly. A Service is a Tonic that exists only once but can be accessed from anywhere.
+    if ttLedger._instance:
+        # Wacht heel even tot alle achtergrond Catalysts (zoals SelectorHandler)
+        # daadwerkelijk hun thread hebben afgesloten vóórdat we de administratie vernietigen.
+        for t in ttLedger._instance.tonics:
+            if t and hasattr(t, 'sparkling') and t.id > 0:
+                start_t = time.time()
+                while t.sparkling and time.time() - start_t < 1.0:
+                    time.sleep(0.01)
 
-**Defining a Service:**
-Set the `_tt_is_service` attribute.
+        ttLedger._instance.records = []
+        ttLedger._instance.tonics = []
+        ttLedger._instance.formula = None
 
-```python
-class Database(ttTonic):
-    _tt_is_service = "db_service" # Unique ID
-    
-    def __init__(self, **kwargs):
-        # Runs ONLY once (first creation)
+    ttLedger._instance = None
+    ttLedger._singleton_init_done = False
+
+
+def get_free_port():
+    """Zoekt een vrije poort om 'Address already in use' errors te voorkomen."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('localhost', 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
+# ==============================================================================
+# TEST 1: Isolatie test van de DictSocketHandler (Inpakken/Uitpakken)
+# ==============================================================================
+
+def test_dict_socket_serialization_and_fragmentation():
+    """Test de zuivere logica van het inpakken en uitpakken van dicts."""
+    handler = DictSocketHandler.__new__(DictSocketHandler)
+    handler.rcv_buf = b''
+
+    test_dict_1 = {"cmd": "login", "user": "test", "id": 1}
+    test_dict_2 = {"cmd": "data", "payload": [1, 2, 3]}
+
+    packed_1 = handler.send_data_conversion(test_dict_1)
+    packed_2 = handler.send_data_conversion(test_dict_2)
+
+    # 1. Fragmentatie simuleren
+    result = handler.rcv_data_conversion(packed_1[:3])
+    assert len(result) == 0
+    assert len(handler.rcv_buf) == 3
+
+    # 2. De rest + een stuk van de volgende
+    chunk = packed_1[3:] + packed_2[:10]
+    result = handler.rcv_data_conversion(chunk)
+    assert len(result) == 1
+    assert result[0] == test_dict_1
+    assert len(handler.rcv_buf) == 10
+
+    # 3. Het laatste stukje
+    result = handler.rcv_data_conversion(packed_2[10:])
+    assert len(result) == 1
+    assert result[0] == test_dict_2
+    assert len(handler.rcv_buf) == 0
+
+
+# ==============================================================================
+# TONICS VOOR INTEGRATIE TESTS
+# ==============================================================================
+
+class MockServer(ttTonic):
+    def __init__(self, port, **kwargs):
         super().__init__(**kwargs)
-        self.connect_db()
-
-    def _init_service(self, context, **kwargs):
-        # Runs EVERY time the service is requested
-        self.log(f"Accessed by {context.name}")
-```
-
-**Using a Service:**
-Simply instantiate it. If it exists, you get the running instance.
-
-```python
-# In any other Tonic:
-my_db = Database() # Returns the existing Singleton
-```
-
----
-
-## 6. Example: The Traffic Light
-
-This example demonstrates `ttLiquid` hierarchy, Sparkles, and State Machine logic.
-
-```python
-from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot, ttLog
-
-class TrafficLight(ttTonic):
-    def ttse__on_start(self):
-        self.to_state('red')
-
-    # --- State: RED ---
-    def ttse_red__on_enter(self):
-        self.log("STOP (Red)")
-        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
-
-    def ttsc_red__next(self, info):
-        self.to_state('green')
-
-    # --- State: GREEN ---
-    def ttse_green__on_enter(self):
-        self.log("GO (Green)")
-        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
-
-    def ttsc_green__next(self, info):
-        self.to_state('yellow')
-
-    # --- State: YELLOW ---
-    def ttse_yellow__on_enter(self):
-        self.log("CAUTION (Yellow)")
-        ttTimerSingleShot(1, sparkle_back=self.ttsc__next)
-
-    def ttsc_yellow__next(self, info):
-        self.to_state('red')
-
-class SimFormula(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/project/name', 'TrafficSim'),
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
-
-    def creating_starting_tonics(self):
-        TrafficLight()
-
-if __name__ == "__main__":
-    SimFormula()
-```
-## `File: _documents\TaskTonic - Sparkling Programming.md`
-# Sparkling Programming: Escape the Async/Threading Nightmare
-
-If you are a seasoned Python programmer, you know the pain of concurrency. You’ve wrestled with the viral spread of `async/await` infecting your entire codebase. You’ve debugged multi-threading race conditions, scattered `Lock()` objects everywhere, and watched in horror as your PyQt UI froze because a background thread didn't marshal its signals correctly. 
-
-**TaskTonic asks you to leave those headaches behind.** 
-
-TaskTonic allows you to build applications that handle a large number of seemingly parallel tasks without the complexity of traditional multi-threading [1]. It introduces a paradigm called **Sparkling Programming**. 
-
-Here is why you need to adopt it, how to think in "Sparkles", and why you will never want to go back.
-
----
-
-## 1. The Core Paradigm: Atomic Immutability
-
-In standard Python, if two threads call `my_object.calculate()` simultaneously, you have a race condition. You need locks. In `asyncio`, if you `await` a database call, another coroutine can jump in and change your object's state while you are waiting.
-
-TaskTonic solves this by breaking work down into **Sparkles**—the smallest, non-interruptible units of work [2]. When you call a Sparkle (e.g., `self.ttsc__do_work()`), it doesn't run immediately. It is placed as a "work order" on a shared queue [3]. The **Catalyst** (the engine) continuously pulls these orders and executes them one by one [3].
-
-### Why is this revolutionary?
-Sparkles can be called from *any* thread, but they are always executed by the *same* Catalyst thread [4]. Because execution is sequential per Catalyst, **a Sparkle is atomic** [2]. 
-
-**While you are inside a Sparkle, the state of your Tonic cannot change.** You never have to think about thread-safe programming or data locks inside your Tonic logic [4]. It is completely safe.
-
----
-
-## 2. Example A: Fluid UIs without `QThread` Boilerplate
-
-Let's look at a PySide6 window. Normally, waiting for 2 seconds or doing a background task freezes the GUI unless you write boilerplate `QThread` and `QRunnable` classes. With TaskTonic, you just use Sparkles and built-in Timers [5]. 
-
-TaskTonic automatically binds UI signals to your Sparkles using the `ttqt__` prefix [6]. 
-
-```python
-from TaskTonic.ttTonicStore import ttPysideWindow
-from TaskTonic import ttTimerSingleShot
-
-class AppWindow(ttPysideWindow):
-    def setup_ui(self):
-        # Imagine we setup a simple UI with a button named 'btn_start'
-        # and a label named 'lbl_status'
-        pass
+        self.port = port
+        self.received_data = []
+        self.received_count = 0  # <--- Toegevoegd voor de stop_on_probe optimalisatie!
+        self.client_connected = False
 
     def ttse__on_start(self):
-        self.lbl_status.setText("Ready")
-
-    # 1. Automatically bound to self.btn_start.clicked!
-    def ttqt__btn_start__clicked(self):
-        self.log("Button clicked. Starting fake download.")
-        self.lbl_status.setText("Downloading...")
-        self.btn_start.setEnabled(False)
-        
-        # 2. Start a non-blocking timer. No time.sleep()!
-        ttTimerSingleShot(seconds=2.0, name='download_done')
-
-    # 3. Executes exactly 2 seconds later. UI never freezes.
-    def ttse__on_tm_download_done(self, timer_info):
-        self.log("Download complete.")
-        self.lbl_status.setText("Done!")
-        self.btn_start.setEnabled(True)
-```
-No threads spawned. No signal/slot complex wiring. Just pure, readable, atomic logic.
-
----
-
-## 3. Example B: The Chunked Iterator (Processing Big Data)
-
-The first question every senior dev asks: *"If a Sparkle can't be interrupted, won't a heavy loop block the Catalyst and freeze my UI?"*
-
-Yes, it will. If a Sparkle takes 5 seconds, the engine halts for 5 seconds. 
-**The Sparkling Solution:** You break the heavy work into small, fast chunks using Python's built-in `iter()` and `next()`. You process a few items, and then explicitly queue the *next* Sparkle to continue the work. This allows the Catalyst to process UI clicks or network events in between your data chunks!
-
-```python
-from TaskTonic import ttTonic
-
-class BigDataProcessor(ttTonic):
-    def ttse__on_start(self):
-        # 1. We load a massive dataset (simulated here)
-        massive_list = list(range(1_000_000))
-        
-        # 2. We create an iterator from our data
-        self.data_iterator = iter(massive_list)
-        self.chunk_size = 5000 
-        
-    def ttsc__start_heavy_processing(self):
-        self.log("Starting heavy job...")
-        self.ttsc__process_chunk() # Queue the first chunk
-
-    def ttsc__process_chunk(self):
-        """ This sparkle processes a chunk, then queues itself again. """
-        try:
-            # 3. Process a chunk of data quickly
-            for _ in range(self.chunk_size):
-                item = next(self.data_iterator)
-                self._do_complex_math(item)
-                
-            # 4. We are not done yet! Put the instruction to process the 
-            # NEXT chunk at the back of the Catalyst queue.
-            self.ttsc__process_chunk() 
-            
-        except StopIteration:
-            # 5. The iterator is exhausted. We are done!
-            self.log("Finished heavy processing smoothly!")
-            self.to_state('done')
-
-    def _do_complex_math(self, item):
-        pass # Fast math logic here
-```
-This is incredibly elegant. If the user clicks "Cancel" in the UI, that `ttqt__` event is placed on the queue and will execute *between* your chunks, allowing you to instantly stop the iterator. No `threading.Event()` checks required!
-
----
-
-## 4. Example C: Tonic Layering (Clean Architecture)
-
-When your logic grows, your code shouldn't become a monolithic mess. TaskTonic encourages **Tonic Layering**. If a task becomes too large for a single Tonic, you can easily divide the work among sub-agents [7]. 
-
-Because Tonics are hierarchical, when a parent creates a child, it becomes the child's "Context" [8]. The parent orchestrates the high-level flow, while the child handles the gritty details. When the parent is finished, the Ledger cleanly shuts down its entire tree of sub-agents automatically [7]. No zombie threads!
-
-```python
-from TaskTonic import ttTonic
-
-# --- LOW LEVEL WORKER ---
-class NetworkDownloader(ttTonic):
-    def ttsc__fetch_data(self, url):
-        self.log(f"Connecting to {url} and doing complex socket stuff...")
-        # ... complex IP logic ...
-        
-        # When done, notify the parent (the base) that created us
-        self.base.ttse__on_download_complete("{"data": "success"}")
-
-# --- HIGH LEVEL ORCHESTRATOR ---
-class UpdateManager(ttTonic):
-    def ttse__on_start(self):
-        self.log("Initializing Update Manager.")
-        
-        # 1. Create the worker child. It automatically binds to this parent!
-        self.downloader = NetworkDownloader()
-        
-    def ttsc__run_update(self):
-        self.log("Starting update process...")
-        self.to_state('downloading')
-        
-        # 2. Delegate the gritty details to the child
-        self.downloader.ttsc__fetch_data("https://api.example.com/update")
-
-    def ttse_downloading__on_download_complete(self, data):
-        self.log(f"Update received: {data}. Applying update...")
-        self.to_state('finished')
-        
-        # 3. Finish the parent. The framework automatically kills 
-        # the NetworkDownloader child. No resource leaks!
-        self.finish() 
-```
-Look how clean `UpdateManager` is. It reads like a story. The low-level socket handling is completely hidden away in `NetworkDownloader`.
-
----
-
-## 5. The Golden Rules & The Distiller
-
-To master Sparkling Programming, you only need to remember two rules:
-1. **Never block the thread:** Do not use `time.sleep()` or heavy `while True` loops [5]. Use `ttTimerSingleShot` [9] or the Iterator Chunk pattern.
-2. **Trust the Queue:** Don't try to call execution methods directly. Let the Catalyst handle the timing [3].
-
-**Are you still worried about performance and execution times?**
-TaskTonic includes the **`ttDistiller`**, a specialized Catalyst built exclusively for testing and profiling [10]. The Distiller executes strictly controlled steps and captures a full trace of every Sparkle, including exactly how many milliseconds it took to execute (`at_enter` and `at_exit` timestamps) [10-12]. If you accidentally write a giant, blocking Sparkle, the Distiller will immediately expose the bottleneck in your unit tests.
-
-Stop fighting the Global Interpreter Lock. Stop littering your code with `await`. Pour yourself a TaskTonic and start Sparkling.## `File: _documents\TaskTonic - Understanding the ttCatalyst.md`
-# The Engine of TaskTonic: Understanding the `ttCatalyst`
-
-If a `Tonic` is a specialized worker on an assembly line, the `ttCatalyst` is the powerful engine that drives the conveyor belt [1]. Its primary and most crucial function is to make Tonics "sparkle" by continuously processing a shared task queue [1]. 
-
-To master TaskTonic, you need to understand what happens inside this engine, how to configure it, and when to spawn new ones.
-
----
-
-## 1. The Basics: A Catalyst *is* a Tonic
-
-An elegant part of the TaskTonic architecture is that `ttCatalyst` inherits directly from `ttTonic` [2, 3]. 
-This means a Catalyst is not just a dumb loop; it is a fully-fledged agent. 
-
-*   **It has a lifecycle:** It starts up, can have its own state machine, and shuts down gracefully.
-*   **It can be used as a Tonic:** You can add your own application logic directly to a custom Catalyst [2, 3].
-*   **It cleans up after itself:** When the last Tonic registered to a Catalyst finishes, the Catalyst determines its job is done and automatically initiates its own shutdown sequence [4, 5].
-
-## 2. The Core: `tt_main_catalyst`
-
-Every TaskTonic application requires at least one Catalyst, known as the **Main Catalyst**. 
-*   It is strictly identified by the name `tt_main_catalyst` and always holds `id = 0` [6, 7]. 
-*   Unlike other Catalysts, the Main Catalyst runs its loop in the **main application thread**, blocking the standard execution flow to keep your application alive [6, 8].
-*   It is defined in your `ttFormula` via the `creating_main_catalyst()` method. By default, the Formula simply spawns a standard `ttCatalyst` [7, 9].
-
-## 3. Under the Hood: The `sparkle()` Loop
-
-When you call `start_sparkling()`, the Catalyst enters its main `while` loop [6]. Here is exactly what happens in that loop:
-
-1.  **Timer Check:** It looks at the list of registered timers and calculates `next_timer_expire`—the exact amount of time until the nearest timer needs to fire [10].
-2.  **Queue Wait:** It calls `get(timeout=next_timer_expire)` on its master queue (`catalyst_queue`). The thread goes to sleep, consuming 0% CPU, until either a task arrives or the timer expires [10].
-3.  **Execution:** If a task (work order) is pulled from the queue, it unpacks the payload and calls the internal `_execute_sparkle` method on the target Tonic [11, 12].
-4.  **Extra Sparkles:** After executing the main task, it rapidly drains any `extra_sparkles` (like immediate state transitions: `on_exit` -> `on_enter`) before returning to the start of the loop [11].
-
-### The Catalyst Queue: What exactly is in it?
-The `catalyst_queue` is a standard Python `queue.SimpleQueue` [13]. A single "work order" payload placed on this queue contains [10, 14]:
-*   The `instance` of the target Tonic.
-*   The `sparkle` method to execute.
-*   The `args` and `kwargs` (parameters).
-*   The `source` (who called this sparkle, tracked via the `ttSparkleStack`).
-
-## 4. Trade-offs: Using Multiple Catalysts
-
-Because any Catalyst created *after* the Main Catalyst automatically spawns its own background thread, you can easily distribute workloads [8, 15]. 
-
-**Why you might want to use your own Catalyst:**
-*   **Thread Independence:** A new Catalyst runs in its own thread. If the `tt_main_catalyst` is heavily bogged down by UI repaints or a busy Tonic, your independent Catalyst remains hyper-responsive. 
-
-**Why you should be careful (The Drawbacks):**
-*   **The Deepcopy Penalty (Slower):** TaskTonic guarantees data immutability. If Thread A calls a Sparkle on a Tonic managed by Thread B (a different Catalyst), the framework detects the thread crossing. To prevent race conditions, it uses `copy.deepcopy()` on all `args` and `kwargs` before placing them on the queue [16-18]. This deep copy is completely safe, but it introduces overhead and is slower than running in the same Catalyst.
-*   **Thread Bloat:** Spawning a new Catalyst for every single Tonic defeats the purpose of the framework. You fall back into the trap of managing a mess of OS threads.
-
-**Best Practice:** Use a separate Catalyst for a self-contained module or Service that manages a whole tree of sub-Tonics (infusions). Do *not* spawn a new Catalyst for a single, lightweight Tonic.
-
-## 5. Advanced: Creating a Custom Catalyst Class
-
-Because `ttCatalyst` is just a class, you can subclass it. Why would you write your own Catalyst engine?
-
-### A. Interfacing with Blocking/Long-Running Processes (e.g., Numpy)
-Sometimes you *have* to run a Sparkle that takes a long time (like a heavy Numpy calculation). In a shared Catalyst, this freezes all other Tonics. 
-By creating a dedicated custom Catalyst just for this math module, you can explicitly *allow* long-running Sparkles. The main application remains fluid. 
-*(Warning: Remember that if a Sparkle takes 5 seconds, a `finish()` command sent to that Tonic will also be delayed by up to 5 seconds because it waits in the same queue!)*
-
-### B. High-Speed Custom Queues & Interfaces (The `SelectorHandler` Pattern)
-Standard queues use `time.sleep` or locks to wait. For ultra-fast I/O (like IP communication), you want to use OS-level selectors [19]. 
-
-The TaskTonic framework allows you to override the `new_catalyst_queue()` method [13, 20]. You can inject a custom queue that bridges the gap between Python queues and OS sockets.
-
-**The IP Communication Example:**
-In `examples/ip_communicatie.py`, a custom Catalyst named `SelectorHandler` is used [21]: 
-1.  **Custom Queue:** It overrides `new_catalyst_queue` with a `MyNotifyingQueue` [20]. Whenever a Sparkle is put onto this queue, it also sends a single byte of data to a hidden internal socket (`_queue_filled_notify_channel`) [20].
-2.  **Custom Loop:** The standard `sparkle()` loop is overridden. Instead of blocking on `queue.get()`, it blocks on `selectors.select()` [22]. 
-3.  **Result:** The Catalyst sleeps efficiently at the OS level. It wakes up instantly if *either* network data arrives on an IP port, *or* if another Tonic drops a Sparkle into the `MyNotifyingQueue` [19, 21, 22]. 
-
-This demonstrates the ultimate power of TaskTonic: you can bend the engine entirely to your architectural needs without rewriting the underlying Tonic logic.## `File: _documents\TaskTonic - Timers without waiting.md`
-# TaskTonic: Timers without waiting 
-
-In TaskTonic, blocking the execution thread is strictly prohibited. You must **never** block execution using methods like `time.sleep()`, as this will freeze the Catalyst and stop your application from processing its queue. Instead, you must use the framework's built-in timers to keep the system running smoothly.
-
-Timers manage time continuously in the background and trigger a callback (a "sparkle") when their duration or schedule is met.
-
-## 1. Using the TaskTonic timers
-
-When using the timers be aware of the basic principles.
-
-- Create the timer and define the moment of expiration, to fire a timer sparkle.
-
-- Timers are liquid and thus part of the TaskTonic life cycle (its a `ttLiquid` object). Finishing your tonic will automatically finish the timer. Or call `.finish()` to stop and finish.
-
-- For timer control you got two base method `.start()` and `.stop()`, starting and stopping the timer. You're able to cascade this methods like `self.tmr = ttTimerRepeat(seconds=1.5).stop()`. Stopping the time wil not remove them from memory. When you start a timer, the expiration time is recalculated. 
-
-A fundamental rule of TaskTonic timers is that **they start immediately upon instantiation**, creating the object is enough to begin the countdown.
-
-When a timer fires, it needs to trigger an action within your Tonic. You define this action using the `sparkle_back` parameter. However, TaskTonic provides powerful, automatic callback generation if you omit this parameter.
-
-### Automatic Callback Routing (Name-Based Fallback)
-
-If no `sparkle_back` is explicitly provided, the framework uses introspection to find the right event handler in the parent Tonic. It determines the method name based on the `name` property of the timer:
-
-1. **Named Timers (Specific Callbacks):** If you give the timer a specific `name`, the framework automatically prepends `ttse__on_` to it. For example, a timer named `tm_lights_off` will automatically launch the sparkle `ttse__on_tm_lights_off`.
-2. **Unnamed Timers (Generic Fallback):** If the timer has no name, it falls back to the generic `ttse__on_timer` method.
-
-```python
-from TaskTonic import ttTonic, ttTimerSingleShot
-
-class SmartRoom(ttTonic):
-    def ttse__on_start(self):
-        # 1. Explicit callback (Highest priority)
-        ttTimerSingleShot(2.0, sparkle_back=self.ttsc__specific_action)
-
-        # 2. Named Timer (Auto-routes to ttse__on_tm_lights_off)
-        ttTimerSingleShot(10.0, name="tm_lights_off")
-
-        # 3. Unnamed Timer (Auto-routes to generic ttse__on_timer)
-        ttTimerSingleShot(5.0)
-
-    def ttsc__specific_action(self, timer_info):
-        self.log("The explicit 2-second timer fired!")
-
-    # Auto-generated route for the named timer
-    def ttse__on_tm_lights_off(self, timer_info):
-        self.log("Turning off the lights!")
-
-    # Generic fallback for all unnamed timers without a sparkle_back
-    def ttse__on_timer(self, timer_info):
-        self.log("The generic 5-second timer fired!")
-```
-
-> *Note: The callback method always receives a `timer_info` argument (usually a dictionary), allowing you to identify exactly which timer triggered the event if multiple timers share the generic fallback.*
-
----
-
-## 2. Periodic Timers: Relative Time
-
-Standard timers deal with relative durations. You set the seconds to elapse from the moment of creation (or minutes, hours, weeks, months for longer periods).
-
-Beside `.start()` and `.stop()` Periodic timers introduce `.restart()`, to stop the timer, recalculate the expiration time and start again. With `.change_period()`  you can change the period time. This doesn't change the expiration moment, but is used when reloading the time. `self.tmr.change_period(seconds=10).restart()`
-
-### 2.1. `ttTimerRepeat` (Periodic Loops)
-
-Fires periodically based on a relative interval. Ideal for continuous background tasks like polling sensors or refreshing UIs.
-
-```python
-# Fires every 1.5 seconds indefinitely
-self.poll_timer = ttTimerRepeat(seconds=1.5, name="sensor_poll")
-
-def ttse__on_sensor_poll(self, timer_info):
-    pass # Read sensor data
-```
-
-### 2.2. `ttTimerSingleShot` and The Watchdog Pattern
-
-A `ttTimerSingleShot` fires only once.  Perfect for timeouts and one time events.  However, using its `.restart()` method, it becomes the perfect tool for building a **Watchdog Timer** to monitor continuous data streams (like IP connections or serial ports).
-
-
-
-```python
-class ConnectionMonitor(ttTonic):
-    def ttse__on_start(self):
-        # Start a 10-second watchdog
-        self.watchdog = ttTimerSingleShot(10.0, name="connection_timeout")
-
-    def ttse__on_data_received(self, data):
-        self.log("Data packet received.")
-        # Reset the timer. As long as data flows within 10s, it never hits 0.
-        self.watchdog.restart()
-
-    def ttse__on_connection_timeout(self, timer_info):
-        self.log("ALARM: Connection timed out!")
-        self.to_state('error')
-```
-> *Note: when a  single shot expires it fires its sparkle_back and gets finished immediately. So an expired `ttTimerSingleShot` can't be used again. You have to make a new one.*
-
-### 2.3. `ttTimerPausing` 
-
-Pausing timers can also be temporarily halted. If your application enters a state where a running timer should stop counting, you can call `.pause()`. Calling `.resume()` will continue the countdown from the exact point it was paused. You can also instantiate a timer in a paused state by passing `paused=True`.
-
->*Note: a pausing timer that expires will immediately be paused. You have to `.resume()` in your sparkle_back to use it again*
-
----
-
-## 3. Scheduled Timers: Absolute Time
-
-While standard timers count seconds, **Scheduled Timers** deal with absolute, real-world time (calendar and clock).
-
-`ttTimerScheduled` is the abstract base class and **cannot be used directly**. Instead, TaskTonic provides  subclasses like `ttTimerEveryWeek` to handle any calendar scenario.
-
-The syntax is extremely flexible, allowing integers, strings (`"august"`, `"monday"`), precise time strings (`"23:59:59"`), and even negative indices to target the "last" occurrence (e.g., `day=-1` for the last day of the month).
-
-### `ttTimerEveryYear`
-
-Executes once a year at a highly specific moment.
-
-```python
-# Absolute dates
-ttTimerEveryYear(month=2, day=3, hour=8, minute=30) # fires every year at 8:30 at februari 3
-ttTimerEveryYear(month="august", day=2, hour=10)
-
-# The 'last' day of a month using negative index
-ttTimerEveryYear(month="august", day=-1, hour=10)
-ttTimerEveryYear(month="december", day=-1, time_str="23:59:59")
-
-# Complex relational dates (e.g., The last Monday of February)
-ttTimerEveryYear(month="february", day="monday", in_week=-1, time_str="9:56:45")
-ttTimerEveryYear(month="september", day="saturday", in_week=-1, time_str="8:00:00")
-
-# Week-number based
-ttTimerEveryYear(week=1, day="tuesday", hour=8)
-ttTimerEveryYear(week=3, day=6, hour=6)
-ttTimerEveryYear(week=52, day=6, time_str="23:59:59")
-```
-
-### `ttTimerEveryMonth`
-
-Executes once a month. Excellent for monthly reports or billing cycles.
-
-```python
-# Specific days within specific weeks (e.g., First Wednesday)
-ttTimerEveryMonth(day="wednesday", in_week=1, hour=10)
-ttTimerEveryMonth(day="wednesday", in_week=2, hour=10)
-
-# Negative indexing for weeks (e.g., Last Wednesday of the month)
-ttTimerEveryMonth(day="wednesday", in_week=-1, hour=10)
-ttTimerEveryMonth(day="wednesday", in_week=-6, hour=10) # Failsafe negative boundaries
-
-# Overflow/Underflow weeks
-ttTimerEveryMonth(day="tuesday", in_week=5, hour=10)
-ttTimerEveryMonth(day="tuesday", in_week=6, hour=10)
-
-# Absolute day of the month
-ttTimerEveryMonth(day=27, time_str="13:00:00")
-
-# Relative to the end of the month
-ttTimerEveryMonth(day=-1, time_str="13:00:00")  # The very last day
-ttTimerEveryMonth(day=-10, time_str="13:00:00") # 10 days before the end of the month
-```
-
-### `ttTimerEveryWeek`
-
-Executes weekly on a specific day.
-
-```python
-# Using string literals (case-insensitive) or integers (0 = Monday)
-ttTimerEveryWeek(day=0, time_str="23:59:59")
-ttTimerEveryWeek(day="Tuesday", time_str="23:59:00")
-ttTimerEveryWeek(day="wednesday", hour=1)
-ttTimerEveryWeek(day="friday", hour=2)
-ttTimerEveryWeek(day="saturday", hour=23)
-```
-
-### `ttTimerEveryDay`
-
-Executes every day exactly when the system clock hits the target time.
-
-```
-ttTimerEveryDay(hour=0)
-ttTimerEveryDay(hour=5, minute=30,seconds=0)
-ttTimerEveryDay(time_str="12:15:00")
-ttTimerEveryDay(hour=19)
-```
-
-### `ttTimerEveryHour` & `ttTimerEveryMinute`
-
-Instead of full timestamps, these synchronize with the clock rolling over.
-
-```python
-# Triggers at exactly 15 minutes and 0 seconds past every hour (e.g., 01:15, 02:15, 03:15)
-ttTimerEveryHour(time_str="15:00")
-ttTimerEveryHour(minutes=15)
-
-# Triggers at specific seconds within every minute
-ttTimerEveryMinute(second=0)  # Exactly at the top of the minute
-ttTimerEveryMinute(second=15)
-ttTimerEveryMinute(second=30)
-ttTimerEveryMinute(second=2.5) # with seconds, floats are allowed 
-```
-
-### Example: Implementing a Scheduled Timer
-
-```python
-from TaskTonic.ttTonicStore import ttTimerEveryWeek
-
-class BackupService(ttTonic):
-    def ttse__on_start(self):
-        self.log("Backup service initialized.")
-
-        # Schedule the backup for every Sunday at 02:00 AM using a named timer
-        ttTimerEveryWeek(
-            day="sunday",
-            hour=2,
-            name="weekly_backup"
-        )
-
-    # Automatically called by the timer named 'weekly_backup'
-    def ttse__on_weekly_backup(self, timer_info):
-        self.log("Executing weekly database backup...")
-        # Place backup logic here
-```## `File: _documents\TaskTonic - Testing in the ttDistiller.md`
-# Testing TaskTonic: Mastering the `ttDistiller`
-
-Testing software is fundamental, but testing **concurrent, asynchronous systems** is notoriously difficult. In standard threaded or `asyncio` applications, you are at the mercy of the OS scheduler. A test might pass 99 times and fail on the 100th because a background thread executed a millisecond too late. You cannot easily pause time, inspect the exact state mid-execution, or predict the exact order of operations.
-
-TaskTonic eliminates these threading nightmares through its atomic **Sparkles** and sequential queue. But how do you test an asynchronous queue without relying on messy `time.sleep()` calls in your tests?
-
-Enter the **`ttDistiller`**: a specialized, deterministic test engine for TaskTonic.
-
----
-
-## 1. The Print Statement vs. The Distiller (`self.log` vs `ttDistiller`)
-
-When developing a Tonic, your first instinct is to use `self.log("Doing something...")`. This is excellent for visual debugging. You can watch the execution flow, state changes, and parameter values scroll by in your console.
-
-However, **you cannot write an automated unit test against console output**. 
-If someone breaks your Tonic's logic six months from now, `self.log` won't fail a CI/CD pipeline. 
-
-The `ttDistiller` replaces the standard `ttCatalyst` engine during testing. Instead of running a continuous, infinite loop in the background, the Distiller acts as a **manual crank** for the TaskTonic engine. It records every Sparkle, every state change, and every parameter passed, turning your asynchronous application into a completely synchronous, predictable, and heavily inspectable data structure.
-
-## 2. Usage: Pytest or Standalone
-
-You don't need a heavy testing framework to use the Distiller, but it integrates perfectly with them.
-*   **Standalone:** You can write a simple Python script that instantiates a Distiller, runs your Tonic, and asserts conditions using standard `assert` statements.
-*   **Pytest (Recommended):** You can use `pytest` fixtures to set up your Distiller, run your Tonics through their paces, and generate beautiful test reports. The Distiller runs synchronously in the main thread, making your `pytest` suite incredibly fast and 100% deterministic.
-
----
-
-## 3. Controlling Time and Execution: Distiller Functions
-
-Because the Distiller owns the queue, you dictate exactly when and how Sparkles are executed.
-
-### Step-by-Step Sparkling
-Instead of `start_sparkling()`, you tell the Distiller exactly how many items to process from the queue.
-```python
-# Process exactly ONE Sparkle on the queue, then pause.
-distiller.sparkle(steps=1) 
-
-# Process 5 Sparkles, then pause.
-distiller.sparkle(steps=5)
-```
-This allows you to freeze the universe mid-execution and inspect the state of your application.
-
-### Sparkling Until a Condition
-Often, you don't know *exactly* how many Sparkles it takes to finish a complex network handshake. You just want to run the engine until a specific event happens.
-```python
-# Run the engine until the Tonic enters the 'finished' state
-distiller.run_until_state(tonic_instance, target_state='finished')
-
-# Run the engine until a specific Sparkle method is called
-distiller.run_until_sparkle(tonic_instance, target_sparkle='ttse__on_data_received')
-```
-
-### Data Probing
-While frozen between Sparkles, you can "probe" your Tonic. Since the Distiller runs in your testing thread, you have safe, direct access to the Tonic's internal variables. You can assert that `tonic_instance.download_count == 5` exactly at the moment it enters the 'saving' state.
-
-### Contract Testing (The Ultimate Regression Guard)
-Because TaskTonic executes predictably, the sequence of Sparkles and State changes forms a rigid "Contract". 
-The Distiller can record a "Golden Run" of your Tonic. If a junior developer later modifies the code and accidentally triggers an extra `ttsc__reconnect` Sparkle, the Distiller will fail the test immediately because the execution signature (the Contract) no longer matches the expected sequence.
-
----
-
-## 4. Unpacking the Status Content (and Profiling)
-
-Every time a Sparkle is executed, the Distiller logs a comprehensive status record. This isn't just a string; it's a rich data structure containing:
-
-*   **Target:** Which Tonic instance executed the Sparkle.
-*   **Method:** The exact method name (e.g., `ttsc__process_chunk`).
-*   **Arguments:** The `args` and `kwargs` passed into the Sparkle.
-*   **State:** The state of the Tonic before and after the Sparkle.
-*   **Execution Time (Profiling):** Crucially, the Distiller records the exact `at_enter` and `at_exit` timestamps for every Sparkle. 
-
-**Finding the "Giant Sparkle":**
-Remember the golden rule of Sparkling Programming: *Never block the Catalyst.*
-If you suspect your UI is stuttering, you can write a test and check the Distiller's execution times. If the Distiller reports that `ttsc__parse_xml` took 450ms, you instantly know you have found a "Giant Sparkle" that needs to be broken down using the Chunked Iterator pattern.
-
----
-
-## 5. Mocking Infusions vs. Integration Testing
-
-TaskTonic encourages building hierarchical applications where a Parent Tonic delegates work to Child Tonics (Infusions). The Distiller allows you to test these at multiple levels.
-
-### A. The Unit Test (Mocking Infusions)
-If you want to test the Parent's logic independently, you don't want the actual IP connections or databases (the children) to fire. 
-1.  **Mock the Infusion:** Override the child Tonic with a mock version.
-2.  **Inject Events:** From your test script, you act as the child. You manually queue up events to see how the Parent reacts.
-```python
-# We are the test. We pretend the child (network socket) received data.
-# We inject this directly onto the queue for the parent to process.
-distiller.inject_sparkle(parent_tonic.ttse__on_network_data, {"status": "ok", "payload": "123"})
-distiller.sparkle(steps=1)
-assert parent_tonic.current_state == 'processing_data'
-```
-
-### B. The Integration Test (Full Hierarchy)
-You can also load the parent *and* all its real infusions into the Distiller. 
-Because all Tonics in the same Formula share the same Catalyst engine, the Distiller easily manages the master queue for the entire tree. You can trigger a high-level command on the Parent, tell the Distiller to run 50 Sparkles, and watch the entire cascade of commands and events flow down to the children and bubble back up to the parent. It provides a flawless, synchronous integration test of a highly asynchronous system.
-
----
-
-### Summary
-Testing concurrent code used to mean adding `time.sleep(1)` everywhere and praying. With TaskTonic and the `ttDistiller`, you gain the power to freeze time, inspect memory, profile execution speeds, and lock down your application's behavior with deterministic contracts.
-```## `File: _documents\TaskTonic - Depending on your state.md`
-# Mastering State Machines in TaskTonic
-
-When building asynchronous systems, keeping track of "what the system is currently doing" can quickly devolve into a nightmare of boolean flags (`is_connecting`, `has_data`, `is_waiting`). 
-
-TaskTonic eliminates this spaghetti code by building a highly efficient **State Machine** directly into the core `ttTonic` class [1-3].
-
-Here is everything you need to know about why, when, and how to use state machines in your Sparkling Programming journey.
-
----
-
-## 1. Why and When to Use a State Machine?
-
-A State Machine restricts which actions are valid based on the current "mode" (or state) of the application. 
-
-**When to use one:**
-*   **Complex Asynchronous Flows:** Like network communication (e.g., `disconnected` -> `connecting` -> `authenticating` -> `ready`) [4-6].
-*   **User Interfaces:** Managing wizard flows, disabled/enabled button states, or traffic light simulations [7, 8].
-*   **Hardware Control:** Ensuring a motor can only receive a "move" command if it is in an `idle` state, not if it is in an `error` or `moving` state.
-
-**When NOT to use one:**
-State machines are **not mandatory** in TaskTonic [2, 9]. 
-If your Tonic is simply a data pipeline (e.g., it receives an event, processes it, and spits it out), or a simple standalone worker, a state machine is overkill. You can just use generic "flat" sparkles (e.g., `ttsc__process_data`) without ever calling `to_state()`. If you never call `to_state()`, the Tonic remains in its default stateless mode (`state = -1`) [10, 11].
-
----
-
-## 2. How it Works: The State Lifecycle
-
-In TaskTonic, you don't need to define massive dictionary structures to configure states. You simply transition between them using `self.to_state('state_name')` [3, 11, 12].
-
-### The Transition Sequence
-A critical concept to grasp is that calling `self.to_state()` **does not immediately change the state and interrupt your current code** [11]. Instead, it queues up a highly specific sequence of events that guarantees data integrity.
-
-If you call `self.to_state('new_state')` inside a Sparkle, the exact sequence of execution is [11, 13]:
-
-1.  **Current Sparkle Finishes:** The rest of the code in your current Sparkle executes to completion [11].
-2.  **`on_exit` is Triggered:** TaskTonic automatically executes the exit handler for the *old* state [13].
-3.  **State Transition:** The internal state variable is updated to the new state [13, 14].
-4.  **`on_enter` is Triggered:** TaskTonic automatically executes the enter handler for the *new* state [13].
-
-Because these transitions are scheduled as rapid `extra_sparkles` behind the scenes, the Catalyst executes the entire block seamlessly before grabbing the next user command from the queue [13, 15].
-
----
-
-## 3. The Queueing Secret: Late State Binding
-
-This is arguably the most powerful feature of TaskTonic’s architecture, and it is vital for concurrency:
-
-**TaskTonic checks the state when a Sparkle is *executed*, NOT when it is placed on the queue [16, 17].**
-
-Imagine a UI with two fast button clicks:
-1.  User clicks "Disconnect" (queues `ttsc__disconnect`).
-2.  A millisecond later, user clicks "Send Data" (queues `ttsc__send_data`).
-
-If the "Disconnect" Sparkle changes the state from `connected` to `offline`, what happens to the pending "Send Data" Sparkle already sitting in the queue?
-
-When the Catalyst pulls `ttsc__send_data` from the queue, it dynamically checks the Tonic's state *at that exact moment* [16]. Because the state is now `offline`, TaskTonic looks for `ttsc_offline__send_data`. If you haven't defined that, it safely falls back to a generic handler or silently does nothing (`_noop`) [3, 11, 18, 19]. 
-
-You never have to write `if self.is_connected:` inside your Sparkles. The queue inherently protects you from stale asynchronous calls!
-
----
-
-## 4. The Syntax for State Sparkles
-
-TaskTonic uses smart naming conventions (introspection) to route your Sparkles. You don't need to register anything manually [20-23].
-
-The general syntax pattern is: `prefix_[state]__name` [3, 21, 24].
-
-### A. The Lifecycle Hooks
-These are automatically called during transitions [25, 26].
-*   `ttse__on_enter(self)`: Called whenever *any* state is entered [25].
-*   `ttse__on_exit(self)`: Called whenever *any* state is exited [25].
-*   `ttse_<state>__on_enter(self)`: Called *only* when entering a specific state (e.g., `ttse_waiting__on_enter`) [25, 26].
-
-### B. State-Specific Sparkles
-You can restrict a command or event so it behaves differently (or only exists) in a specific state [3, 19, 27].
-
-```python
-class SmartDoor(ttTonic):
-    def ttse__on_start(self):
-        self.to_state('locked') # Initial state [28]
-
-    # --- STATE: LOCKED ---
-    def ttse_locked__on_enter(self):
-        self.log("The door is now locked.") # [28]
-        
-    def ttsc_locked__open(self):
-        self.log("Cannot open. Door is locked!")
-        
-    def ttsc_locked__unlock(self):
-        self.to_state('unlocked')
-
-    # --- STATE: UNLOCKED ---
-    def ttsc_unlocked__open(self):
-        self.log("Opening the door...")
-        self.to_state('open')
-        
-    def ttsc_unlocked__lock(self):
-        self.to_state('locked')
-```
-
-### C. The Fallback Chain
-What happens if another Tonic calls `door.ttsc__open()` while the door is in an unknown state? TaskTonic follows a strict resolution order [3, 19, 29]:
-
-1.  **Specific:** It looks for `ttsc_<current_state>__open`.
-2.  **Generic (Fallback):** If the specific method doesn't exist, it looks for a stateless fallback: `ttsc__open` [19, 30].
-3.  **No-Op:** If neither exists, it safely ignores the command using an internal `_noop` (doing nothing) [11, 19]. 
-
-This allows you to write incredibly clean code. Define the generic behavior once, and only override it with a state-specific `ttsc_<state>__name` when the behavior needs to deviate!## `File: _documents\Tasktonic - At you Service.md`
-# Mastering TaskTonic Services (The Singleton Pattern)
-
-When building complex applications, you often need a central resource that multiple Tonics can share without stepping on each other's toes. In traditional programming, you might use global variables or implement complex Singleton patterns with thread locks. 
-
-TaskTonic provides an elegant, built-in solution for this: **Services** [1].
-
-Here is everything you need to know about what Services are, when to use them, how to create them, and the best practices for context-aware initialization.
-
----
-
-## 1. What is a Service and When Do You Use It?
-
-A Service is a special `ttTonic` class that is managed as a **Singleton** [1, 2]. The TaskTonic metaclass guarantees that **only one instance of a Service ever exists** throughout your application's lifecycle [3, 4].
-
-When a Tonic tries to create an instance of a Service:
-*   **The First Time:** The framework creates the instance, executes its `__init__` method, and registers it in the `ttLedger` [3-5].
-*   **Every Subsequent Time:** The framework intercepts the creation, finds the existing instance in the ledger, and returns it. `__init__` is *not* called again [4, 5].
-
-**When to use a Service:**
-You should use a Service for any central resource that needs to be unique and shared [6, 7]:
-*   **Databases:** A single connection pool manager (`DatabaseService`) [6, 7].
-*   **Hardware Control:** A single handler for a serial port to prevent multiple Tonics from sending conflicting bytes (`SerialService`) [7, 8].
-*   **State Management:** A centralized data store like the `DigitalTwin` (using `ttStore`) [9].
-*   **Logging/Configuration:** A central logger or config file loader [6, 7].
-
----
-
-## 2. How to Create a Service
-
-Creating a Service requires only a few specific steps. 
-
-### Step 1: The Class Flag
-You define a Service by inheriting from `ttTonic` (or another essence) and setting the `_tt_is_service` class variable to a unique string [10, 11]. This string is the name the Ledger uses to identify the singleton [10, 11].
-
-```python
-from TaskTonic import ttTonic
-
-class DatabaseService(ttTonic):
-    _tt_is_service = "SharedDatabaseService" # Unique identifier
-```
-
-### Step 2: `__init__` (One-Time Setup)
-Implement your `__init__` method for configuration that should only happen **once** (like connecting to the database) [11, 12]. 
-*   **Naming Convention:** Prefix parameters intended for one-time setup with `srv_` (e.g., `srv_db_url`) [12, 13].
-*   **Kwargs Rule:** You *must* accept `**kwargs` and pass them to `super().__init__(**kwargs)` so the framework can handle context routing [12, 13].
-
-```python
-    def __init__(self, srv_db_url, **kwargs):
-        super().__init__(**kwargs)
-        self.db_url = srv_db_url
-        self.log(f"Connecting to database at {self.db_url} (Happens ONCE)")
-        self.connected_clients = {}
-```
-
----
-
-## 3. The `_init_service` Hook (Per-Access Setup)
-
-Because `__init__` only runs once, how does the Service know when a *new* Tonic connects to it? 
-
-TaskTonic provides the **`_init_service`** hook. This method is called by the framework **every single time** a Tonic asks for the Service (including the very first time) [5, 14, 15]. 
-
-*   **Naming Convention:** Prefix parameters intended for per-access setup with `ctxt_` (e.g., `ctxt_access_level`) [13, 16].
-*   This is where you register the new client (the `context`) with your Service [17].
-
-### 🚨 Best Practice: Use a Sparkle for Registration!
-When a worker Tonic requests your Service, the `_init_service` method is executed *in the calling Tonic's thread*. If your Service is running on its own Catalyst (its own thread), modifying Service variables directly inside `_init_service` violates TaskTonic's thread-safety guarantees!
-
-**The Golden Rule:** Use `_init_service` strictly to put a command (`ttsc__`) onto the Service's queue [18, 19]. Let the Service process the registration in its own time, ensuring atomic thread safety.
-
-```python
-    def _init_service(self, context, ctxt_access_level="read", **kwargs):
-        """
-        Runs EVERY time a Tonic binds this service.
-        Runs in the CALLER'S thread. Do not modify state directly!
-        """
-        if context is None:
-            return
-            
-        # Queue a sparkle to handle the registration safely!
-        self.ttsc__register_new_client(context, ctxt_access_level)
-
-    def ttsc__register_new_client(self, context, access_level):
-        """
-        Runs in the SERVICE'S thread. 100% thread-safe.
-        """
-        self.log(f"Registering client '{context.name}' with level: {access_level}")
-        self.connected_clients[context.id] = {
-            'instance': context, 
-            'level': access_level
-        }
-```
-
----
-
-## 4. How to Use a Service
-
-To use a Service, you simply instantiate it as if it were a normal Tonic [20, 21]. The framework handles the Singleton magic behind the scenes.
-
-```python
-class DataAnalyzer(ttTonic):
-    def ttse__on_start(self):
-        # 1. Ask for the service. 
-        # Pass 'srv_' args just in case this is the first time it's created.
-        # Pass 'ctxt_' args for this specific analyzer.
-        self.db = DatabaseService(
-            srv_db_url="postgres://user:pass@localhost",
-            ctxt_access_level="write"
-        )
-        
-    def ttsc__save_data(self):
-        self.db.ttsc__store_record({"data": "123"})
-```
-
-### ⚠️ The Context Trap (Warning!)
-
-By default, when you instantiate a Tonic inside another Tonic, the new Tonic becomes a child of the caller (it binds to the caller's context) [22, 23]. 
-
-If you create a Service from a temporary worker Tonic, the Service becomes a child of that worker [22, 23]. **If the worker finishes, it will recursively finish all its children—killing your shared Service for the entire application!** [22, 23]
-
-**How to avoid this:**
-It is highly recommended to create Services at the top level of your application (in your `ttFormula` inside `creating_starting_tonics`) [23, 24]. If you *must* create a Service from inside a worker, explicitly break the context chain by passing `context=None` (or `context=-1`):
-
-```python
-    def ttse__on_start(self):
-        # By passing context=None, the Service is registered at the root level,
-        # completely immune to this worker's lifecycle.
-        self.db = DatabaseService(
-            context=None, 
-            srv_db_url="postgres://..."
-        )
-        # Manually trigger the access hook for this worker
-        self.db._init_service(context=self, ctxt_access_level="read")
-```
-
-## Summary Checklist for Services
-1. Add `_tt_is_service = "name"` to your class [10, 11].
-2. Use `__init__` for one-time setup (`srv_` kwargs) [11, 12].
-3. Use `_init_service` for per-client setup (`ctxt_` kwargs) [13, 14, 16].
-4. **Always** dispatch a `ttsc__` sparkle inside `_init_service` to modify the Service's internal state [18, 19]. 
-5. Instantiate Services at the Formula level to prevent accidental teardowns [22-24].
-```## `File: _documents\TaskTonic - Active data store.md`
-# ttStore & Store/Item: Central Data Repository
-
-This documentation describes the functionality of the `Store` and `Item` classes and their integration within TaskTonic
-via `ttStore`.
-
-## Introduction
-
-In complex applications, it is essential to share data between different components in a structured and accessible way.
-`ttStore` functions as a **Central Data Repository**. It offers a hierarchical storage structure (comparable to a file
-system or a nested dictionary) that is:
-
-1. **Centralized:** A single source of truth for parameters, sensor values, and configurations.
-2. **Reactive:** Components can subscribe to changes in specific data paths.
-3. **Flexible:** Data can be accessed via absolute paths or relative pointers (`Item`).
-
----
-
-## Concepts: Store vs. ttStore
-
-The system consists of two layers that can also be used **independently**.
-
-### 1. The Core: `Store` and `Item`
-
-The `Store` is the pure data container. It is a standalone class that holds the data and provides methods to read or
-write data via paths (e.g., `'sensors/temp/value'`).
-
-The `Item` is a smart "pointer" or "cursor" to a specific location in the `Store`. It allows for relative navigation
-without needing to know the full absolute path.
-
-> **Note:** `Store` and `Item` can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical
-data structure.
-
-### 2. The Service: `ttStore`
-
-`ttStore` is the TaskTonic wrapper around a `Store`. It transforms the store into a **Service** within the TaskTonic
-ecosystem. This adds capabilities such as:
-
-* **Event-driven updates:** Automatically notify other Tonics (like UI or controllers) upon changes.
-* **Service Binding:** Easily linked to other Tonics via `self.bind()`.
-
----
-
-## API Reference & Methods
-
-Below is an overview of the most important methods for data manipulation and navigation.
-
-### Dictionary Access (`[]` Syntax)
-
-For convenience, `ttStore` and `Item` support standard Python dictionary syntax.
-
-* **Reading:** `val = store['path']`
-    * Equivalent to `.get('path')`.
-    * Returns `None` if the path does not exist (unlike standard Python dicts which raise KeyError).
-* **Writing:** `store['path'] = val`
-    * Equivalent to `.set([('path', val)])`.
-    * Triggers updates immediately (unless inside a `group`).
-
-**Example:**
-
-```python
-# Read
-current_limit = self.twin['parameters/temp_limit']
-
-# Write
-self.twin['parameters/temp_limit'] = 12.0
-```
-
-### Writing Data (`set`, `.v`, `.append`)
-
-#### `set(data)`
-
-Writes one or multiple values to the store. It accepts a `dict` or an `Iterable` (list/tuple) of tuples.
-
-* **Usage:** Initialization, bulk updates, or when you need to write multiple values atomically.
-* **Smart Paths:**
-    * `#`: Creates a new unique entry (auto-increment list).
-    * `./`: Refers to the last created entry (useful for setting properties of an item).
-
-**Example:**
-
-```python
-# Initialize a store with parameters and sensors
-self.twin.set([
-    ('parameters/update_freq', 2),     # Set update frequency to 2
-    ('sensors/#', 'temp'),             # Create new sensor 'temp'
-    ('sensors/./value', 15.0),         # Set value of THAT sensor
-    ('sensors/./unit', '℃'),           # Set unit of THAT sensor
-])
-```
-
-#### `.v` (Value Property via Item)
-
-If you hold an `Item` object (a pointer to a location), you can read and write directly via the `.v` property. This is
-the most efficient way to manipulate data if you already have the Item.
-
-**Example:**
-
-```python
-# Assume we have a pointer (Item) to the sensor value
-sensor_val_item = self.twin.at('sensors/#0/value')
-
-# Write a new value
-sensor_val_item.v = 22.5
-```
-
-#### `append(value)` (via Item) or `append(path, value)` (via Store)
-
-Adds a new item to a list. This is a cleaner, more pythonic alternative to using the `'path/#'` syntax when adding
-single items.
-
-* **Via Item:** `item.append(value)`
-* **Via Store:** `store.append(path, value)`
-
-**Example:**
-
-```python
-# Append via Store (adds 'System Started' to the 'logs' list)
-self.twin.append('logs', 'System Started')
-
-# Append via Item
-log_item = self.twin.at('logs')
-log_item.append('User logged in')
-```
-
-### Reading Data (`get`, `at`)
-
-#### `get(path, default=None)`
-
-Retrieves the value of a specific path. If the path does not exist, the `default` value is returned.
-
-**Example:**
-
-```python
-freq = self.twin.get('parameters/update_freq', 5)  # Default 5 if not found
-```
-
-#### `at(path) -> Item`
-
-Returns an `Item` object pointing to the location `path`. This is **more powerful** than `get` because it allows further
-navigation from that point.
-
-**Example:**
-
-```python
-# Get a pointer (Item) to the first sensor
-sensor_item = self.twin.at('sensors/#0')
-
-# Read values via the Item
-print(sensor_item['value'].v)  # Prints: 15.0
-```
-
-### Navigation (`Item` objects)
-
-An `Item` object acts as a smart window onto your data.
-
-* **`item['child']`**: Navigate to a sub-item.
-    ```python
-    val = sensor_item['value'].v
-    ```
-* **`item.parent`**: Returns an `Item` to the parent.
-    ```python
-    root_sensors = sensor_item.parent # Now points to 'sensors'
-    ```
-* **`item.list_root`**: If the item is part of a list (like sensors), this returns the item itself, regardless of how
-  deep you are in the hierarchy.
-    ```python
-    # If located at 'sensors/#0/value', list_root returns 'sensors/#0'
-    sensor_name = sensor_item.list_root.v # Returns e.g., 'temp'
-    ```
-
-#### `.children(prefix=None)`
-
-Returns an **iterator** (not a list) of `Item` objects that are direct children of the current item.
-
-* **Why an iterator?** It is memory efficient (lazy evaluation). If you have thousands of items, it doesn't create
-  objects for all of them unless you consume them.
-* **prefix:** Optional string to filter children (e.g., useful if you have different types of lists in one folder).
-
-**Example 1: Converting to a list**
-If you need index access or the length, convert it to a list explicitly.
-
-```python
-sensors = self.twin.at('sensors')
-sensor_list = list(sensors.children())
-print(f"Count: {len(sensor_list)}")
-```
-
-**Example 2: Iterating directly (Efficient)**
-Searching for a specific sensor without creating a full list in memory.
-
-```python
-target_sensor = None
-for item in self.twin.at('sensors').children():
-    if item.v == 'humidity':
-        target_sensor = item
-        break
-```
-
-### Reactivity (`subscribe`)
-
-Only available in `ttStore`. This allows subscribing a method to data changes.
-
-#### `subscribe(path, callback)`
-
-* **path:** The path to monitor (e.g., `'sensors'`).
-* **callback:** The method called upon change.
-
-The callback receives a list of `updates`. Each update is a tuple: `(path, new_value, old_value, source)`.
-
-**Example:**
-
-```python
-def ttse__on_start(self):
-    # Listen to anything changing under 'sensors'
-    self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-
-def ttse__on_sensor_update(self, updates):
-    for path, new, old, source in updates:
-        print(f"Sensor update at {path}: {old} -> {new}")
-```
-
-### Utilities (`dumps`, `group`, `source`)
-
-#### `dumps()`
-
-Returns a string representation of the entire store (useful for debugging).
-
-```python
-print(self.twin.dumps())
-```
-
-#### `group(notify=True, source_id=None)` & `source(source_id)`
-
-Context managers to control how updates are processed.
-
-1. **`group(notify=False)`**: Performs updates atomically.
-
-* **Usage:** Batch initialization. No events are fired until the block ends (or never if `notify=False`).
-
-  ```python
-  with self.twin.group(notify=False):
-      self.twin.set(...) 
-  ```
-
-2. **`source(source_id)` / `group(..., source_id=...)`**:
-
-* **Usage:** Identifying *who* made the change. This is crucial for bidirectional sync (e.g., connecting a GUI slider to
-  a value).
-* If a GUI updates the Store, the Store notifies the GUI. You want the GUI to ignore that notification to prevent an
-  infinite loop.
-
-  ```python
-  # Example: Updating from a specific source (e.g., 'GUI')
-  with self.twin.source('GUI'):
-      self.twin['parameters/speed'] = 50
-  
-  # In the callback, you can check the source:
-  def on_change(self, updates):
-      for path, new, old, src in updates:
-          if src == 'GUI':
-              continue # Ignore changes I made myself
-          # Update GUI display...
-  ```
-
----
-
-## Performance & Best Practices
-
-Although `ttStore` is powerful, consider the following points for optimal performance and clean code.
-
-### 1. Batch Updates with `group`
-
-When modifying a lot of data simultaneously (e.g., during startup or reset), always use
-`with self.group(notify=False):`.
-
-* **Reason:** Without this, every single write action triggers all subscribers immediately. `group` prevents this "
-  update storm".
-
-### 2. Efficiency of `Item`
-
-If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the `Item` **once** during
-`__init__` or `on_start`, and cache it.
-
-* **Inefficient:** Calling `self.twin.get('sensors/#0/value')` in every cycle (must parse the path string every time).
-* **Efficient:**
-    ```python
-    # In __init__:
-    self.temp_val_item = self.twin.at('sensors/#0/value')
-
-    # In timer loop:
-    self.temp_val_item.v += 0.1
-    ```
-
-### 3. Data Types
-
-The Store is not strictly typed (it is Python), but consistency is key. If a path starts as a `float` (`15.0`), try to
-keep it that way and do not suddenly change it to a `string` ("15"), unless your application logic specifically handles
-this.
-
----
-
-## Example Implementation
-
-Below is a full integration where `MyProcess` writes data and `OperatorInterface` reacts to that data via the
-`DigitalTwin` store.
-
-```python
-from TaskTonic import *
-from TaskTonic.ttTonicStore import ttStore
-import random
-
-
-# --- The Data Repository Service ---
-class DigitalTwin(ttStore):
-    _tt_is_service = "digital_twin"  # Service name for binding
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.my_record['auto_finish'] = True
-
-    def _init_post_action(self):
-        super()._init_post_action()
-        # Use group(notify=False) for performance during init
-        with self.group(notify=False):
-            # Because the set method uses Iterable, both tuples (()) and lists [] are valid.
-            self.set((
-                ('parameters/update_freq', 2),
-                ('parameters/temp_limit', 10),
-                ('sensors/#', 'temp'),         # Create sensor 0
-                ('sensors/./value', 15.0),
-                ('sensors/./unit', '℃'),
-                ('sensors/./high_alarm', False),
-                ('sensors/#', 'humidity'),     # Create sensor 1
-                ('sensors/./value', -1),
-            ))
-
-        self.log(f"Digital Twin is initialized\n{self.dumps()}")
-
-
-# --- The Observer (e.g., GUI or Logger) ---
-class OperatorInterface(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        # Bind to the service
-        self.twin = DigitalTwin()
-
-    def ttse__on_start(self):
-        # Subscribe to sensor changes
-        self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-        # Schedule parameter update and end of program
-        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
-        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
-
-    def ttse__on_sensor_update(self, updates):
-        for path, new, old, source in updates:
-            # Use .at(path) to get an Item for smart navigation
-            # .list_root automatically navigates up to the sensor item (e.g., 'sensors/#0')
-            sensor_item = self.twin.at(path).list_root
-
-            # Retrieve name and value via the item
-            name = sensor_item.v
-            val = sensor_item['value'].v
-            unit = sensor_item.get('unit', '')
-
-            self.log(f"UPDATE OF SENSOR {name}: {val:.3f}{unit}")
-
-    def ttse__on_parm_update(self, tmr):
-        self.twin['parameters/update_freq'] = .5
-
-    def ttse__on_end_program(self, tmr):
-        self.finish()
-
-
-# --- The Controller (Process Logic) ---
-class MyProcess(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        self.my_record['auto_finish'] = True
-        self.twin = self.bind(DigitalTwin)
-
-        # Performance optimization: Cache the item pointer
-        # This avoids parsing the path string in every loop cycle
-        self.temp_sens_item = self.twin.at('sensors/#0')
-
-    def ttse__on_start(self):
-        self.twin.subscribe("parameters", self.ttse__on_param_update)
-        # Start a timer based on a parameter from the store
-        freq = self.twin.get('parameters/update_freq', 5)
-        self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__on_param_update(self, updates):
-        for path, new, old, source in updates:
-            if path == 'parameters/update_freq':
-                self.utmr.stop()
-                # Restart timer with new frequency
-                freq = self.twin.get('parameters/update_freq', 5)
-                self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__update_timer(self, tmr):
-        # Writing directly via the cached item is very efficient
-        self.temp_sens_item['value'].v += random.uniform(-2, 2)
-
-
-# --- App Configuration ---
-class myApp(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
-
-    def creating_starting_tonics(self):
-        DigitalTwin()
-        OperatorInterface()
-        MyProcess()
-
-
-if __name__ == '__main__':
-    myApp()
-```## `File: _documents\Store API.md`
-# TaskTonic Store & Item API Documentation
-
-The TaskTonic state management system consists of two primary components:
-
-1. **`Store`**: The thread-safe, hierarchical data core that handles storage, pub/sub notifications, and batching.
-2. **`Item`**: A convenient, cursor-like view representing a specific path within the `Store`, allowing for intuitive
-   data manipulation and traversal.
-
----
-
-## 1. Class: `Store`
-
-The central registry. It holds the state and manages all updates and subscriptions.
-
-### Core Methods
-
-#### `at(path: str) -> Item`
-
-Returns an `Item` cursor pointing to the specified path in the store.
-
-```python
-from TaskTonic.internals import Store
-
-store = Store()
-settings = store.at("app/settings")
-```
-
-#### `set(path_or_data, value=None, notify=True) -> Item`
-
-Updates a value or performs a batch update at the root level.
-
-```python
-# Single value update
-store.set("system/status", "online")
-
-# Batch dictionary update
-store.set("system/metrics", {
-    "cpu": 45,
-    "memory": 1024
-})
-```
-
-#### `get(path: str, default=None) -> Any`
-
-Retrieves a value by its absolute path.
-
-```python
-cpu_usage = store.get("system/metrics/cpu", default=0)
-```
-
-#### `subscribe(path, callback, ignore_source=None, recursive=True, exclude=None)`
-
-Listens for changes on a specific path. By default, it also triggers when descendant paths change.
-
-```python
-def on_user_change(events):
-    for path, new_val, old_val, source in events:
-        print(f"Path '{path}' changed from {old_val} to {new_val}")
-
-# Listen to all changes under 'users', except for 'users/temporary'
-store.subscribe("users", on_user_change, exclude=["users/temporary"])
-```
-
-### Context Managers
-
-#### `group(source_id=None, notify=True)`
-
-Batches multiple updates into a single notification event. Highly recommended when updating multiple related fields to
-prevent redundant callback triggers.
-
-```python
-# Both updates happen, but listeners are only notified once at the end of the block.
-with store.group(source_id="network_sync"):
-    store["player/x"] = 150
-    store["player/y"] = 200
-```
-
----
-
-## 2. Class: `Item`
-
-An object-oriented way to interact with the `Store`. You usually get an `Item` by calling `store.at("path")` or
-`store["path"]`.
-
-### Properties
-
-#### `.v`
-
-Directly gets or sets the value of the current item. Writing to `.v` always triggers a notification unless grouped.
-
-```python
-health_item = store.at("player/health")
-health_item.v = 100
-
-if health_item.v < 20:
-    print("Warning: Low health!")
-```
-
-#### `.parent`
-
-Returns an `Item` pointing to the direct parent container.
-
-```python
-city_item = store.at("users/profile/address/city")
-address_item = city_item.parent  # Points to "users/profile/address"
-```
-
-#### `.list_root`
-
-Walks up the path tree to find the nearest ancestor created as a list item (identified by the `#` syntax, e.g., `#0`,
-`user#1`). Very useful in callbacks to find the context of a deeply nested change.
-
-```python
-# Imagine a path: "devices/#0/sensors/temperature"
-temp_item = store.at("devices/#0/sensors/temperature")
-
-# Quickly grab the device root item ("devices/#0")
-device_root = temp_item.list_root
-print(f"Device name: {device_root['name'].v}")
-```
-
-### Methods
-
-#### `set(data, value=None, notify=True)`
-
-The most versatile way to write data. It supports **Smart Pathing**:
-
-- `#`: Appends a new item to a list.
-- `.`: Targets the *last created* item in a list.
-
-```python
-users = store.at("users")
-
-# Smart Pathing: Add a new user and assign sub-properties instantly
-users.set("#", "Alice")           # Creates users/#0
-users.set("./role", "Admin")      # Targets users/#0/role
-users.set("./age", 32)            # Targets users/#0/age
-
-# Batch setting via dictionary
-users.set("#", "Bob")             # Creates users/#1
-users.at(".").set({
-    "role": "Editor",
-    "age": 25
-})
-```
-
-#### `get(key: str, default=None)`
-
-Dictionary-style lookup for children relative to this item.
-
-```python
-bob_item = store.at("users/#1")
-bob_role = bob_item.get("role", "Guest")
-```
-
-#### `append(prefix=None)` / `extend(data_list, prefix=None)`
-
-Explicit methods to add items to a list container.
-
-```python
-devices = store.at("devices")
-
-# Using append explicitly instead of '#'
-new_device = devices.append(prefix="sensor")  # Creates devices/sensor#0
-new_device.v = "Thermometer"
-new_device["active"] = True
-
-# Extend with multiple items
-devices.extend(["Barometer", "Hygrometer"], prefix="sensor")
-```
-
-#### `pop(subpath=None)` / `remove(subpath=None)`
-
-Removes an item (or a child of the item). `pop` returns the value before deletion.
-
-```python
-cart = store.at("shopping_cart")
-cart["apples"] = 5
-
-# Remove and get the value
-apple_count = cart.pop("apples")  # returns 5
-```
-
-#### `children(prefix=None)`
-
-Iterates over all direct child `Item`s.
-
-```python
-for user in store.at("users").children():
-    print(f"User path: {user.path}, Value: {user.v}")
-```
-
-#### `dumps()`
-
-Returns a formatted string representing the subtree, perfect for debugging.
-
-```python
-print(store.at("users").dumps())
-```
-
----
-
-## 3. Store Lists: A Deep Dive
-
-Unlike a standard Python `list` where elements are stored in a linear array (making finding a specific deep item
-potentially slow), TaskTonic **Store Lists** use a hierarchical key-value structure with auto-incrementing keys (like
-`#0`, `#1`).
-
-**The Speed Advantage:** Because every list item has an absolute path (`teams/#1/score`), retrieving it is a direct
-`O(1)` dictionary lookup. You never have to iterate through an array to find or update an item; you just target its
-exact path.
-
-Let's build a list step-by-step to see how the syntax changes the structure.
-
-### 3.1. Basic Append vs. Container Append
-
-There is a big difference between assigning a value directly to the list node (`list/# = value`) versus making the list
-node a container for other properties (`list/#/property = value`).
-
-```python
-store = Store()
-team = store.at("team")
-
-# 1. Basic Append: The node itself holds the value.
-team["#"] = "Alice"
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-
-# 2. Container Append: The node holds children, not a direct value.
-team["#/name"] = "Bob"
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-#   #1/name = Bob    <-- Notice #1 has no direct value, it's a container for 'name'
-```
-
-### 3.2. Targeting the Last Item (`.`)
-
-When you create a container item, you often want to add more properties to that *exact same* newly created item. You use
-the `.` syntax for this.
-
-```python
-# The '.' points to the last created item (#1 in this case)
-team["./role"] = "Developer"
-team["./age"] = 30
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-#   #1/name = Bob
-#   #1/role = Developer
-#   #1/age = 30
-```
-
-### 3.3. Custom Prefixes (`prefix#`)
-
-If you store different types of entities in the same container, you can prefix the `#`. Each prefix maintains its own
-auto-incrementing counter.
-
-```python
-store["devices/sensor#"] = "TempSensor"
-store["devices/sensor#"] = "LightSensor"
-store["devices/camera#"] = "MainCamera"
-
-print(store.at("devices").dumps())
-# Dump of <devices>:
-#   camera#0 = MainCamera
-#   sensor#0 = TempSensor
-#   sensor#1 = LightSensor
-```
-
-### 3.4. Popping an Entire Tree
-
-Because the store is hierarchical, calling `pop()` or `remove()` on a list root item deletes that element **and all of
-its children** instantly.
-
-```python
-# Bob (#1) leaves the team
-popped_val = team.at("#1").pop()
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-# (Bob's name, role, and age are all completely removed from the store)
-```
-
----
-
-## 4. Crucial Concept: Native Python Collections in the Store
-
-You can store native Python collections (like `list`, `dict`, `set`) as a value in the Store, but **you must be aware of
-how notifications work.**
-
-```python
-# Storing a native Python list
-store["inventory/items"] = ["Sword", "Shield"]
-```
-
-⚠️ **WARNING:** If you mutate this native list directly, the Store will **NOT** trigger a change notification, because
-the object reference hasn't changed (the Store doesn't know the inside of the list changed).
-
-```python
-# THIS DOES NOT TRIGGER NOTIFICATIONS!
-store["inventory/items"].v.append("Potion") 
-```
-
-**The Solution:**
-If you need to store native collections and still want UI updates/notifications, you should maintain a separate
-`version` or `length` parameter that you update alongside the mutation, and subscribe to that instead.
-
-```python
-# Subscribe to the version instead
-store.subscribe("inventory/version", on_inventory_update)
-
-# When modifying the native list, also update the version trigger
-with store.group():
-    store["inventory/items"].v.append("Potion")
-    # This triggers the notification!
-    store["inventory/version"].v = store.get("inventory/version", 0) + 1 
-```
-
-*Alternatively, translate the data into a TaskTonic Store List (using `#`) so the Store tracks every deep change
-natively.*
-
----
-
-## 5. TaskTonic Framework: Do's and Don'ts
-
-- **DO** use `with store.group():` when updating multiple properties of the same object to prevent spamming your
-  subscribers with incomplete data states.
-- **DO** use the smart pathing (`#` and `.`) for clean, readable list building.
-- **DO** use `item.list_root` inside your event listeners to easily find the primary record associated with a nested
-  change.
-- **DON'T** mutate native Python `list` or `dict` objects stored in `.v` and expect listeners to fire. Use a sibling
-  `version` node or convert them to TaskTonic Store Lists.
-- **DON'T** use single-line `if` statements with colons (e.g., `if True: return`) in your callbacks or business logic.
-  Always put the statement on a new line.
-- **DON'T** let line lengths exceed 120 characters to maintain readability across the framework.
-- **DON'T** write to `item.v` inside a rapid loop without a silent group, as it will trigger massive amounts of callback
-  notifications.## `File: _documents\TaskTonic Store & Item API Documentation.md`
-# TaskTonic Store & Item API Documentation
-
-The TaskTonic state management system consists of two primary components: 
-
-1. **`Store`**: The thread-safe, hierarchical data core that handles storage, pub/sub notifications, and batching.
-2. **`Item`**: A convenient, cursor-like view representing a specific path within the `Store`, allowing for intuitive data manipulation and traversal.
-
----
-
-## 1. Class: `Store`
-
-The central registry. It holds the state and manages all updates and subscriptions.
-
-### Core Methods
-
-#### `at(path: str) -> Item`
-
-Returns an `Item` cursor pointing to the specified path in the store.
-
-```python
-from TaskTonic.internals import Store
-
-store = Store()
-settings = store.at("app/settings")
-```
-
-#### `set(path_or_data, value=None, notify=True) -> Item`
-
-Updates a value or performs a batch update at the root level.
-
-```python
-# Single value update
-store.set("system/status", "online")
-
-# Batch dictionary update
-store.set("system/metrics", {
-    "cpu": 45,
-    "memory": 1024
-})
-```
-
-#### `get(path: str, default=None) -> Any`
-
-Retrieves a value by its absolute path.
-
-```python
-cpu_usage = store.get("system/metrics/cpu", default=0)
-```
-
-#### `subscribe(path, callback, ignore_source=None, recursive=True, exclude=None)`
-
-Listens for changes on a specific path. By default, it also triggers when descendant paths change.
-
-```python
-def on_user_change(events):
-    for path, new_val, old_val, source in events:
-        print(f"Path '{path}' changed from {old_val} to {new_val}")
-
-# Listen to all changes under 'users', except for 'users/temporary'
-store.subscribe("users", on_user_change, exclude=["users/temporary"])
-```
-
-### Context Managers
-
-#### `group(source_id=None, notify=True)`
-
-Batches multiple updates into a single notification event. Highly recommended when updating multiple related fields to prevent redundant callback triggers.
-
-```python
-# Both updates happen, but listeners are only notified once at the end of the block.
-with store.group(source_id="network_sync"):
-    store["player/x"] = 150
-    store["player/y"] = 200
-```
-
----
-
-## 2. Class: `Item`
-
-An object-oriented way to interact with the `Store`. You usually get an `Item` by calling `store.at("path")` or `store["path"]`.
-
-### Properties
-
-#### `.v`
-
-Directly gets or sets the value of the current item. Writing to `.v` always triggers a notification unless grouped.
-
-```python
-health_item = store.at("player/health")
-health_item.v = 100
-
-if health_item.v < 20:
-    print("Warning: Low health!")
-```
-
-#### `.parent`
-
-Returns an `Item` pointing to the direct parent container.
-
-```python
-city_item = store.at("users/profile/address/city")
-address_item = city_item.parent  # Points to "users/profile/address"
-```
-
-#### `.list_root`
-
-Walks up the path tree to find the nearest ancestor created as a list item (identified by the `#` syntax, e.g., `#0`, `user#1`). Very useful in callbacks to find the context of a deeply nested change.
-
-```python
-# Imagine a path: "devices/#0/sensors/temperature"
-temp_item = store.at("devices/#0/sensors/temperature")
-
-# Quickly grab the device root item ("devices/#0")
-device_root = temp_item.list_root
-print(f"Device name: {device_root['name'].v}")
-```
-
-### Methods
-
-#### `set(data, value=None, notify=True)`
-
-The most versatile way to write data. It supports **Smart Pathing**:
-
-* `#`: Appends a new item to a list.
-* `.`: Targets the *last created* item in a list.
-
-```python
-users = store.at("users")
-
-# Smart Pathing: Add a new user and assign sub-properties instantly
-users.set("#", "Alice")           # Creates users/#0
-users.set("./role", "Admin")      # Targets users/#0/role
-users.set("./age", 32)            # Targets users/#0/age
-
-# Batch setting via dictionary
-users.set("#", "Bob")             # Creates users/#1
-users.at(".").set({
-    "role": "Editor",
-    "age": 25
-})
-```
-
-#### `get(key: str, default=None)`
-
-Dictionary-style lookup for children relative to this item.
-
-```python
-bob_item = store.at("users/#1")
-bob_role = bob_item.get("role", "Guest")
-```
-
-#### `append(prefix=None)` / `extend(data_list, prefix=None)`
-
-Explicit methods to add items to a list container.
-
-```python
-devices = store.at("devices")
-
-# Using append explicitly instead of '#'
-new_device = devices.append(prefix="sensor")  # Creates devices/sensor#0
-new_device.v = "Thermometer"
-new_device["active"] = True
-
-# Extend with multiple items
-devices.extend(["Barometer", "Hygrometer"], prefix="sensor")
-```
-
-#### `pop(subpath=None)` / `remove(subpath=None)`
-
-Removes an item (or a child of the item). `pop` returns the value before deletion.
-
-```python
-cart = store.at("shopping_cart")
-cart["apples"] = 5
-
-# Remove and get the value
-apple_count = cart.pop("apples")  # returns 5
-```
-
-#### `children(prefix=None)`
-
-Iterates over all direct child `Item`s.
-
-```python
-for user in store.at("users").children():
-    print(f"User path: {user.path}, Value: {user.v}")
-```
-
-#### `dumps()`
-
-Returns a formatted string representing the subtree, perfect for debugging.
-
-```python
-print(store.at("users").dumps())
-```
-
----
-
-## 3. Store Lists: A Deep Dive
-
-Unlike a standard Python `list` where elements are stored in a linear array (making finding a specific deep item potentially slow), TaskTonic **Store Lists** use a hierarchical key-value structure with auto-incrementing keys (like `#0`, `#1`). 
-
-**The Speed Advantage:** Because every list item has an absolute path (`teams/#1/score`), retrieving it is a direct `O(1)` dictionary lookup. You never have to iterate through an array to find or update an item; you just target its exact path.
-
-Let's build a list step-by-step to see how the syntax changes the structure.
-
-### 3.1. Basic Append vs. Container Append
-
-There is a big difference between assigning a value directly to the list node (`list/# = value`) versus making the list node a container for other properties (`list/#/property = value`).
-
-```python
-store = Store()
-team = store.at("team")
-
-# 1. Basic Append: The node itself holds the value.
-team["#"] = "Alice"
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-
-# 2. Container Append: The node holds children, not a direct value.
-team["#/name"] = "Bob"
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-#   #1/name = Bob    <-- Notice #1 has no direct value, it's a container for 'name'
-```
-
-### 3.2. Targeting the Last Item (`.`)
-
-When you create a container item, you often want to add more properties to that *exact same* newly created item. You use the `.` syntax for this.
-
-```python
-# The '.' points to the last created item (#1 in this case)
-team["./role"] = "Developer"
-team["./age"] = 30
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-#   #1/name = Bob
-#   #1/role = Developer
-#   #1/age = 30
-```
-
-### 3.3. Custom Prefixes (`prefix#`)
-
-If you store different types of entities in the same container, you can prefix the `#`. Each prefix maintains its own auto-incrementing counter.
-
-```python
-store["devices/sensor#"] = "TempSensor"
-store["devices/sensor#"] = "LightSensor"
-store["devices/camera#"] = "MainCamera"
-
-print(store.at("devices").dumps())
-# Dump of <devices>:
-#   camera#0 = MainCamera
-#   sensor#0 = TempSensor
-#   sensor#1 = LightSensor
-```
-
-### 3.4. Popping an Entire Tree
-
-Because the store is hierarchical, calling `pop()` or `remove()` on a list root item deletes that element **and all of its children** instantly.
-
-```python
-# Bob (#1) leaves the team
-popped_val = team.at("#1").pop()
-
-print(team.dumps())
-# Dump of <team>:
-#   #0 = Alice
-# (Bob's name, role, and age are all completely removed from the store)
-```
-
----
-
-## 4. Crucial Concept: Native Python Collections in the Store
-
-You can store native Python collections (like `list`, `dict`, `set`) as a value in the Store, but **you must be aware of how notifications work.**
-
-```python
-# Storing a native Python list
-store["inventory/items"] = ["Sword", "Shield"]
-```
-
-⚠️ **WARNING:** If you mutate this native list directly, the Store will **NOT** trigger a change notification, because the object reference hasn't changed (the Store doesn't know the inside of the list changed).
-
-```python
-# THIS DOES NOT TRIGGER NOTIFICATIONS!
-store["inventory/items"].v.append("Potion") 
-```
-
-**The Solution:**
-If you need to store native collections and still want UI updates/notifications, you should maintain a separate `version` or `length` parameter that you update alongside the mutation, and subscribe to that instead.
-
-```python
-# Subscribe to the version instead
-store.subscribe("inventory/version", on_inventory_update)
-
-# When modifying the native list, also update the version trigger
-with store.group():
-    store["inventory/items"].v.append("Potion")
-    # This triggers the notification!
-    store["inventory/version"].v = store.get("inventory/version", 0) + 1 
-```
-
-*Alternatively, translate the data into a TaskTonic Store List (using `#`) so the Store tracks every deep change natively.*
-
----
-
-## 5. TaskTonic Framework: Do's and Don'ts
-
-* **DO** use `with store.group():` when updating multiple properties of the same object to prevent spamming your subscribers with incomplete data states.
-* **DO** use the smart pathing (`#` and `.`) for clean, readable list building.
-* **DO** use `item.list_root` inside your event listeners to easily find the primary record associated with a nested change.
-* **DON'T** mutate native Python `list` or `dict` objects stored in `.v` and expect listeners to fire. Use a sibling `version` node or convert them to TaskTonic Store Lists.
-* **DON'T** use single-line `if` statements with colons (e.g., `if True: return`) in your callbacks or business logic. Always put the statement on a new line.
-* **DON'T** let line lengths exceed 120 characters to maintain readability across the framework.
-* **DON'T** write to `item.v` inside a rapid loop without a silent group, as it will trigger massive amounts of callback notifications.
-## `File: _documents\old_documents_not_matching_the_code\ttDataShare.md`
-# DataShare Class: A User Guide
-
-## 1. Introduction
-
-`DataShare` is a powerful, thread-safe, hierarchical data store for Python. It's designed to be a centralized repository
-for application state and configuration, allowing for complex, nested data structures that can be accessed and
-manipulated via a simple path-based syntax.
-
-**Key Features:**
-
-* **Hierarchical Structure:** Access nested data using file-system-like paths (e.g., `'system/network/host'`).
-* **Advanced List Support:** Natively create and manipulate lists within the hierarchy.
-* **Dual-Value Nodes:** A single path can hold both a direct value and serve as a container for sub-keys.
-* **Observer Pattern:** Subscribe to changes at any level of the data hierarchy and receive notifications.
-* **Thread Safety:** All operations are thread-safe, making it ideal for multi-threaded applications.
-* **Serialization:** Save and load the entire data store to a compact binary format.
-
----
-
-## 2. Core Concepts
-
-### Hierarchical Paths
-
-Data is organized in a tree-like structure of nested dictionaries and lists. You interact with it using a **`key_path`
-**, which is a string of keys joined by a separator (default is `/`).
-
-```python
-# This sets a value in a nested dictionary
-ds.set('user/preferences/theme', 'dark')
-```
-
-### List Syntax
-
-`DataShare` has special syntax for interacting with lists.
-
-* **Append (`[]`):** Use an empty `[]` to append a new item to a list. If the list doesn't exist, it will be created.
-* **Index (`[n]`):** Use `[index]` to access or modify a list item at a specific position. Negative indices are
-  supported.
-
-```python
-# Appends 'admin' to the 'user/roles' list
-ds.set('user/roles[]', 'admin')
-
-# Accesses the first role
-role = ds.get('user/roles[0]')
-```
-
-### Dual-Value Nodes (`_value`)
-
-A powerful feature is that any node can have both a direct value and sub-keys. This is handled internally by storing the
-direct value in a special `_value` key. This allows you to treat a path as both an endpoint and a container.
-
-```python
-# Set a direct value for 'lights'
-ds.set('home/living/lights', 'on')
-
-# Set a sub-key on the same 'lights' path
-ds.set('home/living/lights/ceiling', '30%')
-
-# The internal structure is now similar to:
-# 'lights': { '_value': 'on', 'ceiling': {'_value': '30%'} }
-```
-
----
-
-## 3. Initialization
-
-To start, import and instantiate the class.
-
-```python
-# Create an empty instance
-ds = DataShare()
-
-# Create an instance with initial data
-initial = {
-    'system': {
-        'host': 'server.local',
-        'port': 8080
-    }
-}
-ds_with_data = DataShare(initial_data=initial)
-```
-
-The `initial_data` parameter can be one of:
-
-* A `dict`.
-* A `list` of `(key_path, value)` tuples.
-* A `set` or `tuple` of `(key_path, value)` tuples.
-
----
-
-## 4. API Reference
-
-### `set(key_or_data, value=None)`
-
-This is the primary method for adding or modifying data. It's highly versatile.
-
-**1. Set a Single Value**
-
-```python
-ds.set('user/name', 'Alice')
-ds.set('user/id', 123)
-```
-
-**2. Set a List Item by Index**
-This will overwrite the value at the specified index.
-
-```python
-ds.set('user/roles[1]', 'moderator')
-```
-
-**3. Append to a List**
-Use `[]` to add a new item to the end of a list.
-
-* **Appending Simple Values:**
-    ```python
-    # Append a simple string
-    ds.set('user/roles[]', 'guest')
-    ```
-
-* **Appending Complex Objects (Dictionaries):**
-  A powerful feature is creating and populating a dictionary inside a list in one go.
-    1. Use `[]` with a sub-key to create a new dictionary in the list and set its first value.
-    2. Use a negative index like `[-1]` to refer to the item you *just* added and set more values on it.
-
-    ```python
-    # 1. Add a new user 'anna' to the 'app/users' list.
-    # This creates a new dictionary: {'name': {'_value': 'anna'}}
-    ds.set('app/users[]/name', 'anna')
-
-    # 2. Add the role 'admin' to the user we just created.
-    # The path 'app/users[-1]' now refers to anna's dictionary.
-    ds.set('app/users[-1]/role', 'admin')
-
-    # You can continue adding more users
-    ds.set('app/users[]/name', 'ben')
-    ds.set('app/users[-1]/role', 'editor')
-
-    # The resulting list would look like this (in clean view):
-    # (
-    #   {'name': 'anna', 'role': 'admin'},
-    #   {'name': 'ben', 'role': 'editor'}
-    # )
-    ```
-
-> **Note:** When using negative indices like `[-1]` in a `batch_update` block, it refers to the list's state *at the
-time of the call*, not including previous appends within the same batch.
-
-**4. Batch Updates**
-You can set multiple values at once by passing a `dict`, `list`, or `tuple`.
-
-```python
-# Using a dictionary
-ds.set({
-    'system/network/host': 'new-host.com',
-    'system/network/port': 443
-})
-
-# Using a list of tuples
-ds.set([
-    ('user/active', True),
-    ('user/last_login', '2025-09-22')
-])
-```
-
----
-
-### `get(key_path, default=None, *, get_value=0)`
-
-Retrieves data from the store, offering different "views" of the data.
-
-* `key_path`: The path to the data.
-* `default`: The value to return if the path is not found.
-* `get_value`: (Keyword-only) An integer that controls the data view:
-    * `0` **(Default) - Clean View:** Returns a user-friendly view. Internal `_value` wrappers are removed where
-      possible. For example, `{'power': {'_value': 'on'}}` becomes `{'power': 'on'}`. This is the most common mode.
-    * `1` **- Raw View:** Returns the data exactly as it's stored internally, including all `_value` wrappers.
-      Dictionaries are returned as read-only `MappingProxyType` objects.
-    * `2` **- Value-Only View:** Extracts only the direct value from a node's `_value` key, ignoring any sub-keys. If
-      the `_value` key doesn't exist, it returns the `default`.
-
-**Example Setup**
-
-```python
-ds = DataShare()
-ds.set('lights', 'on')
-ds.set('lights/ceiling', '30%')
-ds.set('users[]', 'Alice')
-```
-
-The internal structure of `lights` is `{'lights': {'_value': 'on', 'ceiling': {'_value': '30%'}}}`.
-
-**1. Using `get_value=0` (Clean View - Default)**
-This mode simplifies the output by removing unnecessary `_value` wrappers.
-
-```python
-# Gets the 'lights' node and cleans it up
-# The sub-key 'ceiling' is unwrapped from {'_value': '30%'} to '30%'
-# The main '_value': 'on' remains because 'lights' also has other keys
-clean_node = ds.get('lights')
-# clean_node is a read-only dict: {'_value': 'on', 'ceiling': '30%'}
-
-# Lists are also cleaned
-users = ds.get('users')
-# users is a read-only tuple: ('Alice',)
-```
-
-**2. Using `get_value=1` (Raw View)**
-This shows you the exact internal structure.
-
-```python
-# Get the raw, untouched internal node for 'lights'
-raw_node = ds.get('lights', get_value=1)
-# raw_node is a read-only dict: {'_value': 'on', 'ceiling': {'_value': '30%'}}
-
-# Get a single item node
-user_node = ds.get('users[0]', get_value=1)
-# user_node is a read-only dict: {'_value': 'Alice'}
-```
-
-**3. Using `get_value=2` (Value-Only View)**
-This extracts a specific `_value` and ignores everything else.
-
-```python
-# Get only the direct value of 'lights'
-state = ds.get('lights', get_value=2) # Returns 'on'
-
-# If a node has no direct value, it returns the default
-missing = ds.get('system', get_value=2, default='N/A') # Returns 'N/A'
-```
-
----
-
-### `getk(key_path, default=..., *, strip_prefix=False)`
-
-Retrieves data as a **flattened tuple of `(full_key_path, value)` pairs**. This is useful for reading entire
-configuration sections.
-
-* `key_path`: The branch of the data tree to retrieve.
-* `default`: If the `key_path` is not found, it returns `((key_path, default),)`. If `default` is not provided, returns
-  `()`.
-* `strip_prefix`: (Keyword-only) If `True`, the `key_path` is removed from the start of all returned keys, giving you
-  relative paths.
-
-```python
-# Setup
-ds.set('db/host', 'localhost')
-ds.set('db/user/name', 'admin')
-
-# 1. Get a flattened branch
-all_db_config = ds.getk('db')
-# Returns (('db/host', 'localhost'), ('db/user/name', 'admin'))
-
-# 2. Get a branch with relative keys
-relative_config = ds.getk('db', strip_prefix=True)
-# Returns (('host', 'localhost'), ('user/name', 'admin'))
-
-# 3. Handle a missing key with a default
-missing = ds.getk('api/key', default='default_key')
-# Returns (('api/key', 'default_key'),)
-```
-
----
-
-### `subscribe(key_path, callback)` & `unsubscribe(key_path, callback)`
-
-Register a function to be called whenever data at or below a certain `key_path` changes.
-
-**Callback Signature**
-Your callback function must accept three arguments: `key`, `old_value`, and `new_value`.
-
-```python
-def my_callback(key, old, new):
-    print(f"Change detected at '{key}':")
-    print(f"  Old -> {old}")
-    print(f"  New -> {new}")
-
-ds.subscribe('system/network', my_callback)
-```
-
-> **Important:** The `old` and `new` values are automatically "unwrapped". If a value is a simple endpoint (internally
-`{'_value': 'on'}`), you will receive the clean value (`'on'`). You only receive the full dictionary if the node has
-both a direct value and sub-keys.
-
----
-
-### `batch_update()`
-
-A context manager to perform multiple `set` operations while only triggering a single round of notifications at the end.
-This is highly efficient for bulk updates.
-
-```python
-with ds.batch_update():
-    ds.set('user/profile/bio', '...')
-    ds.set('user/profile/location', '...')
-    ds.set('user/active', False)
-# All notifications are sent here, at the end of the block.
-```
-
----
-
-## 5. Serialization & Debugging
-
-### `serialize()` & `deserialize(data)`
-
-Save and load the entire state of the `DataShare` object.
-
-```python
-# Save state to a file
-# serialized_data = ds.serialize()
-# with open('app_state.bin', 'wb') as f:
-#     f.write(serialized_data)
-
-# Load state from a file
-# with open('app_state.bin', 'rb') as f:
-#     loaded_data = f.read()
-# new_ds = DataShare.deserialize(loaded_data)
-```
-
-### `dumps(indent=2)`
-
-Get a human-readable, pretty-printed string representation of the data, perfect for debugging.
-
-```python
-print(ds.dumps())
-```## `File: _documents\old_documents_not_matching_the_code\ttTonic.md`
-# Documentation: The ttTonic Class
-
-This document describes the functionality, syntax, and usage of the refactored `ttTonic` class within the
-TaskTonic framework.
-
----
-
-## 1. Introduction and Core Concepts
-
-The `ttTonic` is the base class for creating active, stateful (if you want) components within a `Catalyst`-driven system.
-Its purpose is to break down complex logic into small, manageable steps (**Sparkles**) that are executed
-asynchronously via a shared queue.
-
-### Core Concepts
-
-* **Context**: A `tonic` runs in the `context` the controlling `tonic` bound by the `bind` method. 
-  The context controls the bound `tonic` by sending commands. Reactions, or events, are send back to inform the
-  status or send data. `'Tonics'`, started from the `formula` (from main) don't have a context. **Finishing** a `tonic` will
-  result in finishing the whole chain of `tonics` in the context.
-
-* **Catalyst**: The `Catalyst` makes the `Tonic` sparkle. It manages the main execution queue
-  for the lifecycle of all connected `Tonic` instances. 
-  When a `Tonic` is initialized, it inherits the context `Catalyst`.
-
-* **Catalyst Queue**: A `Tonic` uses the queue provided by its `Catalyst`. When a
-  sparkle is called, a "work order" is placed on this shared queue. The `Catalyst` is responsible for
-  processing this queue.
-
-* **Sparkle**: A `Sparkle` is a Python method within a `Tonic` class that performs a small, specific task. The
-  method's name follows a strict syntax to define its behavior and type.
-
-* **State Machine**: A `Tonic` can function as a state machine. Sparkles can be linked to a specific *state*,
-  which changes the `Tonic`'s behavior depending on the active state.
-
-* **Executor Modes**: The `Tonic`'s internal sparkle executor (`_execute_sparkle`) is dynamic. It starts in a
-  placeholder state, switches to normal execution mode (`__exec_sparkle`) after initialization, and switches to
-  a system-only mode (`__exec_system_sparkle`) during shutdown.
-
----
-
-## 2. The Lifecycle of a Tonic
-
-A `Tonic` now has a managed lifecycle, from startup to graceful shutdown.
-
-1. **Initialization (`__init__`)**: Create a Tonic by using the bind method to create context. Only the starting 
-   Tonics in the formula are started without binding. When the `Tonic` is created, it informs its `Catalyst`, 
-   and runs `_sparkle_init()` to discover all its sparkles and build its internal logic.
-2. **Startup**: Immediately after initialization, the `ttse__on_start` sparkle is called directly to 
-   perform setup logic. The default state can be activated by calling `to_state`.
-3. **State startup**: Every time the `state` changes the state `on_enter` sparkle is called, the `on_exit` sparkle is
-   called on the next state transition.
-3. **Normal Operation**: The `Tonic` is now active. Its `__exec_sparkle` method is used by the `Catalyst` to
-   process any work orders from the queue.
-4. **Shutdown Request (`finish()`)**: An external entity calls the `finish()` method on the `Tonic` to
-   initiate a graceful shutdown.
-5. **Finishing Mode**: The `Tonic` enters its shutdown sequence. The executor switches to `__exec_system_sparkle`,
-   which ignores all regular sparkles and only processes system-level cleanup sparkles (`_ttss__`).
-6. **Termination (`finished()`)**: After all cleanup is done, the `Tonic` calls its `finished()` method to
-   notify the `Catalyst` that it has completely terminated.
-
----
-
-## 3. Sparkle Syntax
-
-The `_sparkle_init` method scans for methods based on the following conventions.
-
-### Sparkle Prefixes
-
-* `ttsc__<command>`
-    * **C** = Command. A public command to initiate a task. Places a work order on the `catalyst_queue`.
-* `ttse__<event>`
-    * **E** = Event. A public method for reacting to an event. Places a work order on the `catalyst_queue`.
-* `tts__<sparkle>`
-    * **S** = Sparkle. An internal action. When called, it places a work order on the `catalyst_queue`.
-* `_tts__<sparkle>`
-    * A "private" internal action that also queues a work order.
-* `_ttss__<sparkle>`
-    * **SS** = System Sparkle. A system-level action. Don't use this for basic functionality, but just for developing
-      special TaskTonic features with automated sparkles.
-      These are the *only* sparkles that are still executed when the `Tonic` is in its shutdown (`finishing`) mode.
-
-### State-Specific Sparkles
-
-Any of the above prefixes can be combined with a state to make them state-dependent.
-Example: `ttsc_waiting__process`.
-
-### Fallback Behavior
-
-When a command is called, the framework searches for an implementation in this order:
-
-1. **Specific**: `ttsc_<current_state>__<command>`
-2. **Generic**: `ttsc__<command>` (used if the specific version does not exist)
-3. **Nothing**: `_noop` (if neither exists)
-
-### Lifecycle Handlers
-
-These are special, reserved sparkles called automatically by the framework.
-
-* `_ttss__on_start()`: System-level startup hook. Called directly in `__init__`.
-* `ttse__on_start()`: User-level startup hook. Called directly in `__init__`.
-* `ttse__on_enter()`: A global handler called directly every time the `Tonic` *enters* any state.
-* `ttse__on_exit()`: A global handler called directly every time the `Tonic` *exits* any state.
-* `ttse__on_finished()`: User-level shutdown hook. Called when `finish()` is initiated.
-* `_ttss__on_finished()`: System-level shutdown hook for final cleanup.
-
----
-
-## 4. Key Methods
-
-* `__init__(self, context, ...)`: Initializes the `Tonic` and binds it to the `Catalyst` provided in the `context`.
-* `to_state(self, state)`: Requests a state transition. The change is processed after the current sparkle
-  finishes. A special value of `-1` can be passed to immediately stop the state machine.
-* `finish(self)`: Initiates the graceful shutdown sequence for the `Tonic`.
-
----
-
-## 5. Usage Example
-
-This example shows a simple `FileProcessor` tonic that waits for a file, processes it, and then finishes.
-
-```python
-# --- Definition ---
-class FileProcessor(ttTonic):
-    def __init__(self, context, name="FileProcessor"):
-        super().__init__(context, name=name)
-        self.log("File processor is ready.")
+        self.net = DictSocketHandler(as_server=True, host='localhost', port=self.port)
         self.to_state('waiting')
-        # internals
-        self.filename = None
-        self.result = ''
 
-    # --- Lifecycle Handlers ---
-    def ttse__on_start(self):
-        self.log("Event: Tonic has started.")
+    def ttse__on_socket_connected(self, addr):
+        self.client_connected = True
+        self.to_state('connected')
 
-    def ttse__on_enter(self):
-        self.log(f"GLOBAL: Now entering state '{self.get_current_state_name()}'.")
-        
-    def ttse__on_finished(self):
-        self.log("Event: Tonic has received finish command and is cleaning up.")
-
-    # --- Sparkles ---
-    def ttsc_waiting__process_file(self, filename):
-        """This command is only available in the 'waiting' state. Start processing by calling ttsc__process_file """
-        self.filename = filename
-        self.log(f"Starting to process file: {filename}")
-        self.to_state('processing')
-
-    def _tts_processing__step(self):
-        """ Processing done in the state machine."""
-        self.log("...processing step complete...")
-        self.result += 'processed '
-        self.to_state('finished')
-        
-    def ttsc_finished__cleanup(self):
-        """A command to gracefully shut down the tonic."""
-        self.log("Cleanup complete. Finishing the tonic.")
-        self.context.ttse__on_file_processed(self.result)  # inform context that job is done en returns data
-        self.finish()
-    
-class DoingSomething(ttTonic):
-    def ttse__on_start(self):
-        self.processor = self.bind(FileProcessor)
-        
-    def ttse__on_pressed_button(self):
-        self.processor.ttsc__process_file('c:/setting.json')
-
-    def ttse__on_file_processed(self, result):
-        self.log(f'Result: {result}')
+    def ttse__on_socket_data(self, data):
+        self.received_data.append(data)
+        self.received_count += 1
+        data['echo'] = True
+        self.net.ttsc__send_data(data)
 
 
-```
-
----
-## `File: _documents\old_documents_not_matching_the_code\ttCatalyst.md`
-# Documentation: The `ttCatalyst` Class
-
-This document describes the functionality of the `ttCatalyst` class within the TaskTonic framework.
-
----
-
-## 1. Introduction: The Engine of the System
-
-If a `Tonic` is a specialized worker on an assembly line, the `ttCatalyst` is the powerful engine that drives the
-conveyor belt. Its primary and most crucial function is to make `Tonic`s "sparkle" by continuously processing a
-shared task queue.
-
-It's important to understand the `Catalyst`'s role:
-
-* **It provides EXECUTION power**: The `Catalyst` runs the main loop that pulls tasks from a queue and executes them.
-* **It does NOT provide COORDINATION**: The `Catalyst` is not the brain of the operation. It doesn't decide
-  which `Tonic`s to create or what tasks they should perform. That higher-level logic is handled by other
-  components in the framework, such as the `Formula` and `Ledger`.
-
-[Image of a powerful, clean industrial engine]
-
----
-
-## 2. Core Functionality
-
-The `Catalyst` has three main responsibilities: managing the queue, running the execution loop, and tracking the
-lifecycle of the `Tonic`s it powers.
-
-### The Master Queue (`catalyst_queue`)
-
-The `Catalyst` owns the central `Queue` that all its managed `Tonic`s will use. When any `Tonic` calls one of
-its sparkle methods (e.g., `ttsc__process`), it places a "work order" onto this shared `catalyst_queue`.
-
-### The Execution Loop (`sparkle()`)
-
-This is the heart of the `Catalyst`. It's a `while` loop with a single job:
-
-1. Wait for and retrieve a work order from the `catalyst_queue`.
-2. Unpack the work order to identify the target `Tonic` instance and the sparkle to be executed.
-3. Call the `_execute_sparkle` method on that specific `Tonic`, handing off the task.
-
-The loop uses a timeout when getting items from the queue. This ensures it doesn't block forever and can gracefully
-shut down when instructed.
-
-### Lifecycle Management
-
-The `Catalyst` keeps a register of all the `Tonic`s it is currently powering.
-
-* **Startup (`_ttss__startup_tonic`)**: When a `Tonic` is initialized, it calls this system sparkle on its
-  `Catalyst` to register itself as active.
-* **Shutdown (`_ttss__tonic_finished`)**: When a `Tonic` completes its `finish()` sequence, it calls this
-  system sparkle to de-register itself.
-* **Automatic Shutdown**: When the last registered `Tonic` finishes, the `Catalyst` determines its job is
-  done and automatically initiates its own shutdown sequence.
-
----
-
-## 3. Usage and Operation
-
-### Starting the Catalyst (`start_sparkling()`)
-
-To begin processing the queue, you must call the `start_sparkling()` method. This kicks off the `sparkle()` loop.
-The framework distinguishes between the main `Catalyst` (with `id=0`) and others:
-
-* **Main Catalyst**: Runs the loop in the current (main) thread, blocking further execution in that thread.
-* **Other Catalysts**: Start the execution loop in a new, separate background thread.
-
-### Binding a Tonic to a Catalyst
-
-A `Tonic` automatically binds itself to its `Catalyst` during initialization. It looks for the `Catalyst` in the
-`context` it receives.
-
-```python
-# --- Inside a Tonic's __init__ method ---
-
-# It finds the catalyst in its context and gets a reference to the shared queue.
-self.catalyst = context.catalyst if hasattr(context, 'catalyst') else ...
-self.catalyst_queue = self.catalyst.catalyst_queue
-
-# It then registers itself with the catalyst as an active component.
-self.catalyst._ttss__bind_tonic_to_catalyst(self.id)
-```
-## `File: _documents\old_documents_not_matching_the_code\_introduction.md`
-# TaskTonic Framework: Developer Manual
-
-## 1. Introduction
-
-**TaskTonic** is *the* Python framework for realizing concurrency. It allows code to appear as if it is executing
-simultaneously. Ideal for scenarios such as:
-- TaskTonic is ideal for any scenario where you need to orchestrate numerous independent components:
-- Responsive User Interfaces: Keep your UI fluid while performing heavy computations in the background.
-- IoT & Sensor Networks: Process a continuous stream of events and measurements from thousands of devices.
-- Communication Servers: Manage thousands of concurrent connections for chat applications, game servers, or data
-  streams.
-- Complex Simulations: Build simulations (e.g., swarm behavior, traffic models) where each entity acts autonomously.
-- Asynchronous Data Processing: Create robust data pipelines where information is processed in small, distinct steps.
-
-*...or all of the above, at the same time. That's where the framework's power truly lies.*
-
-### How?
-In TaskTonic, this is achieved by breaking down code into small, atomic units that are executed one by one the
-framework. Think of them as **sparkles in a tonic**, buzzing with activity. These sparkles are defined within your class
-using smart naming conventions. The tonic filters these names and automatically creates the sparkles, making your 
-tonic class look clean and tidy.
-
-Also TaskTonic supports you by providing built-in timers, state machines, and clear task hierarchy management.
-Additionally, there is a toolbox containing integrations for **PySide6**, smart data storage (`ttStore`), IP
-communication, and more. While multithreading is seamlessly supported, it is not strictly necessary to create responsive
-applications.
-
----
-
-## 2. Architecture & Hierarchy
-
-### 2.1 The Foundation: Essence & Ledger
-
-The foundation of TaskTonic is formed by the `ttEssence` class, which, together with the `ttLedger`, handles the
-framework's administration.
-
-* **Every task is a subclass of `ttEssence`.**
-* **Hierarchy:** The hierarchy is managed here. A `ttEssence` can start a subtask (child) that runs in its own context.
-* **Lifecycle:** Terminating a `ttEssence` results in the immediate termination of all its subtasks.
-
-*Note: While `ttEssence` handles structure and hierarchy, it does not yet offer "sparkling."*
-
-### 2.2 The Fun Part: The Tonic
-
-The real magic happens in the next layer: the **`ttTonic`** class. This is where the **sparkles** are added. Within a
-`ttTonic`, you can create dynamic code, whether "flat" (sequential) or implemented as a robust State Machine.
-
-### 2.3 The Engine: The Catalyst
-
-The **`ttCatalyst`** is the component that actually makes the system sparkle.
-
-* **Queueing:** When called, sparkles are placed in a queue.
-* **Execution:** The Catalyst executes them one by one.
-
-You can work with just the **Main Catalyst** (running in the main thread), but you can also add other Catalysts, each
-running in their own thread.
-
-### 2.4 Thread Safety (Concurrency Made Easy)
-
-A crucial feature of TaskTonic is how it handles threading:
-
-1. **Sparkles can be called from *any* thread** (parameters are passed safely).
-2. **Sparkles are always executed by the *same* thread** (the one owning the Catalyst).
-
-**Implication:** You never have to think about thread-safe programming *inside* a Tonic, and rarely outside of it.
-
----
-
-## 3. Quick Start Example
-
-The following example demonstrates the `ttTonic` workflow. Note how `HelloWorld` is a `ttTonic` that chains methods (
-sparkles) together.
-
-```python
-from TaskTonic import *
-
-# 1. Define the Logic (The Tonic)
-class HelloWorld(ttTonic):
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
+class MockClient(ttTonic):
+    def __init__(self, port, **kwargs):
+        super().__init__(**kwargs)
+        self.port = port
+        self.received_data = []
 
     def ttse__on_start(self):
-        """Called automatically by the framework on start."""
-        self.tts__hello()
+        self.net = DictSocketHandler(as_client=True, host='localhost', port=self.port)
+        self.to_state('connecting')
 
-    def tts__hello(self):
-        self.log('Hello ')
-        self.tts__world()
+    def ttse__on_socket_connected(self, addr):
+        self.to_state('connected')
 
-    def tts__world(self):
-        self.log('world, ')
-        self.tts__welcome()
+    def ttsc_connected__send_test(self, payload):
+        self.net.ttsc__send_data(payload)
 
-    def tts__welcome(self):
-        self.log('welcome ')
-        self.tts__to()
-
-    def tts__to(self):
-        self.log('to ')
-        self.tts__tasktonic()
-
-    def tts__tasktonic(self):
-        self.log('TaskTonic!')
-        self.finish()
+    def ttse__on_socket_data(self, data):
+        self.received_data.append(data)
 
 
-# 2. Define the Application Structure (The Formula)
-class MyApp(ttFormula):
+class NetworkTestFormula(ttFormula):
+    def __init__(self, port):
+        self.port = port
+        super().__init__()
+
     def creating_formula(self):
-        """Configuration settings."""
-        return (
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
+        return {
+            'tasktonic/log/to': 'off',
+            'tasktonic/log/default': 'stealth',
+        }
 
     def creating_main_catalyst(self):
-        super().creating_main_catalyst()
+        self.distiller = ttDistiller(name='tt_main_catalyst')
 
     def creating_starting_tonics(self):
-        """Define which Tonics start immediately."""
-        HelloWorld()
-
-# 3. Run
-if __name__ == '__main__':
-    MyApp()
-```
-
----
-
-## 4. The Tonic in Depth
-
-The `ttTonic` class uses **introspection** to discover its behavior. You do not register callbacks manually; you simply
-name your methods according to the Sparkle convention.
-
-### 4.1 Sparkle Naming Convention
-
-The naming structure is: `prefix[_state]__name`.
-
-* **`ttsc__<name>` (Command):** Public command to *request* action (e.g., `ttsc__process`). Puts a job on the queue.
-* **`ttse__<name>` (Event):** Public event handler (e.g., `ttse__on_timer`).
-* **`tts__<name>` (Internal):** Internal logic, but still executed via the queue.
-* **`_ttss__<name>` (System):** Reserved for framework lifecycle (e.g., `_ttss__finish`).
-
-### 4.2 Built-in State Machine
-
-Every Tonic is a state machine. You can transition states using `self.to_state('new_state')`.
-
-**State Routing:**
-If you call `ttsc__next()`, the framework looks for a handler in this order:
-
-1. `ttsc_<current_state>__next` (Specific to current state)
-2. `ttsc__next` (Generic fallback)
-3. `_noop` (Do nothing)
-
-**Hooks:**
-
-* `ttse__on_enter` / `ttse__on_exit`: Called when entering/leaving *any* state.
-* `ttse_<state>__on_enter`: Specific handler for entering `<state>`.
-
----
-
-## 5. Services (The Singleton Pattern)
-
-TaskTonic has a built-in Service mechanism handled by the `ttEssence` metaclass.
-
-### 5.1 Defining and Using a Service
-
-Set the `_tt_is_service` attribute to a unique name. Use `bind` to access it.
-
-* **First Call:** Creates the instance, runs `__init__`, runs `_init_service`.
-* **Subsequent Calls:** Returns the *existing* instance, runs `_init_service`.
-
-```python
-class DatabaseService(ttTonic):
-    _tt_is_service = 'db_service'  # Unique Service Name
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Runs once per application lifecycle
-
-    def _init_service(self, context, **kwargs):
-        # Runs every time a Tonic binds this service
-        pass
-
-# Usage in a worker tonic
-self.db = DatabaseService()
-```
-
----
-
-## 6. Data Store (`ttStore`)
-
-A thread-safe, hierarchical data store service, with notification at data change.
-
-* **Set:** `ds.set('app/config/version', '1.0')`
-* **List Append:** `ds.set('users/list[]', 'new_user')`
-* **Get:** `val = ds.get('app/config')`
-* **Subscribe:** `ds.subscribe('app/config', callback_function)`
-
----
-
-## 7. Timers (`ttTimer`)
-
-Timers are Essences that trigger a callback (`sparkle_back`) after a duration.
-
-* **`ttTimerSingleShot`**: Fires once.
-* **`ttTimerRepeat`**: Fires periodically.
-
-**Default Behavior:**
-If no `sparkle_back` is provided, the timer looks for `ttse__on_timer` in the parent Tonic.
-
-```python
-# Default callback (calls self.ttse__on_timer)
-ttTimerSingleShot(5.0)
-
-def ttse__on_timer(self, info):
-    self.log("5 seconds passed")
-```
-
----
-
-## 8. Logging (`ttLogger`)
-
-Logging is controlled via the Formula.
-
-* **STEALTH:** No logging.
-* **OFF:** Only lifecycle events.
-* **QUIET:** Lifecycle + explicit `self.log()`.
-* **FULL:** Logs every Sparkle execution (Trace).
-
----
-
-## 9. Testing: The Distiller (`ttDistiller`)
-
-The `ttDistiller` is a specialized Catalyst for testing. Instead of running indefinitely, it executes strictly
-controlled steps and captures a full trace of sparkles and state changes for analysis.## `File: _documents\old_documents_not_matching_the_code\Tonic Services.md`
-# The Service (Singleton) Pattern
-
-This document explains how to create and use "Services" within the TaskTonic framework. A Service is a special type of
-`ttTonic` class that is managed as a **Singleton**, ensuring only one instance ever exists.
-
-It also introduces the concept of a "per-access" hook (`_init_service`) for context-aware interactions.
-
----
-
-## 1. What is a Service?
-
-A Service is a `ttTonic` class that is guaranteed to have **only one instance** throughout the application's lifecycle.
-
-The `ttMeta` metaclass (which `ttEssence` and `ttTonic` use) manages this. When you try to create an instance of a
-Service:
-
-* **The First Time:** The metaclass creates the instance, runs its `__init__` and `_init_post_action` methods once, and
-  stores it in the `ttLedger` under a unique name.
-* **Every Subsequent Time:** The metaclass intercepts the call, finds the *existing* instance in the `ttLedger`, and
-  returns it immediately. `__init__` is **not** called again.
-
-### Key Feature: The `_init_service` Hook
-
-A Service is "context-aware." Every time a Service is accessed (both on creation *and* on subsequent retrievals), the
-metaclass will call its `_init_service` method.
-
-This allows you to pass context-specific parameters (e.g., `ctxt_ip`, `ctxt_access_level`) that are processed *every
-time*, while one-time setup parameters (e.g., `srv_api_key`) are only processed *once* in `__init__`.
-
----
-
-## 2. Application Examples
-
-You should use this pattern for any class that needs to be unique and shared across your entire application. 📈
-
-* **Logging:** A `LoggerService` that all other `ttTonic` tasks call to write logs. You only want one instance managing
-  the log file or screen output.
-* **Configuration:** A `ConfigService` that loads a `.ini` or `.yaml` file once and provides settings to any task that
-  asks for it.
-* **Database Management:** A `DatabaseService` that manages a single connection pool for the entire application.
-* **API Clients:** An `ApiService` that handles a single OAuth2 token, rate limiting, and authentication for a shared
-  REST API.
-* **Hardware Control:** A `SerialService` that manages a single connection to a piece of hardware, preventing multiple
-  tasks from trying to access the same port.
-
----
-
-## 3. How to Create a Service
-
-Creating a service is simple and follows four steps.
-
-### Step 1: Inherit from `ttTonic`
-
-Your service class must inherit from `ttTonic` (or any class that inherits from `ttEssence`).
-
-```python
-class MyService(ttTonic):
-    pass
-```
-
-### Step 2: Set the Service Flag
-
-Set the `_tt_is_service` class variable to a unique string name. This name is how the `ttLedger` will identify your
-singleton.
-
-```python
-class MyService(ttTonic):
-    # This tells the metaclass to treat this class as a
-    # service identified by the name "MyUniqueService"
-    _tt_is_service = "MyUniqueService"
-```
-
-### Step 3: Implement `__init__` (One-Time Setup)
-
-This is your standard constructor. It is **only called once** when the service is first created.
-
-* Use parameters prefixed with `srv_` (service) for one-time setup (e.g., `srv_api_key`).
-* **Crucially:** You must also accept any context parameters (e.g., `ctxt_...`) and `**kwargs` so you can cleanly pass
-  the correct arguments to `super().__init__`.
-
-```python
-class MyService(ttTonic):
-    _tt_is_service = "MyUniqueService"
-
-    def __init__(self, srv_api_key, ctxt_ip=None, **kwargs):
-        """
-        Runs ONCE.
-        Catches the 'srv_api_key' for setup.
-        Catches 'ctxt_ip' (and others) just to remove them
-        before calling super().
-        """
-        print(f"  MyService __init__: Service is being CREATED.")
-        print(f"  > Setting API Key to: {srv_api_key}")
-        
-        # 'name' is in kwargs, passed by the metaclass
-        super().__init__(**kwargs) 
-        
-        self.api_key = srv_api_key
-        self.context_data = {}
-```
-
-### Step 4: Implement `_init_service` (Per-Access Hook)
-
-This method is **called every time** the service is accessed, including the first time (right after
-`_init_post_action`).
-
-* Use parameters prefixed with `ctxt_` (context) for per-access logic.
-* Use `**kwargs` to safely ignore the one-time `srv_` parameters that are also passed in.
-
-```python
-class MyService(ttTonic):
-    _tt_is_service = "MyUniqueService"
-
-    def __init__(self, srv_api_key, ctxt_ip=None, **kwargs):
-        # ... (from Step 3) ...
-        print(f"  MyService __init__: Service is being CREATED.")
-        print(f"  > Setting API Key to: {srv_api_key}")
-        super().__init__(**kwargs) 
-        self.api_key = srv_api_key
-        self.context_data = {}
-
-    def _init_service(self, context, ctxt_ip, **kwargs):
-        """
-        Runs EVERY time.
-        Catches 'context' and 'ctxt_ip'.
-        Ignores 'srv_api_key' (which is in **kwargs).
-        """
-        if context is None:
-            return
-            
-        print(f"  MyService _init_service__: Context '{context.name}' "
-              f"is accessing from IP '{ctxt_ip}'")
-        
-        # Store context-specific data
-        self.context_data[context.id] = {'ip': ctxt_ip}
-
-    def get_ip_for(self, context):
-        return self.context_data.get(context.id, {}).get('ip')
-```
-
-### **A Critical Warning on Context and Lifecycle**
-
-> **BE AWARE:** When creating a service, be careful with its `context`. If you create a service *within the context of
-another essence* (e.g., `MyService(context=another_task)`), it becomes a child of that essence via the `bind` mechanism.
->
-> If `another_task` is finished, it will call `finish()` on all its children. This **will finish and unregister your
-service singleton for everyone**.
->
-> **Recommendation:** It is almost always better to create services with `context=None` (making them top-level) or from
-a single, persistent root task (e.g., your "formula" or main application runner).
-
----
-
-# 5. Using a Service Base Class
-
-Sometimes you want to use a service, without knowing what kind of service implementation is used. For instance when
-you use an `ConnectionService`, that can be een `IpConnectionService` or `BluToothConnectionService`.
-
-## 5.1 How to
-For that create a service base class (or interface) that provides a universal contract for a specific type of 
-functionality (e.g., "connecting" or "logging"). This approach is central to creating a decoupled and 
-maintainable architecture.
-
-In the formula the implementation of a specific service is started. The service name wil be the same for every
-implementation. Tonics that are using the service should depend on the universal base class and use the service name.
-The specific service, with that name, will be used due to the singleton service implementation. 
-
-
-## 5.2 Example: ConnectionService
-
-Let's walk through an example with a universal `ConnectionService` (the base class) and two specific implementations:
-`IpConnectionService` and `BluToothConnectionService`.
-
-### 1. Defining the Services
-
-First, we define the abstract base class and the concrete implementations. The Tonics will only know about
-`ConnectionService`.
-
-```python
-# === services/connection_service.py ===
-from TaskTonic import *
-
-
-class ConnectionService(ttCatalyst):
-  """
-  The universal base class (interface) for all connection services.
-  Tonics will depend on this class.
-  
-  It defines the 'contract' that all connection services must follow.
-  """
-  _tt_is_service = 'connection_service'
-
-  def ttsc__connect(self):
-    pass
-
-  def ttsc__disconnect(self):
-    pass
-
-  def ttsc__transmit(self, data):
-    pass
-
-
-# === services/ip_connection.py ===
-from .connection_service import ConnectionService
-
-
-class IpConnectionService(ConnectionService):
-  """
-  Specific implementation for IP-based connections (e.g., WiFi, Ethernet).
-  """
-
-  def __init__(self, context=None, host: str, port: int):
-    super().__init__(context=context, log_mode='quiet')
-    self.host = host
-    self.port = port
-    self.status = "Disconnected"
-    self.log(f"IpConnectionService: Initialized for {host}:{port}")
-    self.to_state('disconnected')
-
-  def ttsc__disconnected__connect(self):
-    # Specific logic for IP connection
-    self.log(f"Connecting via IP to {self.host}:{self.port}...")
-    # ... implementation details ...
-    self.status = f"Connected (IP to {self.host})"
-    self.log("IpConnectionService: Established.")
-    self.to_state('connected')
-
-  def ttsc__connected__disconnect(self):
-    self.log("Disconnecting IP connection.")
-    self.to_state('disconnected')
-
-  def ttsc__connected__transmit(self, data):
-    self.log(f'Tranmitting: {data}')
-    # ... implementation details ...
-
-  def ttse__connected__on_exit(self):
-# implement disconnection
-
-
-# === same for all other connection services
-
-# === myTonic 
-class MyTonic(ttTonic):
-  def ttse__on_start(self):
-    from services.connection_service import ConnectionService
-    self.conn = ConnectionService() # use the service base class
-    self.conn.ttsc__connect()
-
-
-#  == Formula
-class MyFormula(ttFormula):
-  def creating_starting_tonics(self):
-    IpConnectionService(context=-1, 'localhost', 123456) # startup the ip connection service
-    MyTonic(context=-1)
-
-```
-
-## 6. Full Example
-
-Here is a complete example showing how two different tasks (`RootTask` and `WorkerTask`) access the same service.
-
-```python
-from TaskTonic import *
-
-class RootTask(ttTonic):
-    """A standard, non-service task."""
-    pass
-    
-class WorkerTask(ttTonic):
-    """Another standard, non-service task."""
-    pass
-
-class NetService(ttTonic):
-    """
-    A singleton service that manages a network resource.
-    """
-    
-    # 1. Set the unique service name
-    _tt_is_service = "NetworkManager"
-    
-    def __init__(self, srv_host_url, ctxt_port=None, **kwargs):
-        """
-        Runs ONCE to configure the service.
-        """
-        self.log(f"  NetService __init__: CONNECTING to {srv_host_url}...")
-        
-        # Pass standard args (name, context) up to ttEssence
-        super().__init__(**kwargs) 
-        
-        self.host_url = srv_host_url
-        self.context_ports = {}
-
-    def _init_service(self, context, ctxt_port, **kwargs):
-        """
-        Runs EVERY time to register context-specific info.
-        """
-        self.ttsc__new_service_entry(context, ctxt_port)
-                
-    def ttsc__new_service_entry(context, ctxt_port):
-        self.log(f"  NetService _init_service__: Context '{context.name}' "
-                 f"registered on port {ctxt_port}.")
-        self.context_ports[context.id] = ctxt_port
-        
-# --- Example Usage ---
-if __name__ == "__main__":
-
-    print("--- 1. Creating Tasks ---")
-    root = RootTask(name="Root")
-    worker = WorkerTask(name="Worker", context=root)
-
-    print("\n--- 2. RootTask requests the NetService ---")
-    # This is the FIRST call. __init__ will run.
-    # We create it with context=None as recommended.
-    service1 = NetService(
-        context=None,
-        srv_host_url="httpsa://api.tasktonic.com",
-        ctxt_port=8080
-    )
-    # Manually log access for root
-    service1._init_service(context=root, ctxt_port=8080)
-
-
-    print("\n--- 3. WorkerTask requests the SAME NetService ---")
-    # This is the SECOND call. __init__ is SKIPPED.
-    service2 = NetService(
-        context=worker,
-        srv_host_url="[https://api.IGNORED.com](https://api.IGNORED.com)", # This is ignored
-        ctxt_port=9090
-    )
-    
-    print("\n--- 4. Verification ---")
-    print(f"service1 is service2: {service1 is service2}")
-    print(f"Service Host URL: {service1.host_url}")
-    print(f"Root's Port: {service1.context_ports[root.id]}")
-    print(f"Worker's Port: {service1.context_ports[worker.id]}")
-## `File: _documents\old_documents_not_matching_the_code\finisching flow.md`
-# TaskTonic Framework: Developer Manual
-
-## 1. Introduction
-
-**TaskTonic** is a Python framework designed to manage complex, asynchronous applications with ease. It allows you to
-build responsive UIs, sensor networks, and simulation engines without the headache of traditional multi-threading.
-
-### The Philosophy
-
-The framework uses an "Alchemist" metaphor. Instead of calling methods directly, you create "Tonics" (agents) that
-emit "Sparkles" (atomic actions), all driven by a "Catalyst" (engine).
-
-**Key Benefits:**
-
-* **Event-Driven:** "Don't call us, we'll call you."
-* **Thread Safety:** Tasks are processed sequentially by the Catalyst, removing race conditions.
-* **State Machines:** Tonics have built-in state management.
-* **Hierarchy:** Automatic lifecycle management for parent/child tasks.
-
----
-
-## 2. Core Concepts (The Lexicon)
-
-Understanding the vocabulary is crucial to using TaskTonic effectively.
-
-| Term | Component | Description |
-| :--- | :--- | :--- |
-| **Formula** | `ttFormula` | The "recipe" for your app. The entry point where you define initial tasks. |
-| **Tonic** | `ttTonic` | The worker agent. A stateful object that executes tasks. |
-| **Sparkle** | Method | A specific unit of work (a method) inside a Tonic. |
-| **Catalyst** | `ttCatalyst` | The engine. It pulls "Sparkles" from a queue and executes them. |
-| **Ledger** | `ttLedger` | The registry that tracks all active Tonics. |
-
-### Architecture Overview
-
-```mermaid
-graph TD
-    Queue[Catalyst Queue]
-    Cat[Catalyst Engine]
-    
-    subgraph "Tonic (Agent)"
-        S1[Sparkle: on_start]
-        S2[Sparkle: process_data]
-        State[State Machine]
-    end
-
-    Formula -->|Creates| Cat
-    Formula -->|Creates| Tonic
-    Tonic -->|Places Work| Queue
-    Cat -->|Pulls Work| Queue
-    Cat -->|Executes| S1
-    Cat -->|Executes| S2
-```
-
-**
-
----
-
-## 3. Getting Started
-
-### A Simple "Hello World"
-
-To create an application, you need a `Tonic` (the logic) and a `Formula` (the launcher).
-
-```python
-from TaskTonic import ttTonic, ttFormula
-
-# 1. Define your Tonic (The Worker)
-class HelloWorldTonic(ttTonic):
-    def ttse__on_start(self):
-        """Runs automatically when the Tonic starts."""
-        self.log("Hello TaskTonic!")
-        self.finish() # Signal that work is done
-
-    def ttse__on_finished(self):
-        """Runs automatically during cleanup."""
-        self.log("Goodbye!")
-
-# 2. Define the Formula (The Application)
-class MyApp(ttFormula):
-    def creating_starting_tonics(self):
-        # Create the tonic with no parent (context=-1)
-        HelloWorldTonic(context=-1)
-
-# 3. Run it
-if __name__ == "__main__":
-    MyApp()
-```
-
-**
-
----
-
-## 4. The Tonic: Deep Dive
-
-The `ttTonic` is the heart of the framework. Its behavior is defined by **Sparkles**. You do not register callbacks
-manually; instead, you name your methods according to a strict convention.
-
-### 4.1 Naming Convention (Sparkles)
-
-The framework scans your class for methods with specific prefixes:
-
-* **`ttsc__<name>` (Command):** Public methods meant to *start* an action (e.g., `ttsc__process`).
-* **`ttse__<name>` (Event):** Public methods meant to *react* to an event (e.g., `ttse__on_start`).
-* **`tts__<name>` (Internal):** Internal steps, not meant for public access.
-* **`ttsc_<state>__<name>`:** A command that only runs when the Tonic is in a specific `<state>`.
-
-> **Note:** When you call `self.ttsc__do_work()`, it does not run immediately. It places a "work order" on the Catalyst
-queue.
-
-### 4.2 Built-in State Machine
-
-Every Tonic is a state machine. You can transition states using `self.to_state('new_state')`.
-
-**State Routing:**
-If you call `ttsc__flip()`, the framework looks for a handler in this order:
-
-1. `ttsc_<current_state>__flip` (Specific to current state)
-2. `ttsc__flip` (Generic fallback)
-3. `_noop` (Do nothing)
-
-**Example: A Light Switch**
-
-```python
-class LightSwitch(ttTonic):
-    def ttse__on_start(self):
-        self.to_state('off')
-
-    # The public command
-    def ttsc__flip(self):
-        pass 
-
-    # Logic when State is OFF
-    def ttsc_off__flip(self):
-        self.log("Turning ON")
-        self.to_state('on')
-
-    # Logic when State is ON
-    def ttsc_on__flip(self):
-        self.log("Turning OFF")
-        self.to_state('off')
-```
-
-**
-
-### 4.3 Hierarchy & Context (Binding)
-
-Tonics are hierarchical. When a Tonic creates a child (using `bind`), it becomes the child's **Context**.
-
-* **Binding:** `self.child = WorkerTonic()` auto binds to current context (in sparkle_stack)
-* **Automatic Cleanup:** If a parent finishes, all children are automatically finished.
-
----
-
-## 5. Services (Singleton Pattern)
-
-Services are specialized Tonics used for shared resources (Logging, Database, Hardware). They follow the Singleton
-pattern: only one instance exists per application.
-
-### 5.1 Creating a Service
-
-Inherit from `ttTonic` and set `_tt_is_service`.
-
-```python
-class DatabaseService(ttTonic):
-    _tt_is_service = "DB_Service_Unique_Name"
-
-    def __init__(self, srv_db_url, **kwargs):
-        """Runs ONCE when the VERY FIRST instance is created."""
-        super().__init__(**kwargs)
-        self.db_url = srv_db_url
-        self.connect()
-
-    def _init_service(self, context, ctxt_user_id, **kwargs):
-        """Runs EVERY TIME the service is accessed/bound."""
-        self.log(f"User {ctxt_user_id} accessed DB.")
-```
-
-**
-
-### 5.2 Using a Service
-
-Any Tonic can access the service. The first call creates it; subsequent calls return the existing instance.
-
-```python
-# In some worker Tonic
-self.db = DatabaseService(
-                    srv_db_url="sqlite:///",   # Used only on 1st creation
-                    ctxt_user_id="Worker_1")   # Used every time
-```
-
----
-
-## 6. DataShare: Managing State
-
-`DataShare` is a thread-safe, hierarchical data store (like a Registry or Redux store). It allows complex data access
-via path strings.
-
-### 6.1 Basic Usage
-
-```python
-ds = DataShare()
-
-# Setting Data
-ds.set('user/preferences/theme', 'dark')
-ds.set('user/roles[]', 'admin') # Append to list
-
-# Getting Data
-theme = ds.get('user/preferences/theme')
-```
-
-### 6.2 Advanced Views
-
-DataShare nodes store both a value AND sub-keys. You can control what you retrieve:
-
-* `get(..., get_value=0)`: **Clean View** (Default). Returns simple Python dicts/values.
-* `get(..., get_value=1)`: **Raw View**. Shows internal structure `{'theme': {'_value': 'dark'}}`.
-
-### 6.3 Subscriptions
-
-You can observe changes in data:
-
-```python
-def on_theme_change(key, old, new):
-    print(f"Theme changed to {new}")
-
-ds.subscribe('user/preferences', on_theme_change)
-```
-
----
-
-## 7. Advanced Features
-
-### 7.1 Timers
-
-Don't use `time.sleep()`. Use timers to keep the Catalyst running smoothly.
-
-```python
-from TaskTonic import ttTimerRepeat
-
-# Bind a timer to call 'ttsc__tick' every 1 second
-ttTimerRepeat(seconds=1, sparkle_back=self.ttsc__tick)
-```
-
-**
-
-### 7.2 The Catalyst Loop
-
-The Catalyst runs a loop that:
-
-1. Pulls a work order from `catalyst_queue`.
-2. Finds the target Tonic.
-3. Calls `_execute_sparkle`.
-4. Repeats.
-   *It manages lifecycle, ensuring Tonics are registered on startup and deregistered on finish.*
-
----
-
-## 8. Summary Checklist for Developers
-
-1. **Inheritance:** Always inherit from `ttTonic`.
-2. **Naming:** Use `ttsc__` for commands and `ttse__` for events.
-3. **State:** Use `to_state()` to switch contexts; use `ttsc_state__name` for specific logic.
-4. **Blocking:** **Never block** execution (no long `sleep` or heavy computation in the main thread). Use sub-tonics or
-   threads for heavy lifting.
-5. **Hierarchy:** Create ttEssence (or subclass) creates children so cleanup automatic.
-
-
-
-
-```mermaid
-zenuml
-title Finishing ttEssence (static)
-c as Context
-e as Essence
-b as Binding
-l as ledger
-
-//finish from context (C); no bindings
-c->e.finish(C) {
-    e->e._finished() {
-        e->l.unregister()
-    }
-
-}
-//finish from context (C); with bindings
-c->e.finish(C) { 
-    e->b.finish(E) {
-        b->b._finished() {
-            b->l.unregister()
+        self.server = MockServer(port=self.port, name="ServerTonic")
+        self.client = MockClient(port=self.port, name="ClientTonic")
+
+
+# ==============================================================================
+# TEST 2: Flow & Gedrag (Connectie, Send, Rcv) in de Distiller
+# ==============================================================================
+
+def test_socket_connection_flow():
+    port = get_free_port()
+    app = NetworkTestFormula(port)
+    dist = app.distiller
+
+    # --- DEEL 1: Wacht robuust op connectie (AND LOGICA) ---
+    # We vertellen de Distiller: Stop pas als de client de state 'connected'
+    # heeft, EN de server de interne variabele 'client_connected' op True heeft staan.
+    connect_contract = {
+        'timeout': 3.0,
+        'stop_match_count': 'all',  # AND logica
+        'tonics': {
+            'ClientTonic': {
+                'till_state_in': ['connected']
+            },
+            'ServerTonic': {
+                'probes': ['client_connected'],
+                'stop_on_probe': {'client_connected': True}
+            }
         }
-        b->e.binding_finished()
-        {
-           e->l.unregister()
-       }
     }
-    
-}
+
+    trace1 = dist.sparkle(contract=connect_contract)
+
+    # Verifieer dat we gestopt zijn wegens het contract en niet de timeout
+    assert 'contract_met: 2/2 tonics matched' in trace1['stop_condition']
+    assert app.client.get_current_state_name() == 'connected'
+    assert app.server.client_connected is True
+
+    # --- DEEL 2: Data sturen en ontvangen ---
+    test_payload = {"msg": "Hello TaskTonic"}
+    app.client.ttsc__send_test(test_payload)
+
+    # Wacht tot de client de echo binnenkrijgt. Eén match is voldoende.
+    echo_contract = {
+        'timeout': 3.0,
+        'stop_match_count': 1,
+        'tonics': {
+            'ClientTonic': {
+                'till_sparkle_in': ['ttse__on_socket_data']
+            }
+        }
+    }
+
+    trace2 = dist.sparkle(contract=echo_contract)
+    assert 'contract_met: 1/1 tonics matched' in trace2['stop_condition']
+
+    # Controleer of de flow 100% goed is gegaan
+    assert len(app.server.received_data) == 1
+    assert app.server.received_data[0]["msg"] == "Hello TaskTonic"
+
+    assert len(app.client.received_data) == 1
+    assert app.client.received_data[0]["msg"] == "Hello TaskTonic"
+    assert app.client.received_data[0]["echo"] is True
+
+    dist.finish_distiller()
+
+
+# ==============================================================================
+# TEST 3: Full Speed / Bulk Test (Stress test & Buffering logica)
+# ==============================================================================
+
+class BulkSenderClient(MockClient):
+    def ttsc_connected__start_bulk(self, amount):
+        self.sent_count = amount
+        for i in range(amount):
+            self.net.ttsc__send_data({"seq": i, "padding": "X" * 1024})
+        self.to_state('done_sending')
+
+
+def test_socket_bulk_speed_and_buffering():
+    port = get_free_port()
+
+    class BulkFormula(NetworkTestFormula):
+        def creating_starting_tonics(self):
+            self.server = MockServer(port=self.port, name="ServerTonic")
+            self.client = BulkSenderClient(port=self.port, name="ClientTonic")
+
+    app = BulkFormula(port)
+    dist = app.distiller
+
+    # --- DEEL 1: Wacht op connectie (AND LOGICA) ---
+    dist.sparkle(contract={
+        'timeout': 3.0,
+        'stop_match_count': 'all',
+        'tonics': {
+            'ClientTonic': {'till_state_in': ['connected']},
+            'ServerTonic': {'probes': ['client_connected'], 'stop_on_probe': {'client_connected': True}}
+        }
+    })
+
+    # --- DEEL 2: BULK DATA ---
+    # Stuur 5000 flinke dicts tegelijkertijd weg (~5MB)
+    TOTAL_MESSAGES = 5000
+    app.client.ttsc__start_bulk(TOTAL_MESSAGES)
+
+    # Wacht tot de server exact 5000 berichten heeft verwerkt.
+    # Dit voorkomt dat we the Distiller continu laten pollen!
+    bulk_contract = {
+        'timeout': 5.0,
+        'stop_match_count': 1,
+        'tonics': {
+            'ServerTonic': {
+                'probes': ['received_count'],
+                'stop_on_probe': {'received_count': TOTAL_MESSAGES}
+            }
+        }
+    }
+
+    trace = dist.sparkle(contract=bulk_contract)
+    assert 'contract_met: 1/1 tonics matched' in trace['stop_condition']
+
+    # Final checks
+    assert len(app.server.received_data) == TOTAL_MESSAGES
+    for i in range(TOTAL_MESSAGES):
+        assert app.server.received_data[i]["seq"] == i
+
+    dist.finish_distiller()
 ```
-
-When essence.finish is called the essence will check if it has 1 or more bindings. If not the essencese is finished and unregistered in the ledger.
-If the essence does have a binding, the finish of that binding is called. After calling unregister the method binding_finished of its context is called (the context is the initiating essence). In that method the essence unbinds and checks if there are bindings left. If not it will unregister it self.
-
-There is one extra functionality, not in the timeline. If the essence is a service and the calling context is in its service context list, that context is removed and binding finished is called. However, when the creating context is finishing the service, all service bindings get notified with binding_finished, and the service finishes as normal.
-
-## Tonic finish
-
-2 system sparkles are created. _ttss_finish wil be called from the (rewriten) finish method. In the sparkle, super().finish is called. The same for _ttss_binding finished called from binding_finished.
-
-Besides that, in _ttss__finish the sparkle execution wil be set to the system sparkles only mode. The tonic is finishing and dont execpt normal commands or events.
-
-
-## `File: _documents\old_documents_not_matching_the_code\ttStore.md`
-# ttStore & Store/Item: Central Data Repository
-
-This documentation describes the functionality of the `Store` and `Item` classes and their integration within TaskTonic
-via `ttStore`.
-
-## Introduction
-
-In complex applications, it is essential to share data between different components in a structured and accessible way.
-`ttStore` functions as a **Central Data Repository**. It offers a hierarchical storage structure (comparable to a file
-system or a nested dictionary) that is:
-
-1. **Centralized:** A single source of truth for parameters, sensor values, and configurations.
-2. **Reactive:** Components can subscribe to changes in specific data paths.
-3. **Flexible:** Data can be accessed via absolute paths or relative pointers (`Item`).
-
----
-
-## Concepts: Store vs. ttStore
-
-The system consists of two layers that can also be used **independently**.
-
-### 1. The Core: `Store` and `Item`
-
-The `Store` is the pure data container. It is a standalone class that holds the data and provides methods to read or
-write data via paths (e.g., `'sensors/temp/value'`).
-
-The `Item` is a smart "pointer" or "cursor" to a specific location in the `Store`. It allows for relative navigation
-without needing to know the full absolute path.
-
-> **Note:** `Store` and `Item` can be used outside of TaskTonic in any Python project requiring a powerful, hierarchical
-data structure.
-
-### 2. The Service: `ttStore`
-
-`ttStore` is the TaskTonic wrapper around a `Store`. It transforms the store into a **Service** within the TaskTonic
-ecosystem. This adds capabilities such as:
-
-* **Event-driven updates:** Automatically notify other Tonics (like UI or controllers) upon changes.
-* **Service Binding:** Easily linked to other Tonics via `self.bind()`.
-
----
-
-## API Reference & Methods
-
-Below is an overview of the most important methods for data manipulation and navigation.
-
-### Dictionary Access (`[]` Syntax)
-
-For convenience, `ttStore` and `Item` support standard Python dictionary syntax.
-
-* **Reading:** `val = store['path']`
-    * Equivalent to `.get('path')`.
-    * Returns `None` if the path does not exist (unlike standard Python dicts which raise KeyError).
-* **Writing:** `store['path'] = val`
-    * Equivalent to `.set([('path', val)])`.
-    * Triggers updates immediately (unless inside a `group`).
-
-**Example:**
-
-```python
-# Read
-current_limit = self.twin['parameters/temp_limit']
-
-# Write
-self.twin['parameters/temp_limit'] = 12.0
-```
-
-### Writing Data (`set`, `.v`, `.append`)
-
-#### `set(data)`
-
-Writes one or multiple values to the store. It accepts a `dict` or an `Iterable` (list/tuple) of tuples.
-
-* **Usage:** Initialization, bulk updates, or when you need to write multiple values atomically.
-* **Smart Paths:**
-    * `#`: Creates a new unique entry (auto-increment list).
-    * `./`: Refers to the last created entry (useful for setting properties of an item).
-
-**Example:**
-
-```python
-# Initialize a store with parameters and sensors
-self.twin.set([
-    ('parameters/update_freq', 2),     # Set update frequency to 2
-    ('sensors/#', 'temp'),             # Create new sensor 'temp'
-    ('sensors/./value', 15.0),         # Set value of THAT sensor
-    ('sensors/./unit', '℃'),           # Set unit of THAT sensor
-])
-```
-
-#### `.v` (Value Property via Item)
-
-If you hold an `Item` object (a pointer to a location), you can read and write directly via the `.v` property. This is
-the most efficient way to manipulate data if you already have the Item.
-
-**Example:**
-
-```python
-# Assume we have a pointer (Item) to the sensor value
-sensor_val_item = self.twin.at('sensors/#0/value')
-
-# Write a new value
-sensor_val_item.v = 22.5
-```
-
-#### `append(value)` (via Item) or `append(path, value)` (via Store)
-
-Adds a new item to a list. This is a cleaner, more pythonic alternative to using the `'path/#'` syntax when adding
-single items.
-
-* **Via Item:** `item.append(value)`
-* **Via Store:** `store.append(path, value)`
-
-**Example:**
-
-```python
-# Append via Store (adds 'System Started' to the 'logs' list)
-self.twin.append('logs', 'System Started')
-
-# Append via Item
-log_item = self.twin.at('logs')
-log_item.append('User logged in')
-```
-
-### Reading Data (`get`, `at`)
-
-#### `get(path, default=None)`
-
-Retrieves the value of a specific path. If the path does not exist, the `default` value is returned.
-
-**Example:**
-
-```python
-freq = self.twin.get('parameters/update_freq', 5)  # Default 5 if not found
-```
-
-#### `at(path) -> Item`
-
-Returns an `Item` object pointing to the location `path`. This is **more powerful** than `get` because it allows further
-navigation from that point.
-
-**Example:**
-
-```python
-# Get a pointer (Item) to the first sensor
-sensor_item = self.twin.at('sensors/#0')
-
-# Read values via the Item
-print(sensor_item['value'].v)  # Prints: 15.0
-```
-
-### Navigation (`Item` objects)
-
-An `Item` object acts as a smart window onto your data.
-
-* **`item['child']`**: Navigate to a sub-item.
-    ```python
-    val = sensor_item['value'].v
-    ```
-* **`item.parent`**: Returns an `Item` to the parent.
-    ```python
-    root_sensors = sensor_item.parent # Now points to 'sensors'
-    ```
-* **`item.list_root`**: If the item is part of a list (like sensors), this returns the item itself, regardless of how
-  deep you are in the hierarchy.
-    ```python
-    # If located at 'sensors/#0/value', list_root returns 'sensors/#0'
-    sensor_name = sensor_item.list_root.v # Returns e.g., 'temp'
-    ```
-
-#### `.children(prefix=None)`
-
-Returns an **iterator** (not a list) of `Item` objects that are direct children of the current item.
-
-* **Why an iterator?** It is memory efficient (lazy evaluation). If you have thousands of items, it doesn't create
-  objects for all of them unless you consume them.
-* **prefix:** Optional string to filter children (e.g., useful if you have different types of lists in one folder).
-
-**Example 1: Converting to a list**
-If you need index access or the length, convert it to a list explicitly.
-
-```python
-sensors = self.twin.at('sensors')
-sensor_list = list(sensors.children())
-print(f"Count: {len(sensor_list)}")
-```
-
-**Example 2: Iterating directly (Efficient)**
-Searching for a specific sensor without creating a full list in memory.
-
-```python
-target_sensor = None
-for item in self.twin.at('sensors').children():
-    if item.v == 'humidity':
-        target_sensor = item
-        break
-```
-
-### Reactivity (`subscribe`)
-
-Only available in `ttStore`. This allows subscribing a method to data changes.
-
-#### `subscribe(path, callback)`
-
-* **path:** The path to monitor (e.g., `'sensors'`).
-* **callback:** The method called upon change.
-
-The callback receives a list of `updates`. Each update is a tuple: `(path, new_value, old_value, source)`.
-
-**Example:**
-
-```python
-def ttse__on_start(self):
-    # Listen to anything changing under 'sensors'
-    self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-
-def ttse__on_sensor_update(self, updates):
-    for path, new, old, source in updates:
-        print(f"Sensor update at {path}: {old} -> {new}")
-```
-
-### Utilities (`dumps`, `group`, `source`)
-
-#### `dumps()`
-
-Returns a string representation of the entire store (useful for debugging).
-
-```python
-print(self.twin.dumps())
-```
-
-#### `group(notify=True, source_id=None)` & `source(source_id)`
-
-Context managers to control how updates are processed.
-
-1. **`group(notify=False)`**: Performs updates atomically.
-
-* **Usage:** Batch initialization. No events are fired until the block ends (or never if `notify=False`).
-
-  ```python
-  with self.twin.group(notify=False):
-      self.twin.set(...) 
-  ```
-
-2. **`source(source_id)` / `group(..., source_id=...)`**:
-
-* **Usage:** Identifying *who* made the change. This is crucial for bidirectional sync (e.g., connecting a GUI slider to
-  a value).
-* If a GUI updates the Store, the Store notifies the GUI. You want the GUI to ignore that notification to prevent an
-  infinite loop.
-
-  ```python
-  # Example: Updating from a specific source (e.g., 'GUI')
-  with self.twin.source('GUI'):
-      self.twin['parameters/speed'] = 50
-  
-  # In the callback, you can check the source:
-  def on_change(self, updates):
-      for path, new, old, src in updates:
-          if src == 'GUI':
-              continue # Ignore changes I made myself
-          # Update GUI display...
-  ```
-
----
-
-## Performance & Best Practices
-
-Although `ttStore` is powerful, consider the following points for optimal performance and clean code.
-
-### 1. Batch Updates with `group`
-
-When modifying a lot of data simultaneously (e.g., during startup or reset), always use
-`with self.group(notify=False):`.
-
-* **Reason:** Without this, every single write action triggers all subscribers immediately. `group` prevents this "
-  update storm".
-
-### 2. Efficiency of `Item`
-
-If you need to read or write the same value frequently in a loop (e.g., a timer), retrieve the `Item` **once** during
-`__init__` or `on_start`, and cache it.
-
-* **Inefficient:** Calling `self.twin.get('sensors/#0/value')` in every cycle (must parse the path string every time).
-* **Efficient:**
-    ```python
-    # In __init__:
-    self.temp_val_item = self.twin.at('sensors/#0/value')
-
-    # In timer loop:
-    self.temp_val_item.v += 0.1
-    ```
-
-### 3. Data Types
-
-The Store is not strictly typed (it is Python), but consistency is key. If a path starts as a `float` (`15.0`), try to
-keep it that way and do not suddenly change it to a `string` ("15"), unless your application logic specifically handles
-this.
-
----
-
-## Example Implementation
-
-Below is a full integration where `MyProcess` writes data and `OperatorInterface` reacts to that data via the
-`DigitalTwin` store.
-
-```python
-from TaskTonic import *
-from TaskTonic.ttTonicStore import ttStore
-import random
-
-
-# --- The Data Repository Service ---
-class DigitalTwin(ttStore):
-    _tt_is_service = "digital_twin"  # Service name for binding
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.my_record['auto_finish'] = True
-
-    def _init_post_action(self):
-        super()._init_post_action()
-        # Use group(notify=False) for performance during init
-        with self.group(notify=False):
-            # Because the set method uses Iterable, both tuples (()) and lists [] are valid.
-            self.set((
-                ('parameters/update_freq', 2),
-                ('parameters/temp_limit', 10),
-                ('sensors/#', 'temp'),         # Create sensor 0
-                ('sensors/./value', 15.0),
-                ('sensors/./unit', '℃'),
-                ('sensors/./high_alarm', False),
-                ('sensors/#', 'humidity'),     # Create sensor 1
-                ('sensors/./value', -1),
-            ))
-
-        self.log(f"Digital Twin is initialized\n{self.dumps()}")
-
-
-# --- The Observer (e.g., GUI or Logger) ---
-class OperatorInterface(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        # Bind to the service
-        self.twin = DigitalTwin()
-
-    def ttse__on_start(self):
-        # Subscribe to sensor changes
-        self.twin.subscribe("sensors", self.ttse__on_sensor_update)
-        # Schedule parameter update and end of program
-        ttTimerSingleShot(5, sparkle_back=self.ttse__on_parm_update)
-        ttTimerSingleShot(8, sparkle_back=self.ttse__on_end_program)
-
-    def ttse__on_sensor_update(self, updates):
-        for path, new, old, source in updates:
-            # Use .at(path) to get an Item for smart navigation
-            # .list_root automatically navigates up to the sensor item (e.g., 'sensors/#0')
-            sensor_item = self.twin.at(path).list_root
-
-            # Retrieve name and value via the item
-            name = sensor_item.v
-            val = sensor_item['value'].v
-            unit = sensor_item.get('unit', '')
-
-            self.log(f"UPDATE OF SENSOR {name}: {val:.3f}{unit}")
-
-    def ttse__on_parm_update(self, tmr):
-        self.twin['parameters/update_freq'] = .5
-
-    def ttse__on_end_program(self, tmr):
-        self.finish()
-
-
-# --- The Controller (Process Logic) ---
-class MyProcess(ttTonic):
-
-    def __init__(self, name=None, context=None, log_mode=None, catalyst=None):
-        super().__init__(name, context, log_mode, catalyst)
-        self.my_record['auto_finish'] = True
-        self.twin = self.bind(DigitalTwin)
-
-        # Performance optimization: Cache the item pointer
-        # This avoids parsing the path string in every loop cycle
-        self.temp_sens_item = self.twin.at('sensors/#0')
-
-    def ttse__on_start(self):
-        self.twin.subscribe("parameters", self.ttse__on_param_update)
-        # Start a timer based on a parameter from the store
-        freq = self.twin.get('parameters/update_freq', 5)
-        self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__on_param_update(self, updates):
-        for path, new, old, source in updates:
-            if path == 'parameters/update_freq':
-                self.utmr.stop()
-                # Restart timer with new frequency
-                freq = self.twin.get('parameters/update_freq', 5)
-                self.utmr = self.bind(ttTimerRepeat, freq, sparkle_back=self.ttse__update_timer)
-
-    def ttse__update_timer(self, tmr):
-        # Writing directly via the cached item is very efficient
-        self.temp_sens_item['value'].v += random.uniform(-2, 2)
-
-
-# --- App Configuration ---
-class myApp(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
-
-    def creating_starting_tonics(self):
-        DigitalTwin()
-        OperatorInterface()
-        MyProcess()
-
-
-if __name__ == '__main__':
-    myApp()
-```## `File: _documents\old_documents_not_matching_the_code\developer documentation.md`
-# TaskTonic Framework: Developer Documentation
-
-## 1. Philosophy & Metaphor
-
-TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model.
-
-The core philosophy is based on the **Tonic**. Think of your running application as a glass of tonic. It comes to life through **Sparkles**—not electrical sparks, but **bubbles** rising in a liquid.
-
-- **The Flow:** Code is executed in small, atomic units called *Sparkles*.
-- **The Fizz:** When these Sparkles flow continuously, the application "fizzes" with activity. It feels like a single, cohesive whole, even though it may be performing multiple logical processes simultaneously.
-- **The Rule:** A Sparkle must be short-lived. If one bubble takes too long to rise (blocking code), the flow stops, and the fizz goes flat. In practice, this is rarely an issue, as most software processes are reactive chains of short events.
-
-This architecture allows you to write highly responsive, concurrent applications (like UIs or IoT controllers) without the race conditions and headaches of traditional multi-threading.
-
----
-
-## 2. Core Architecture
-
-The framework is built on a strict hierarchy of classes.
-
-| Component    | Class        | Description                                                                                                                                                                         |
-| ------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Liquid**   | `ttLiquid`   | **(Formerly `ttEssence`)** The base substance. It handles identity, hierarchy (parent/child relationships), and lifecycle management in the `Ledger`. It is the passive foundation. |
-| **Tonic**    | `ttTonic`    | The active ingredient. Inherits from `ttLiquid`. It adds the ability to "sparkle" (execute code), manage state (State Machines), and log activity.                                  |
-| **Catalyst** | `ttCatalyst` | The engine that makes the Tonic fizz. It owns the execution thread and the queue. It pulls Sparkles one by one and executes them.                                                   |
-| **Formula**  | `ttFormula`  | The recipe. The entry point of your application where you define the initial mix of Tonics and configuration settings.                                                              |
-
----
-
-## 3. The Tonic (`ttTonic`)
-
-The `ttTonic` is where you write your application logic. It uses **introspection** to automatically bind your methods to the execution queue based on their names.
-
-### 3.1 Sparkle Naming Convention
-
-You do not register callbacks manually. You simply name your methods using specific prefixes.
-
-- **`ttsc__` (Command):** *Public Command.* Call this to request an action from outside the class.
-  - *Example:* `my_tonic.ttsc__start_process()`
-- **`ttse__` (Event):** *Public Event.* Call this to react to an event (like a timer or UI click).
-  - *Example:* `ttse__on_timer(info)`
-- **`tts__` (Sparkle):** *Internal.* Private logic chunks used to break up large tasks.
-  - *Example:* `self.tts__step_two()`
-- **`_ttss__` (System):** Reserved for framework lifecycle hooks (startup/shutdown).
-
-> **Important:** When you call a sparkle method (e.g., `self.tts__calculate()`), it does **not** execute immediately. It places a "bubble" (work order) on the Catalyst queue. It will be executed when the Catalyst reaches it in the stream.
-
-### 3.2 State Machines
-
-Every `ttTonic` is a built-in State Machine. You can organize your code by defining which Sparkles are valid in which state.
-
-**Changing State:** Use `self.to_state('new_state_name')`.
-
-**State-Specific Sparkles:** You can prefix a Sparkle with a state name: `prefix_state__name`.
-
-- **Specific:** `ttsc_idle__start()` — Only runs if the Tonic is in the `idle` state.
-- **Generic:** `ttsc__start()` — Runs in any state (unless a specific version exists).
-- **Fallback:** If called in a state where no handler exists, the call is ignored (the bubble pops harmlessly).
-
-### 3.3 Lifecycle & Termination
-
-To ensure proper cleanup and hierarchy management, you must use the framework's lifecycle methods.
-
-- **`ttsc__finish()`**: **The Stop Command.** Call this to stop the Tonic. It initiates the graceful shutdown sequence:
-  1. Stops the State Machine (transitions to `-1`).
-  2. Sets the Tonic to "Finishing Mode" (ignoring new standard sparkles).
-  3. Triggers the `ttse__on_finished` event.
-  4. Cleans up children/infusions and removes the Tonic from the Ledger.
-- **`ttse__on_start()`**: Called immediately after the Tonic is created and initialized.
-- **`ttse__on_enter()`**: Called whenever entering a new state.
-- **`ttse__on_exit()`**: Called whenever leaving a state.
-- **`ttse__on_finished()`**: Called *during* the shutdown sequence (triggered by `ttsc__finish()`). Use this to close resources like files or sockets before the object is destroyed.
-
----
-
-## 4. Timers and Flow Control
-
-Since Sparkles must be short to keep the "fizz" alive, you cannot use `time.sleep()`. Instead, use the built-in Timers to handle time-bound logic.
-
-```python
-from TaskTonic import ttTonic, ttTimerSingleShot
-
-class MyProcess(ttTonic):
-    def ttse__on_start(self):
-        self.log("Starting process...")
-        # Don't sleep! Schedule a sparkle for later.
-        ttTimerSingleShot(seconds=2.5, name='tm_continue')
-
-    def ttse__on_tm_continue(self, info):
-        self.log("2.5 seconds have passed. Continuing...")
-        # Done with work? Stop the tonic.
-        self.ttsc__finish()
-```
-
----
-
-## 5. Services (Singletons)
-
-The framework uses the `ttLiquid` metaclass to manage Singleton Services effortlessly. A Service is a Tonic that exists only once but can be accessed from anywhere.
-
-**Defining a Service:** Set the `_tt_is_service` attribute.
-
-```python
-class Database(ttTonic):
-    _tt_is_service = "db_service" # Unique ID
-
-    def __init__(self, **kwargs):
-        # Runs ONLY once (first creation)
-        super().__init__(**kwargs)
-        self.connect_db()
-
-    def _init_service(self, context, **kwargs):
-        # Runs EVERY time the service is requested
-        self.log(f"Accessed by {context.name}")
-```
-
-**Using a Service:** Simply instantiate it. If it exists, you get the running instance.
-
-```python
-# In any other Tonic:
-my_db = Database() # Returns the existing Singleton
-```
-
----
-
-## 6. Example: The Traffic Light
-
-This example demonstrates `ttLiquid` hierarchy, Sparkles, and State Machine logic.
-
-```py
-from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot, ttLog
-
-class TrafficLight(ttTonic):
-    def ttse__on_start(self):
-        self.to_state('red')
-
-    # --- State: RED ---
-    def ttse_red__on_enter(self):
-        self.log("STOP (Red)")
-        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
-
-    def ttsc_red__next(self, info):
-        self.to_state('green')
-
-    # --- State: GREEN ---
-    def ttse_green__on_enter(self):
-        self.log("GO (Green)")
-        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
-
-    def ttsc_green__next(self, info):
-        self.to_state('yellow')
-
-    # --- State: YELLOW ---
-    def ttse_yellow__on_enter(self):
-        self.log("CAUTION (Yellow)")
-        ttTimerSingleShot(1, sparkle_back=self.ttsc__next)
-
-    def ttsc_yellow__next(self, info):
-        self.to_state('red')
-
-class SimFormula(ttFormula):
-    def creating_formula(self):
-        return (
-            ('tasktonic/project/name', 'TrafficSim'),
-            ('tasktonic/log/to', 'screen'),
-            ('tasktonic/log/default', ttLog.FULL),
-        )
-
-    def creating_starting_tonics(self):
-        TrafficLight()
-
-if __name__ == "__main__":
-    SimFormula()
-```
-
-# 
-
 
 ## `File: .github\workflows\tests.yml`
 ```yaml
@@ -21753,6 +18841,66 @@ jobs:
         run: |
           pytest testing/
 
+```
+
+## `File: .github\workflows\publish.yml`
+```yaml
+name: Publish TaskTonic to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        python -m build
+        twine upload dist/*
+
+```
+
+## `File: .github\workflows\webdos.yml`
+```yaml
+name: Deploy TaskTonic Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs-material pymdown-extensions
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force
 ```
 
 ## `File: TaskTonic.egg-info\dependency_links.txt`
@@ -25307,522 +22455,1814 @@ class ttTkinterFrame(ttTkinterMixin, tk.Frame, ttTonic):
 
 ```
 
-## `File: doc\new Store doc.md`
-# TaskTonic Store: The Complete Developer Guide
+## `File: docs\TaskTonic  - The introduction.md`
+# TaskTonic Framework: Developer Documentation
 
-Welcome to the TaskTonic Store! This guide covers everything from basic data storage to advanced collection management. TaskTonic is designed to be intuitive, reactive, and far more powerful than a standard dictionary or JSON object.
+<img src="../assets/tasktonic-introduction.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
 
----
 
-## 1. Purpose and Function of the Store
-The Store is the **single source of truth** for your application state. It is a centralized, hierarchical database that notifies your application whenever data changes. 
+## 1. Philosophy & Metaphor
 
-*   **Centralized**: All state lives in one place, making it easy to debug and inspect.
-*   **Reactive**: Components can "subscribe" to paths and react instantly to updates.
-*   **Hierarchical**: Data is organized like a file system, allowing for logical grouping.
+TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model.
 
----
+The core philosophy is based on the **Tonic**. Think of your running application as a glass of tonic. It comes to life through **Sparkles**, the **bubbles** rising in a liquid.
 
-## 2. Basic Path Navigation
-Data in the Store is accessed via **Paths**. Paths are strings using a forward-slash (`/`) notation, similar to folders on your computer.
+*   **The Flow:** Code is executed in small, atomic units called *Sparkles*.
+*   **The Fizz:** When these Sparkles flow continuously, the application "fizzes" with activity. It feels like a single, cohesive whole, even though it may be performing multiple logical processes simultaneously.
+*   **The Rule:** A Sparkle must be short-lived. If one bubble takes too long to rise (blocking code), the flow stops, and the fizz goes flat. In practice, this is rarely an issue, as most software processes are reactive chains of short events.
 
-*   **Example**: `ui/settings/background_color`
-*   **Root**: The very top of the store is represented by an empty string or `/`.
-*   **Case Sensitivity**: Paths are case-sensitive. `User/Name` is different from `user/name`.
+This architecture allows you to write highly responsive, concurrent applications (like UIs or IoT controllers) without the race conditions and headaches of traditional multi-threading.
 
 ---
 
-## 3. Hybrid Nodes: Values and Leaves
-In most data structures, a node is either a "value" (like a string) or a "container" (like a folder). In TaskTonic, **a node can be both at the same time.**
+## 2. Core Architecture
 
-*   **The `.v` Property**: Every node in the Store can hold its own value. You access this value using the `.v` property.
-*   **Leaves (Children)**: Even if a node has a value, it can still have children.
-```python
-# 'user' gets a value
-store.set('user', 'Alice')
-# or
-store['user'] = 'Alice'
+The framework is built on a strict hierarchy of classes.
 
-# 'user' also gets a child 'age'
-store.set('user/age', 30)
-# or
-store['user/age'] = 30
-
-# Result:
-# store.at('user').v -> "Alice"
-# store.at('user/age').v -> 30
-```
-
----
-
-## 4. Item Cursors with `.at()`
-Instead of typing long paths repeatedly, you can create a "cursor" using the `.at()` method. This returns an `Item` object that acts as a shortcut to that specific location.
-
-*   **Shortcuts**: Cursors make your code cleaner and more readable.
-*   **Relative Paths**: Once you have a cursor, all operations are relative to that point.
-```python
-# Set up a shortcut at the beginning of your code
-ui = store.at('ui/settings')
-
-# Use it as a dictionary-style shortcut
-ui['background'] = 'blue'
-ui['opacity'] = 0.8
-
-# This is exactly the same as:
-# store.set('ui/settings/background', 'blue')
-```
-
----
-
-## 5. The Automatic Index (#)
-The `#` symbol tells the Store to find the highest index in a list, add 1, and create a new item.
-
-*   **First Item**: If you use `#` for the first time, the Store starts at `0`.
-*   **Auto-increment**: Every subsequent call with `#` automatically bumps the counter.
-```python
-# This creates 'users/#0/name'
-s.set('users/#/name', 'Alice')
-
-# This creates 'users/#1/name'
-s.set('users/#/name', 'Bob')
-```
-
----
-
-## 6. The "Sticky" Index (.)
-The `.` refers to the **most recent index** generated in that specific path segment. This allows you to add multiple properties to the same list item easily.
-```python
-s['logs/#/msg'] = 'System startup'    # Create a new log entry (gets index #0)
-s['logs/./timestamp'] = '2026-05-02'  # Add a timestamp to the SAME entry (index #0)
-```
-
----
-
-## 7. Smart Ordering & Manual Indexing
-You can override the auto-incrementer by placing a number directly after the `#`. If you return to using a plain `#` later, the Store will continue from the highest index found.
-
-| Action | Resulting Path | Why? |
+| Component | Class | Description |
 | :--- | :--- | :--- |
-| `s.set('l/#/a', 1)` | `l/#0/a` | Starts at 0 |
-| `s.set('l/#200/a', 1)` | `l/#200/a` | Manual override |
-| `s.set('l/#/a', 1)` | `l/#201/a` | Continues from 200 |
+| **Liquid** | `ttLiquid` | The base substance. It handles identity, hierarchy (parent/child relationships), and lifecycle management in the `Ledger`. It is the passive foundation. |
+| **Tonic** | `ttTonic` | The active ingredient. Inherits from `ttLiquid`. It adds the ability to "sparkle" (execute code), manage state (State Machines), and log activity. |
+| **Catalyst** | `ttCatalyst` | The engine that makes the Tonic fizz. It owns the execution thread and the queue. It pulls Sparkles one by one and executes them. |
+| **Formula** | `ttFormula` | The recipe. The entry point of your application where you define the initial mix of Tonics and configuration settings. |
 
 ---
 
-## 8. Named Lists (Prefixes)
-You can mix different types of lists in the same branch by adding text before the `#` to create independent counters.
-```python
-# List with 'm' prefix
-s.set('data/m#/val', 10)  # Becomes data/m#0/val
+## 3. The Tonic (`ttTonic`)
 
-# List with 'x' prefix
-s.set('data/x#/val', 20)  # Becomes data/x#0/val
+The `ttTonic` is where you write your application logic. It uses **introspection** to automatically bind your methods to the execution queue based on their names.
+
+### 3.1 Sparkle Naming Convention
+
+You do not register callbacks manually. You simply name your methods using specific prefixes. Every prefix starts with **tts**, it is a TaskTonic Sparkle.
+
+*   **`ttsc__` (Command):** *Public Command.* Call this to request an action from outside the class.
+    *   *Example:* `my_tonic.ttsc__start_process()`
+*   **`ttse__` (Event):** *Public Event.* Call this to react to an event (like a timer or UI click).
+    *   *Example:* `ttse__on_timer(info)`
+*   **`tts__` , or `_tts__`(Sparkle):** *Internal.* Private logic chunks used to break up large tasks.
+    *   *Example:* `self.tts__step_two()`
+*   **`_ttss__` (System):** Reserved for framework lifecycle hooks (startup/shutdown).
+
+> **Important:** When you call a sparkle method (e.g., `self.tts__calculate()`), it does **not** execute immediately. It places a "bubble" (work order) on the Catalyst queue. It will be executed when the Catalyst reaches it in the stream.
+
+### 3.2 State Machines
+
+Every `ttTonic` is a built-in State Machine. You can organize your code by defining which Sparkles are valid in which state.
+
+**Changing State:**
+Use `self.to_state('new_state_name')`.
+
+**State-Specific Sparkles:**
+You can prefix a Sparkle with a state name: `prefix_state__name`.
+
+*   **Specific:** `ttsc_idle__open()` — Only runs if the Tonic is in the `idle` state.
+*   **Generic:** `ttsc__open()` — Runs in any state (unless a specific version exists).
+*   **Fallback:** If called in a state where no handler exists, the call is ignored (the bubble pops harmlessly).
+
+### 3.3 Lifecycle & Termination
+
+To ensure proper cleanup and hierarchy management, you must use the framework's lifecycle methods.
+
+*   **`ttsc__finish(self)`**: **The Stop Command.** Call this to stop the Tonic. It initiates the graceful shutdown sequence:
+    1.  Stops the State Machine (transitions to `-1`).
+    2.  Sets the Tonic to "Finishing Mode" (ignoring new standard sparkles).
+    3.  Triggers the `ttse__on_finished` event.
+    4.  Cleans up children/infusions and removes the Tonic from the Ledger.
+*   **`ttse__on_start(self)`**: Called immediately after the Tonic is created and initialized.
+*   **`ttse__on_enter(self)`**: Called whenever entering a new state.
+*   **`ttse__on_exit(self)`**: Called whenever leaving a state.
+*   **`ttse__on_finished(self)`**: Called *during* the shutdown sequence (triggered by `ttsc__finish`). Use this to close resources like files or sockets before the object is destroyed.
+
+---
+
+## 4. Timers and Flow Control
+
+Since Sparkles must be short to keep the "fizz" alive, you cannot use `time.sleep()`. Instead, use the built-in Timers to handle time-bound logic.
+
+```python
+from TaskTonic import ttTonic, ttTimerSingleShot
+
+class MyProcess(ttTonic):
+    def ttse__on_start(self):
+        self.log("Starting process...")
+        # Don't sleep! Schedule a sparkle for later.
+        ttTimerSingleShot(seconds=2.5, sparkle_back=self.ttsc__continue)
+
+    def ttsc__continue(self, info):
+        self.log("2.5 seconds have passed. Continuing...")
+        # Done with work? Stop the tonic.
+        self.ttsc__finish()
 ```
 
 ---
 
-## 9. Atomic Batch Creation
-To create a complex object cleanly, pass a **tuple of tuples** to the `set` method.
+## 5. Services (Singletons)
+
+The framework uses the `ttLiquid` metaclass to manage Singleton Services effortlessly. A Service is a Tonic that exists only once but can be accessed from anywhere.
+
+**Defining a Service:**
+Set the `_tt_is_service` attribute.
+
 ```python
-# Create a new sensor with all attributes in one go
-s.set((
-   ('sensors/an#', 'temp living'),   # an = autonumber
-   ('sensors/./type', 'analog'),
-   ('sensors/./val', 21),
-   ('sensors/./unit', 'C'),
-   ('sensors/./settings/log', True),
-   ('sensors/./settings/ip', '192.168.1.200:4444'),
-))
+class Database(ttTonic):
+    _tt_is_service = "db_service" # Unique ID
+    
+    def __init__(self, **kwargs):
+        # Runs ONLY once (first creation)
+        super().__init__(**kwargs)
+        self.connect_db()
+
+    def _tt_init_service_base(self, context, **kwargs):
+        # Runs EVERY time the service is requested
+        self.log(f"Accessed by {base.name}")
+```
+
+**Using a Service:**
+Simply instantiate it. If it exists, you get the running instance.
+
+```python
+# In any other Tonic:
+my_db = Database() # Returns the existing Singleton
 ```
 
 ---
 
-## 10. Built-in Navigation Helpers
-When working with an `Item` (cursor), use these built-in properties to navigate the tree:
+## 6. Example: The Traffic Light
 
-*   **`.index`**: Returns the specific index segment (e.g., `"an0"`).
-*   **`.key`**: Returns the last part of the path (e.g., `"val"`).
-*   **`.parent()`**: Returns a new `Item` pointing one level up.
-*   **`.path`**: Returns the full absolute path string.
+This example demonstrates `ttLiquid` hierarchy, Sparkles, and State Machine logic.
+
+```python
+from TaskTonic import ttTonic, ttFormula, ttTimerSingleShot, ttLog
+
+class TrafficLight(ttTonic):
+    def ttse__on_start(self):
+        self.to_state('red')
+
+    # --- State: RED ---
+    def ttse_red__on_enter(self):
+        self.log("STOP (Red)")
+        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
+
+    def ttsc_red__next(self, info):
+        self.to_state('green')
+
+    # --- State: GREEN ---
+    def ttse_green__on_enter(self):
+        self.log("GO (Green)")
+        ttTimerSingleShot(3, sparkle_back=self.ttsc__next)
+
+    def ttsc_green__next(self, info):
+        self.to_state('yellow')
+
+    # --- State: YELLOW ---
+    def ttse_yellow__on_enter(self):
+        self.log("CAUTION (Yellow)")
+        ttTimerSingleShot(1, sparkle_back=self.ttsc__next)
+
+    def ttsc_yellow__next(self, info):
+        self.to_state('red')
+
+class SimFormula(ttFormula):
+    def creating_formula(self):
+        return (
+            ('tasktonic/project/name', 'TrafficSim'),
+            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/default', ttLog.FULL),
+        )
+
+    def creating_starting_tonics(self):
+        TrafficLight()
+
+if __name__ == "__main__":
+    SimFormula()
+```
+## `File: docs\TaskTonic - Active data store.md`
+# TaskTonic Store for Reactive Data Management
+
+<img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+
+In complex, asynchronous systems, maintaining a consistent, thread-safe application state is one of the greatest challenges. The TaskTonic Store module provides a centralized, hierarchical, and reactive data engine. The module consists of two complementary core components:
+
+1.  **`Store`**: The pure, functional, thread-safe data core. It handles hierarchical storage, lock management, MQTT-style wildcard pub/sub notifications, and atomic updates.
+2.  **`Item`**: A highly powerful, cursor-like view/pointer that references a specific path within the `Store`. This enables relative navigation, local mutations, and isolated subscriptions.
+
+Within the framework, the store is exposed as a Singleton Service via the **`ttStore`** class, accessible in your Tonics via `self.ledger.formula`.
 
 ---
 
-## 11. Iterating Through Collections
-TaskTonic makes it easy to loop through your data using standard Python patterns.
+## 1. Core API & Data Access
 
-### Using a `for` loop
-The `.items()` method yields a cursor for every child in the list.
+TaskTonic provides multiple ways to interact with data, balancing performance and developer convenience. 
+Using the store is a bit like using a python dictionary but with hierarchical paths and strongly optimised for storing
+and distributing data in een reactive systems.
+
+### 1.1 Dictionary Syntax (`[]`)
+For quick, intuitive access, both the `Store` and `Item` objects fully support standard Python dictionary bracket syntax. Reading missing paths natively returns `None` instead of raising a `KeyError`.
+
 ```python
-sensor_list = s.at("sensors")
+# Writing data
+store["machine/status"] = "operational"
+store["machine/metrics/temperature"] = 22.5
 
-for sensor in sensor_list.items():
-    print(f"Checking {sensor.index}: {sensor.v}")
+# Reading data
+current_status = store["machine/status"]
 ```
 
-### Using Iterators & `next()`
+### 1.2 The `get` and `set` Method
+If you want to read a value and provide a fallback if the path doesn't exist, use `.get()`.
+
 ```python
-it = iter(s.at("sensors").items())
-first_item = next(it)
+# Returns 60 if 'machine/metrics/speed' is not found
+speed = store.get("machine/metrics/speed", default=60)
 ```
 
----
+Setting data, single line or multipole line, can be done using set.
 
-## 12. Sibling & Root Discovery in Callbacks
-Inside a callback, use `.parent()` to find the context of the change.
-```python
-def on_val_change(events):
-    for event in events:
-        # If path is "sensors/an0/val"
-        val = event.v
-        sensor = event.parent() # Points to "sensors/an0"
+``` python
+        # one item
+        self.store.set('setting/ui/background', 'blue')
         
-        name = sensor.v
-        print(f"{name} is now {val}")
-
-s.subscribe("sensors/*/val", on_val_change)
-```
-
----
-
-## 13. Inspecting the Store
-To see what’s happening under the hood:
-
-*   **`s.dump()`**: Returns a raw list of all path-value pairs.
-*   **`s.dumps()`**: Returns a visual, readable tree representation.
-
----
-
-## Cheat Sheet
-
-| Symbol | Name | Description |
-| :--- | :--- | :--- |
-| **`#`** | Auto-increment | Create a new index (highest + 1) |
-| **`.`** | Sticky Index | Use the last generated index at this level |
-| **`.v`** | Value | Access the value of the current node |
-| **`.at()`** | Cursor | Create a shortcut to a path |
-
-
----
-# TaskTonic Store - Subscription Guide
-
-The `Store` is the central pub/sub data heart of TaskTonic. It provides a powerful, thread-safe mechanism to listen to data changes with advanced filtering, wildcards, and atomic snapshots. 
-
-This document describes all `subscribe` possibilities, including the correct parameters, use cases, and code examples.
-
----
-
-## 1. Basic Subscription (Exact Path)
-Listens to changes on one specific, exact path. By default, this does **not** listen to changes in underlying paths (`recursive=False`).
-
-*   **Use Case:** Updating a simple UI toggle (e.g., dark mode) when the setting changes.
-```python
-def on_theme_change(events):
-    for path, val, old_val, source in events:
-        print(f"Theme changed from {old_val} to {val}")
-
-#Listens ONLY to 'ui/theme', not to 'ui/theme/color'
-store.subscribe("ui/theme", on_theme_change)
-```
-
----
-
-## 2. Recursive Subscription (`recursive=True`)
-Listens to a root node and all changes in its underlying sub-paths.
-
-*   **Use Case:** Re-rendering an entire profile screen as soon as *anything* in the profile (name, age, address) changes.
-```python
-def on_profile_update(events):
-    for path, val, old_val, source in events:
-        print(f"Something in profile changed at: {path}")
-
-#Triggers on 'user/profile', 'user/profile/name', 'user/profile/address/city', etc.
-store.subscribe("user/profile", on_profile_update, recursive=True)
-```
-
----
-
-## 3. Wildcards (`*` and `**`)
-Subscribe to dynamic paths without knowing the exact IDs or names upfront.
-*   `*`: Matches exactly **one** path level (e.g., `ui/items/*` matches `ui/items/123` but not `ui/items/123/color`).
-*   `**`: Matches **all** underlying path levels (recursively down the tree).
-
-*   **Use Case (`*`):** Listening to the status of any sensor in a dynamically generated list.
-*   **Use Case (`**`):** A global system logger that picks up all status changes anywhere in the system tree.
-```python
-def on_sensor_temp_change(events):
-    for path, val, old_val, source in events:
-        print(f"Sensor at {path} reported temp: {val}")
-
-#Matches 'sensors/kitchen/temp' and 'sensors/garage/temp'
-store.subscribe("sensors/*/temp", on_sensor_temp_change)
-
-def on_any_status_change(events):
-    for path, val, old_val, source in events:
-        print(f"Global status update at {path}")
-
-#Matches 'system/status', 'system/network/status', 'system/cpu/core1/status'
-store.subscribe("system/**/status", on_any_status_change)
-```
-
----
-
-## 4. Atomic Snapshots (`extract` and `.`)
-Instead of receiving individual property events (which can cause race conditions during UI updates), you can ask the Store to build a flat dictionary (snapshot) with specific fields relative to the triggered path. Use `.` to retrieve the value of the base path itself.
-
-**Note:** If you use `extract` to fetch child properties, you **must** enable `recursive=True`. Otherwise, the Store ignores the changes on the child paths before the snapshot can even be constructed.
-
-*   **Use Case:** Updating a list of complex UI buttons. If the color or active state changes, you want to receive the entire button's state at once to redraw it cleanly.
-```python
-def on_button_update(events):
-    for path, snapshot, old_val, source in events:
-        #snapshot is a dictionary, e.g., {'.': 'submit', 'color': 'red', 'active': True}
-        base_value = snapshot["."]
-        color = snapshot["color"]
-        is_active = snapshot["active"]
-        print(f"Button {path} updated: val={base_value}, color={color}, active={is_active}")
-
-store.subscribe(
-    "ui/buttons/*", 
-    on_button_update, 
-    extract=[".", "color", "active"], 
-    recursive=True
-)
-```
-
----
-
-## 5. Direct Initialization (`trigger_now=True`)
-Forces the Store to immediately fire a synthetic `init` event with the current state right after calling `subscribe`. This works perfectly alongside wildcards and snapshots to build an entire list at startup.
-
-*   **Use Case:** Rendering a UI list on the screen for the first time without having to manually fetch all the data using `.get()`.
-```python
-def on_list_item_change(events):
-    for path, snapshot, old_val, source in events:
-        if source == "init":
-            print(f"Initial render for {path} with data: {snapshot}")
-        else:
-            print(f"Update for {path} with data: {snapshot}")
-
-#Will immediately fire for ALL existing items in 'ui/list/'
-store.subscribe(
-    "ui/list/*",
-    on_list_item_change,
-    extract=["title", "done"],
-    recursive=True,
-    trigger_now=True
-)
-```
-
----
-
-## 6. Excluding Paths (`exclude`)
-Listen recursively to a tree, but ignore specific (high-frequency) sub-paths to save performance.
-
-*   **Use Case:** You want to monitor the entire system node to update a dashboard, except for the 'uptime' or 'logs' counter that ticks every millisecond.
-
-```python
-def on_system_change(events):
-    pass #Handle system changes
-
-#Excludes absolute paths from the recursive listener
-store.subscribe(
-    "system", 
-    on_system_change, 
-    recursive=True, 
-    exclude=["system/metrics/uptime", "system/logs"]
-)
-```
-
-## 7. Ignoring Specific Sources (`ignore_source`)
-Prevents infinite feedback loops by ignoring events that were triggered by a specific origin. When you modify the Store using a source tag (via the `store.group()` or `store.source()` context managers), listeners that have this exact tag defined in `ignore_source` will intentionally drop those events.
-
-*   **Use Case:** A two-way bound UI input field (like a volume slider). It needs to update the Store when the user drags it, but it also needs to listen to the Store for external changes. You want to avoid the slider re-rendering or stuttering when it is the one actually making the change.
-```python
-def on_volume_change(events):
-    print("Volume changed externally. Updating UI slider position...")
-
-#The UI component subscribes, but explicitly ignores its own updates
-store.subscribe("audio/volume", on_volume_change, ignore_source="volume_slider")
-
-#When the user drags the slider, we tag the change with our source ID
-with store.source("volume_slider"):
-    store.set("audio/volume", 75) #This will NOT trigger 'on_volume_change'
-
-#An external update from a background process (no source tag attached)
-store.set("audio/volume", 80)     #This WILL trigger 'on_volume_change'
-```
-## 8. Multi-Path Subscriptions
-You can pass a list of paths to a single `subscribe` call. This is useful when a component depends on multiple unrelated data points and you want to handle all updates through a single callback.
-
-*   **Use Case:** A dashboard header that needs to update if either the `user/display_name` or the `system/current_time` changes.
-
-```python
-def on_header_data_change(events):
-    for path, val, old_val, source in events:
-        print(f"Header data update from {path}: {val}")
-
-#Subscribe to multiple paths at once
-paths_to_watch = [
-    "user/display_name",
-    "system/current_time",
-    "ui/notifications/count"
-]
-
-store.subscribe(paths_to_watch, on_header_data_change, trigger_now=True)
-```
----
-
-## 9. Subscribing via Items (Object-Oriented)
-You can call the `subscribe` method directly on an `Item` (cursor) object. This is functionally identical to `store.subscribe(...)`, but keeps the code much cleaner when building standalone components.
-
-*   **Use Case:** OOP components (like a Widget class) that manage their own Store cursor and event lifecycle.
-```python
-class VolumeWidget:
-    def __init__(self, store):
-        self.item = store.at("settings/audio/volume")
+        # multiple items by dict
+        self.store.set({
+            'setting/ui/font', 'arial',
+            'setting/ui/font_size', 10,
+        })        
         
-        #Subscribe directly on the item
-        self.item.subscribe(self.on_volume_change, trigger_now=True)
+        # multiple items by tuple of tuples
+        self.store.set((
+            ('setting/ui/font', 'arial'),
+            ('setting/ui/font_size', 10),
+        ))
+```
 
-    def on_volume_change(self, events):
-        for path, val, old_val, source in events:
-            print(f"UI Volume updated to {val}")
+### 1.3 Live Links / Pointers (`Item` Cursors)
+If you need to read or write to the same path repeatedly (e.g., inside a rapid timer loop), parsing the path string every time via `store["path"]` is inefficient. Instead, use `.at()` to generate an `Item` cursor. 
 
-    def increase(self):
-        #Update the value, which triggers the subscription
-        current = self.item.val(0)
-        self.item.v = current + 10
+Storing this `Item` in a variable creates a **live link** to that location in the store. You can read/write its value directly via the `.v` property, or use it to navigate relatively.
+
+```python
+from TaskTonic import ttTonic
+
+class DisplayTonic(ttTonic):
+    def ttse__on_start(self):
+        # Create a cursor to a specific branch
+        self.ui_settings = self.ledger.formula.at('settings/ui')
+        
+        # Dictionary syntax writes relative to the cursor
+        self.ui_settings['background'] = 'blue'
+        
+        # .v property writes directly to the cursor's path
+        self.ui_settings.at('opacity').v = 0.8
 ```
 
 ---
-## 10. Multi-Path & Relative Subscriptions
-The `subscribe` method is highly flexible and supports subscribing to multiple paths at once. When using an `Item` (cursor), these paths are automatically treated as relative to that item's location in the tree.
 
-*   **Use Case:** A component that depends on several different data points (e.g., a "User Card" needing name, status, and avatar) can subscribe to all of them in a single line of code.
+## 2. Hybrid Nodes & Smart Lists
 
-### Subscribing via Store (Absolute Paths)
-You can pass a list of absolute paths directly to the Store.
+Traditional data structures force a node to be either a value (a leaf, like a string) or a container (a map or folder). The TaskTonic Store breaks this dogma by introducing **Hybrid Nodes**.
+
+Every path in the Store can **simultaneously** hold a direct value and harbor sub-paths (children).
+
+### 2.1 The Auto-Increment (`#`)
+If you store a standard Python list in the Store and append to it, the Store *will not know* its contents changed, and subscriptions won't trigger. 
+
+TaskTonic uses **Smart Lists** (Dictionaries with auto-incrementing keys). The `#` symbol instructs the Store to scan the active list, determine the highest numeric index, increment it by 1, and create a brand new item. Because every item gets an absolute path (e.g., `users/#1/name`), retrieving deep data is a direct `O(1)` lookup.
+
+### 2.2 The "Sticky" Index (`.`)
+The `.` symbol refers to the **most recently generated index** by that specific cursor. This is essential for adding multiple properties to the exact same newly created list item without looking up its generated index.
+
+### 2.3 Creating Valueless Container Lists
+Often, you want to create a list of complex objects where the index itself (e.g., `#0`) doesn't hold a direct value (its `.v` is `None`), but acts purely as a container for children. 
+
+To achieve this, simply **target the child property directly during creation**, rather than assigning a value to the `#`.
+
 ```python
-def on_data_change(events):
-    for path, val, old_val, source in events:
-        print(f"Update from {path}: {val}")
+class UserManager(ttTonic):
+    def ttsc__add_users(self):
+        users = self.ledger.formula.at('settings/users')
 
-#Subscribe to a list of unrelated absolute paths
-store.subscribe(["system/status", "config/version"], on_data_change)
+        # METHOD A: Direct assignment to a sub-property
+        # Notice how 'users/#0' has no direct value, but acts as a container for 'name'
+        users.set('#/name', 'Bob')     # Creates index #0
+        users.set('./role', 'Admin')   # Adds 'role' to #0
+        users.set('./age', 32)         # Adds 'age' to #0
+
+        # METHOD B: Atomic batch creation using `set()` and a tuple of tuples
+        # This prevents triggering multiple incomplete notifications during setup
+        users.set((
+           ('emp#', 'New Employee'),   # Creates 'emp#0', where .v = 'New Employee'
+           ('./department', 'Sales'),
+           ('./salary', 50000),
+        ))
 ```
 
-### Subscribing via Item (Relative Paths)
-When subscribing through an `Item`, you have three ways to call the method:
+### 2.4 Custom Prefixes (`prefix#`)
+As seen in Method B above, you can segregate different entities within the same tree branch by placing text before the `#` symbol. Each prefix maintains its own independent counter.
 
-1.  **Directly on the Item:** Listens to the item itself[cite: 1].
-2.  **Relative Path:** Listens to a child property[cite: 1].
-3.  **List of Paths:** Listens to multiple child properties at once[cite: 1].
 ```python
-user = store.at("users/123")
-
-#1. Listen to the user item itself
-user.subscribe(on_change)
-
-#2. Listen to a specific relative child property
-user.subscribe("status", on_change)
-
-#3. Listen to multiple relative properties at once
-#This will monitor: users/123/name, users/123/avatar, and users/123/color
-user.subscribe(["name", "avatar", "color"], on_change, trigger_now=True)
+users.set('guest#/name', 'Charlie')  # Becomes: users/guest#0/name
+users.set('guest#/name', 'Dave')     # Becomes: users/guest#1/name
 ```
 
-### Important Signature Note
-Because `Item.subscribe` is designed to be intuitive, it intelligently detects if the first argument is a callback function or a path string/list[cite: 1]. 
+---
 
-*   If you call `item.subscribe(callback)`, the Item assumes you want to watch the Item itself[cite: 1].
-*   If you call `item.subscribe("subpath", callback)`, it watches that specific child[cite: 1].
-*   If you call `item.subscribe(["a", "b"], callback)`, it watches those specific children[cite: 1].
+## 3. Navigating the Tree (`Item` Methods)
 
-# TaskTonic Store - Subscription Guide
+Once you hold an `Item` cursor, you can navigate up, down, and across the data tree efficiently.
 
-...
+* **`.parent`**: Returns a new `Item` pointing exactly one level up to the parent container.
+* **`.list_root`**: Recursively navigates up the path tree to identify the nearest list-container (identifiable by the `#` syntax). This is crucial within callbacks to find the surrounding entity of a mutated child property.
+* **`.key`**: Returns the last segment of the path (e.g., `#0` or `brightness`).
 
-## 10. Unsubscribing & Lifecycle Management
-To prevent memory leaks, subscriptions must be removed when they are no longer needed. TaskTonic handles this by linking subscriptions to an **owner** (usually a class instance).
+### 3.1 The `children` Iterator
+To loop over elements in a container, use the `.children()` method. This returns a memory-efficient **Iterator** of `Item` cursors (lazy evaluation).
 
-### Unsubscribe by Instance (Recommended)
-If your callbacks are methods (e.g., `self.on_update`), simply pass `self` to the unsubscribe method. This will remove all subscriptions belonging to that specific object.
-
-*   **Bound Methods**: The owner is automatically detected as `self`.
-*   **Lambdas**: Can be manually linked to an instance using the `owner` parameter.
 ```python
-class WeatherWidget:
-    def __init__(self, store):
-        self.store = store
-        #1. Automatic detection (method is bound to self)
-        self.store.subscribe("weather/temp", self.render)
+sensor_container = store.at("sensors")
 
-        #2. Manual link for lambdas
-        self.store.subscribe("weather/city", lambda e: self.render(), owner=self)
-
-    def on_close(self):
-        #Removes every subscription linked to this specific object
-        self.store.unsubscribe(self)
+# Efficiently iterate without loading the entire tree into memory
+for child_item in sensor_container.children():
+    if child_item.get("status") == "critical":
+        # Handle critical sensor...
+        pass
 ```
 
-### Unsubscribe by Function
-If you used a standalone global function, you can unsubscribe by passing the function itself.
+---
+
+## 4. Graph Navigation (`StoreLinks`)
+
+While the strict hierarchical tree is great for data integrity (the "Canonical State"), you often need to view data functionally (as a Graph). TaskTonic provides **Symlinks** to solve this via the `.link_to()` method.
+
+### 4.1 Passive Links (`bubble_events=False`)
+A passive link acts as a transparent shortcut. It delegates reads and writes to the target. Events bubble up the target's physical tree, but **do not** bubble up the alias tree (preventing UI event storms).
 
 ```python
-#Remove all listeners using this specific function
-store.unsubscribe(my_global_handler)
+class HouseController(ttTonic):
+    def ttse__on_start(self):
+        # Canonical state
+        self.ledger.formula.set("devices/lamp#/brightness", 0)  # creating lamp#0
+
+        # Functional grouping (Passive link)
+        room_lamp = self.ledger.formula.at("house/living/main_light")
+        room_lamp.link_to("devices/lamp#0", bubble_events=False)
+
+        # Writing to the alias automatically routes to devices/lamp_1
+        room_lamp["brightness"] = 80 
 ```
 
-> **Note**: Always ensure you unsubscribe during a component's cleanup phase to keep the Store performant and avoid "ghost" updates.
+### 4.2 Active Links (`bubble_events=True`)
+Active links are two-way connections. If the physical target changes, the Store automatically injects a cloned event into the alias tree. **Use this for sensors** where a room-controller needs to be actively notified of hardware triggers happening deep in the device tree.
 
-### Unsubscribing via Items
-Items provide a clean way to manage subscriptions relative to their path. Since `sub_id` is no longer used, management is done via the callback or the owner.
 ```python
-#1. Subscribe a method (owner is automatically 'self')
-user_item = store.at("users/active")
-user_item.subscribe(self.on_user_update)
-
-#2. Subscribe a lambda with an explicit owner
-user_item.subscribe(lambda e: print("Update!"), owner=self)
-
-#3. Unsubscribe EVERYTHING linked to this class instance
-#This is the most common way to clean up a component
-store.unsubscribe(self)
-
-#4. Unsubscribe only from this specific Item's path
-#Note: This removes ALL listeners on this path from ALL components
-user_item.unsubscribe()
+sensor_alias = self.ledger.formula.at("security/front_door")
+sensor_alias.link_to("devices/motion_1", bubble_events=True)
+# Now, if devices/motion_1 triggers, the 'security/front_door' path 
+# will also bubble the event to any active subscribers.
 ```
 
-#### Why we removed IDs
-By using `owner` (class instances) and `callback` functions as identifiers, we've eliminated the need for tracking numeric IDs. This leads to cleaner code and fewer bugs in component lifecycles, as you can simply "register and forget," then clean up using `self` when the component is destroyed.
+---
 
-## Safe Unsubscribing
-To ensure system stability, TaskTonic does not allow unsubscribing by path string. This prevents one component from accidentally removing listeners belonging to another. Unsubscribing must be done via the **Callback** or the **Owner**.
+## 5. Batch Iteration (`set_each`)
 
-### Unsubscribing with Local Functions
-When using local functions or `lambda` expressions, you must explicitly provide an `owner` during subscription if you want to remove them later using that owner.
+When updating a collection, doing it item-by-item triggers redundant pub/sub notifications. `.set_each()` iterates over children and updates them inside a single atomic `group()`.
+
 ```python
-class MyComponent:
-    def __init__(self, store):
-        self.item = store.at("ui/settings")
+class LightingTonic(ttTonic):
+    def ttsc__turn_off_all_lamps(self):
+        living_room = self.ledger.formula.at("house/living/lamps")
         
-        #Link a local function to 'self'
-        def on_update(events):
-            print("Settings changed!")
+        # Resolves through any StoreLinks and fires ONE batch notification
+        living_room.set_each("power", "off", prefix="lamp")
+```
+
+---
+
+## 6. Advanced Reactivity & Pub/Sub Patterns
+
+The `subscribe` method is the core of TaskTonic's reactivity. It connects data changes to your Tonic's Sparkles (`ttse__`). 
+
+Your event sparkle will receive a list of updates. Each update is a tuple: `(path, new_val, old_val, source_id)`.
+
+### 6.1 Exact vs. Recursive Subscriptions
+* **Exact:** Triggers only on the specific path.
+* **Recursive:** Triggers on the path AND any of its nested children.
+
+```python
+class ProfileWatcher(ttTonic):
+    def ttse__on_start(self):
+        profile = self.ledger.formula.at("user/profile")
+        
+        # Trigger on ANY change inside the profile (name, age, settings)
+        profile.subscribe(self.ttse__on_profile_update, recursive=True)
+```
+
+### 6.2 MQTT-Style Wildcards (`*` and `**`)
+Subscribe to dynamic paths without knowing the exact IDs upfront:
+* `*` (Single-level): Matches exactly **one** path segment.
+* `**` (Multi-level/Recursive): Matches **all** deeper path segments.
+
+```python
+class SensorDashboard(ttTonic):
+    def ttse__on_start(self):
+        store = self.ledger.formula
+        
+        # Matches 'sensors/kitchen/temp' but NOT 'sensors/kitchen/temp/calibration'
+        store.subscribe("sensors/*/temp", self.ttse__on_temp_change)
+
+        # Matches ANY error deep inside the system tree
+        store.subscribe("system/**/error", self.ttse__on_system_error)
+```
+
+### 6.3 Atomic Snapshots (`extract` and `trigger_now`)
+Instead of receiving raw single-property events (which can cause UI stuttering), request a flat dictionary (snapshot). Use `.` inside the extract list to retrieve the value of the base path itself.
+
+* **`extract`**: A list of relative properties to fetch simultaneously.
+* **`trigger_now=True`**: Immediately fires a synthetic `init` event upon subscription. Perfect for rendering UI lists without manually polling the Store first.
+
+```python
+class UIRenderer(ttTonic):
+    def ttse__on_start(self):
+        # Subscribe to all widgets, grab their state instantly, and build snapshots
+        self.ledger.formula.subscribe(
+            "ui/widgets/*", 
+            self.ttse__render_widget, 
+            extract=[".", "color", "visible"], 
+            recursive=True,
+            trigger_now=True
+        )
+
+    def ttse__render_widget(self, events):
+        for path, snapshot, old_val, source in events:
+            # Snapshot is safely pre-assembled: {'.': 'button', 'color': 'red', 'visible': True}
+            widget_type = snapshot.get(".")
+            color = snapshot.get("color")
+            self.log(f"Rendering {widget_type} at {path} in {color}")
+```
+
+### 6.4 Lifecycle Management (Safe Unsubscribing)
+Subscriptions are automatically linked to their `owner` (the instance that created them). **Never** unsubscribe by path; always unsubscribe by `owner` to safely clean up your component.
+
+```python
+    def ttse__on_finished(self):
+        # Removes ALL subscriptions globally where this Tonic is the owner
+        self.ledger.formula.unsubscribe(self)
+```
+
+---
+
+## 7. Context Managers (`group` and `source`)
+
+* **`group(source_id=None, notify=True)`**: Batches multiple updates. Listeners are only notified once the block ends.
+* **`source(source_id)`**: Tags updates with an origin ID. Vital for bidirectional UI sync to prevent infinite loops (listeners can use `ignore_source` to drop events they caused themselves).
+
+```python
+class VolumeSlider(ttTonic):
+    def ttse__on_start(self):
+        vol_item = self.ledger.formula.at("audio/volume")
+        # Listen to the store, but ignore updates tagged with "my_slider"
+        vol_item.subscribe(self.ttse__on_external_change, ignore_source="my_slider")
+
+    def ttse__on_user_drag(self, new_value):
+        # Write to the store, tagging the source so we don't trigger ourselves
+        with self.ledger.formula.source("my_slider"):
+            self.ledger.formula.set("audio/volume", new_value)
+```
+
+---
+
+## 8. Store API Reference
+
+### Core Methods on `Store`
+
+#### `at(path: str) -> Item`
+Returns an `Item` cursor pointing to the specified absolute path.
+
+#### `set(path_or_data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
+Writes data to the root level. Supports single strings, dictionaries, or tuples of tuples.
+* **Returns:** The `Item` cursor of the root.
+
+#### `get(path: str, default: Any = None) -> Any`
+Retrieves a value by its absolute path. Resolves through `StoreLink`s automatically.
+
+#### `subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)`
+Registers a listener.
+* **`path`**: String or list of absolute paths. Supports `*` and `**` wildcards.
+* **`callback`**: The `ttse__` method to execute.
+* **`ignore_source`**: Drops events originating from this `source_id`.
+* **`recursive`**: If `True`, catches changes in all descendant paths. (Required if using `extract`).
+* **`exclude`**: List of absolute sub-paths to ignore.
+* **`extract`**: List of relative child properties to return as a flat snapshot dictionary.
+* **`trigger_now`**: Immediately fires an `init` event with current data.
+* **`owner`**: The object owning this subscription (auto-detected if a bound method is passed).
+
+#### `unsubscribe(target: Union[Callable, object, List[Any]])`
+Removes subscriptions. Pass the specific callback function, or the class instance (`self`) to wipe all subscriptions owned by that instance.
+
+---
+
+### Core Methods on `Item` (Cursor)
+
+#### Properties
+* **`.v`**: Property to get/set the value of this path. Writing triggers notifications.
+* **`.path`**: Absolute path string.
+* **`.parent`**: Returns an `Item` pointing one level up.
+* **`.list_root`**: Walks up the path tree to find the nearest ancestor created as an auto-increment list item (`#0`, `user#1`). Returns `None` if not in a list.
+* **`.key`**: Returns the last segment of the path (e.g., `#0` or `brightness`).
+
+#### `set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -> Item`
+Writes data relative to this cursor. Fully supports `#` and `.` smart syntax.
+* **Returns:** Itself, for method chaining.
+
+#### `get(key: str, default: Any = None) -> Any`
+Dictionary-style lookup for children relative to this cursor.
+
+#### `append(prefix: str = None) -> Item`
+Explicitly creates a new auto-incremented child item.
+* **Returns:** An `Item` pointing to the newly created element.
+
+#### `extend(data_list: List[Any], prefix: str = None) -> Item`
+Appends multiple items to the list. If `data_list` contains tuples of length 2, it builds structures instead of flat values.
+
+#### `pop(subpath: str = None) -> Any`
+Removes the node (and all descendants) and returns its base value. Operates relative to the cursor if `subpath` is provided.
+
+#### `remove(subpath: str = None)`
+Deletes the node and all descendants without returning the value. Safely handles `StoreLink` cleanup (cascading## `File: docs\TaskTonic - Depending on your state.md`
+# Mastering State Machines in TaskTonic
+
+<img src="../assets/tasktonic-statemachine.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+When building asynchronous systems, keeping track of "what the system is currently doing" can quickly devolve into a nightmare of boolean flags (`is_connecting`, `has_data`, `is_waiting`). 
+
+TaskTonic eliminates this spaghetti code by building a highly efficient **State Machine** directly into the core `ttTonic` class [1-3].
+
+Here is everything you need to know about why, when, and how to use state machines in your Sparkling Programming journey.
+
+---
+
+## 1. Why and When to Use a State Machine?
+
+A State Machine restricts which actions are valid based on the current "mode" (or state) of the application. 
+
+**When to use one:**
+*   **Complex Asynchronous Flows:** Like network communication (e.g., `disconnected` -> `connecting` -> `authenticating` -> `ready`) [4-6].
+*   **User Interfaces:** Managing wizard flows, disabled/enabled button states, or traffic light simulations [7, 8].
+*   **Hardware Control:** Ensuring a motor can only receive a "move" command if it is in an `idle` state, not if it is in an `error` or `moving` state.
+
+**When NOT to use one:**
+State machines are **not mandatory** in TaskTonic [2, 9]. 
+If your Tonic is simply a data pipeline (e.g., it receives an event, processes it, and spits it out), or a simple standalone worker, a state machine is overkill. You can just use generic "flat" sparkles (e.g., `ttsc__process_data`) without ever calling `to_state()`. If you never call `to_state()`, the Tonic remains in its default stateless mode (`state = -1`) [10, 11].
+
+---
+
+## 2. How it Works: The State Lifecycle
+
+In TaskTonic, you don't need to define massive dictionary structures to configure states. You simply transition between them using `self.to_state('state_name')` [3, 11, 12].
+
+### The Transition Sequence
+A critical concept to grasp is that calling `self.to_state()` **does not immediately change the state and interrupt your current code** [11]. Instead, it queues up a highly specific sequence of events that guarantees data integrity.
+
+If you call `self.to_state('new_state')` inside a Sparkle, the exact sequence of execution is [11, 13]:
+
+1.  **Current Sparkle Finishes:** The rest of the code in your current Sparkle executes to completion [11].
+2.  **`on_exit` is Triggered:** TaskTonic automatically executes the exit handler for the *old* state [13].
+3.  **State Transition:** The internal state variable is updated to the new state [13, 14].
+4.  **`on_enter` is Triggered:** TaskTonic automatically executes the enter handler for the *new* state [13].
+
+Because these transitions are scheduled as rapid `extra_sparkles` behind the scenes, the Catalyst executes the entire block seamlessly before grabbing the next user command from the queue [13, 15].
+
+---
+
+## 3. The Queueing Secret: Late State Binding
+
+This is arguably the most powerful feature of TaskTonic’s architecture, and it is vital for concurrency:
+
+**TaskTonic checks the state when a Sparkle is *executed*, NOT when it is placed on the queue [16, 17].**
+
+Imagine a UI with two fast button clicks:
+1.  User clicks "Disconnect" (queues `ttsc__disconnect`).
+2.  A millisecond later, user clicks "Send Data" (queues `ttsc__send_data`).
+
+If the "Disconnect" Sparkle changes the state from `connected` to `offline`, what happens to the pending "Send Data" Sparkle already sitting in the queue?
+
+When the Catalyst pulls `ttsc__send_data` from the queue, it dynamically checks the Tonic's state *at that exact moment* [16]. Because the state is now `offline`, TaskTonic looks for `ttsc_offline__send_data`. If you haven't defined that, it safely falls back to a generic handler or silently does nothing (`_noop`) [3, 11, 18, 19]. 
+
+You never have to write `if self.is_connected:` inside your Sparkles. The queue inherently protects you from stale asynchronous calls!
+
+---
+
+## 4. The Syntax for State Sparkles
+
+TaskTonic uses smart naming conventions (introspection) to route your Sparkles. You don't need to register anything manually [20-23].
+
+The general syntax pattern is: `prefix_[state]__name` [3, 21, 24].
+
+### A. The Lifecycle Hooks
+These are automatically called during transitions [25, 26].
+*   `ttse__on_enter(self)`: Called whenever *any* state is entered [25].
+*   `ttse__on_exit(self)`: Called whenever *any* state is exited [25].
+*   `ttse_<state>__on_enter(self)`: Called *only* when entering a specific state (e.g., `ttse_waiting__on_enter`) [25, 26].
+
+### B. State-Specific Sparkles
+You can restrict a command or event so it behaves differently (or only exists) in a specific state [3, 19, 27].
+
+```python
+class SmartDoor(ttTonic):
+    def ttse__on_start(self):
+        self.to_state('locked') # Initial state [28]
+
+    # --- STATE: LOCKED ---
+    def ttse_locked__on_enter(self):
+        self.log("The door is now locked.") # [28]
+        
+    def ttsc_locked__open(self):
+        self.log("Cannot open. Door is locked!")
+        
+    def ttsc_locked__unlock(self):
+        self.to_state('unlocked')
+
+    # --- STATE: UNLOCKED ---
+    def ttsc_unlocked__open(self):
+        self.log("Opening the door...")
+        self.to_state('open')
+        
+    def ttsc_unlocked__lock(self):
+        self.to_state('locked')
+```
+
+### C. The Fallback Chain
+What happens if another Tonic calls `door.ttsc__open()` while the door is in an unknown state? TaskTonic follows a strict resolution order [3, 19, 29]:
+
+1.  **Specific:** It looks for `ttsc_<current_state>__open`.
+2.  **Generic (Fallback):** If the specific method doesn't exist, it looks for a stateless fallback: `ttsc__open` [19, 30].
+3.  **No-Op:** If neither exists, it safely ignores the command using an internal `_noop` (doing nothing) [11, 19]. 
+
+This allows you to write incredibly clean code. Define the generic behavior once, and only override it with a state-specific `ttsc_<state>__name` when the behavior needs to deviate!## `File: docs\TaskTonic - Sparkling Programming.md`
+# Sparkling Programming: Escape the Async/Threading Nightmare
+
+<img src="../assets/tastonic-sparkling-prog.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+If you are a seasoned Python programmer, you know the pain of concurrency. You’ve wrestled with the viral spread of `async/await` infecting your entire codebase. You’ve debugged multi-threading race conditions, scattered `Lock()` objects everywhere, and watched in horror as your PyQt UI froze because a background thread didn't marshal its signals correctly. 
+
+**TaskTonic asks you to leave those headaches behind.** 
+
+TaskTonic allows you to build applications that handle a large number of seemingly parallel tasks without the complexity of traditional multi-threading [1]. It introduces a paradigm called **Sparkling Programming**. 
+
+Here is why you need to adopt it, how to think in "Sparkles", and why you will never want to go back.
+
+---
+
+## 1. The Core Paradigm: Atomic Immutability
+
+In standard Python, if two threads call `my_object.calculate()` simultaneously, you have a race condition. You need locks. In `asyncio`, if you `await` a database call, another coroutine can jump in and change your object's state while you are waiting.
+
+TaskTonic solves this by breaking work down into **Sparkles**—the smallest, non-interruptible units of work [2]. When you call a Sparkle (e.g., `self.ttsc__do_work()`), it doesn't run immediately. It is placed as a "work order" on a shared queue [3]. The **Catalyst** (the engine) continuously pulls these orders and executes them one by one [3].
+
+### Why is this revolutionary?
+Sparkles can be called from *any* thread, but they are always executed by the *same* Catalyst thread [4]. Because execution is sequential per Catalyst, **a Sparkle is atomic** [2]. 
+
+**While you are inside a Sparkle, the state of your Tonic cannot change.** You never have to think about thread-safe programming or data locks inside your Tonic logic [4]. It is completely safe.
+
+---
+
+## 2. Example A: Fluid UIs without `QThread` Boilerplate
+
+Let's look at a PySide6 window. Normally, waiting for 2 seconds or doing a background task freezes the GUI unless you write boilerplate `QThread` and `QRunnable` classes. With TaskTonic, you just use Sparkles and built-in Timers [5]. 
+
+TaskTonic automatically binds UI signals to your Sparkles using the `ttqt__` prefix [6]. 
+
+```python
+from TaskTonic.ttTonicStore import ttPysideWindow
+from TaskTonic import ttTimerSingleShot
+
+class AppWindow(ttPysideWindow):
+    def setup_ui(self):
+        # Imagine we setup a simple UI with a button named 'btn_start'
+        # and a label named 'lbl_status'
+        pass
+
+    def ttse__on_start(self):
+        self.lbl_status.setText("Ready")
+
+    # 1. Automatically bound to self.btn_start.clicked!
+    def ttqt__btn_start__clicked(self):
+        self.log("Button clicked. Starting fake download.")
+        self.lbl_status.setText("Downloading...")
+        self.btn_start.setEnabled(False)
+        
+        # 2. Start a non-blocking timer. No time.sleep()!
+        ttTimerSingleShot(seconds=2.0, name='download_done')
+
+    # 3. Executes exactly 2 seconds later. UI never freezes.
+    def ttse__on_tm_download_done(self, timer_info):
+        self.log("Download complete.")
+        self.lbl_status.setText("Done!")
+        self.btn_start.setEnabled(True)
+```
+No threads spawned. No signal/slot complex wiring. Just pure, readable, atomic logic.
+
+---
+
+## 3. Example B: The Chunked Iterator (Processing Big Data)
+
+The first question every senior dev asks: *"If a Sparkle can't be interrupted, won't a heavy loop block the Catalyst and freeze my UI?"*
+
+Yes, it will. If a Sparkle takes 5 seconds, the engine halts for 5 seconds. 
+**The Sparkling Solution:** You break the heavy work into small, fast chunks using Python's built-in `iter()` and `next()`. You process a few items, and then explicitly queue the *next* Sparkle to continue the work. This allows the Catalyst to process UI clicks or network events in between your data chunks!
+
+```python
+from TaskTonic import ttTonic
+
+class BigDataProcessor(ttTonic):
+    def ttse__on_start(self):
+        # 1. We load a massive dataset (simulated here)
+        massive_list = list(range(1_000_000))
+        
+        # 2. We create an iterator from our data
+        self.data_iterator = iter(massive_list)
+        self.chunk_size = 5000 
+        
+    def ttsc__start_heavy_processing(self):
+        self.log("Starting heavy job...")
+        self.ttsc__process_chunk() # Queue the first chunk
+
+    def ttsc__process_chunk(self):
+        """ This sparkle processes a chunk, then queues itself again. """
+        try:
+            # 3. Process a chunk of data quickly
+            for _ in range(self.chunk_size):
+                item = next(self.data_iterator)
+                self._do_complex_math(item)
+                
+            # 4. We are not done yet! Put the instruction to process the 
+            # NEXT chunk at the back of the Catalyst queue.
+            self.ttsc__process_chunk() 
             
-        self.item.subscribe(on_update, owner=self)
+        except StopIteration:
+            # 5. The iterator is exhausted. We are done!
+            self.log("Finished heavy processing smoothly!")
+            self.to_state('done')
 
-    def destroy(self):
-        #Safely removes ONLY the subscriptions owned by this instance
-        self.item.unsubscribe(self)
+    def _do_complex_math(self, item):
+        pass # Fast math logic here
+```
+This is incredibly elegant. If the user clicks "Cancel" in the UI, that `ttqt__` event is placed on the queue and will execute *between* your chunks, allowing you to instantly stop the iterator. No `threading.Event()` checks required!
+
+---
+
+## 4. Example C: Tonic Layering (Clean Architecture)
+
+When your logic grows, your code shouldn't become a monolithic mess. TaskTonic encourages **Tonic Layering**. If a task becomes too large for a single Tonic, you can easily divide the work among sub-agents [7]. 
+
+Because Tonics are hierarchical, when a parent creates a child, it becomes the child's "Context" [8]. The parent orchestrates the high-level flow, while the child handles the gritty details. When the parent is finished, the Ledger cleanly shuts down its entire tree of sub-agents automatically [7]. No zombie threads!
+
+```python
+from TaskTonic import ttTonic
+
+# --- LOW LEVEL WORKER ---
+class NetworkDownloader(ttTonic):
+    def ttsc__fetch_data(self, url):
+        self.log(f"Connecting to {url} and doing complex socket stuff...")
+        # ... complex IP logic ...
+        
+        # When done, notify the parent (the base) that created us
+        self.base.ttse__on_download_complete("{"data": "success"}")
+
+# --- HIGH LEVEL ORCHESTRATOR ---
+class UpdateManager(ttTonic):
+    def ttse__on_start(self):
+        self.log("Initializing Update Manager.")
+        
+        # 1. Create the worker child. It automatically binds to this parent!
+        self.downloader = NetworkDownloader()
+        
+    def ttsc__run_update(self):
+        self.log("Starting update process...")
+        self.to_state('downloading')
+        
+        # 2. Delegate the gritty details to the child
+        self.downloader.ttsc__fetch_data("https://api.example.com/update")
+
+    def ttse_downloading__on_download_complete(self, data):
+        self.log(f"Update received: {data}. Applying update...")
+        self.to_state('finished')
+        
+        # 3. Finish the parent. The framework automatically kills 
+        # the NetworkDownloader child. No resource leaks!
+        self.finish() 
+```
+Look how clean `UpdateManager` is. It reads like a story. The low-level socket handling is completely hidden away in `NetworkDownloader`.
+
+---
+
+## 5. The Golden Rules & The Distiller
+
+To master Sparkling Programming, you only need to remember two rules:
+1. **Never block the thread:** Do not use `time.sleep()` or heavy `while True` loops [5]. Use `ttTimerSingleShot` [9] or the Iterator Chunk pattern.
+2. **Trust the Queue:** Don't try to call execution methods directly. Let the Catalyst handle the timing [3].
+
+**Are you still worried about performance and execution times?**
+TaskTonic includes the **`ttDistiller`**, a specialized Catalyst built exclusively for testing and profiling [10]. The Distiller executes strictly controlled steps and captures a full trace of every Sparkle, including exactly how many milliseconds it took to execute (`at_enter` and `at_exit` timestamps) [10-12]. If you accidentally write a giant, blocking Sparkle, the Distiller will immediately expose the bottleneck in your unit tests.
+
+Stop fighting the Global Interpreter Lock. Stop littering your code with `await`. Pour yourself a TaskTonic and start Sparkling.## `File: docs\TaskTonic - Testing in the ttDistiller.md`
+# Testing TaskTonic: Mastering the `ttDistiller`
+
+<img src="../assets/tasktonic-distiller.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+Testing software is fundamental, but testing **concurrent, asynchronous systems** is notoriously difficult. In standard threaded or `asyncio` applications, you are at the mercy of the OS scheduler. A test might pass 99 times and fail on the 100th because a background thread executed a millisecond too late. You cannot easily pause time, inspect the exact state mid-execution, or predict the exact order of operations.
+
+TaskTonic eliminates these threading nightmares through its atomic **Sparkles** and sequential queue. But how do you test an asynchronous queue without relying on messy `time.sleep()` calls in your tests?
+
+Enter the **`ttDistiller`**: a specialized, deterministic test engine for TaskTonic.
+
+---
+
+## 1. The Print Statement vs. The Distiller (`self.log` vs `ttDistiller`)
+
+When developing a Tonic, your first instinct is to use `self.log("Doing something...")`. This is excellent for visual debugging. You can watch the execution flow, state changes, and parameter values scroll by in your console.
+
+However, **you cannot write an automated unit test against console output**. 
+If someone breaks your Tonic's logic six months from now, `self.log` won't fail a CI/CD pipeline. 
+
+The `ttDistiller` replaces the standard `ttCatalyst` engine during testing. Instead of running a continuous, infinite loop in the background, the Distiller acts as a **manual crank** for the TaskTonic engine. It records every Sparkle, every state change, and every parameter passed, turning your asynchronous application into a completely synchronous, predictable, and heavily inspectable data structure.
+
+---
+
+## 2. Usage: Pytest or Standalone
+
+You don't need a heavy testing framework to use the Distiller, but it integrates perfectly with them.
+
+* **Standalone:** You can write a simple Python script that instantiates a Distiller, runs your Tonic, and asserts conditions using standard `assert` statements.
+* **Pytest (Recommended):** You can use `pytest` fixtures to set up your Distiller, run your Tonics through their paces, and generate beautiful test reports. The Distiller runs synchronously in the main thread, making your `pytest` suite incredibly fast and 100% deterministic.
+
+---
+
+## 3. Controlling Time and Execution: Distiller Functions
+
+Because the Distiller owns the queue, you dictate exactly when and how Sparkles are executed. Every time you crank the engine, the Distiller returns a comprehensive `trace` dictionary of everything that happened.
+
+### Step-by-Step Sparkling
+Instead of `start_sparkling()`, you tell the Distiller exactly how many items to process from the queue.
+
+```python
+# Process exactly ONE Sparkle on the queue, then pause.
+trace = distiller.sparkle(sparkle_count=1) 
+
+# Process 5 Sparkles, then pause.
+trace = distiller.sparkle(sparkle_count=5)
+```
+This allows you to freeze the universe mid-execution and inspect the state of your application.
+
+### Condition Triggers (Single-Tonic vs. Multi-Tonic)
+Often, you don't know *exactly* how many Sparkles it takes to finish a complex network handshake. You just want to run the engine until a specific event happens. 
+
+**A. Single-Tonic Tests (Direct Parameters)**
+If you are unit testing an isolated Tonic, you can pass stop conditions directly as arguments. The Distiller will pause as soon as *any* active Tonic hits the requirement.
+
+```python
+# Run the engine until the Tonic enters the 'finished' state
+trace = distiller.sparkle(till_state_in=['finished'])
+
+# Run the engine until a specific Sparkle method is called
+trace = distiller.sparkle(till_sparkle_in=['ttse__on_data_received'])
 ```
 
-### Why we avoid Path Unsubscription
-*   **Isolation**: Components should not have the power to kill subscriptions they didn't create.
-*   **Predictability**: Using an `owner` (like `self`) ensures that `unsubscribe(self)` only affects the component that is currently being destroyed.
+**B. Integration Tests (The `contract` Dictionary)**
+When testing multiple Tonics interacting (e.g., a Client and a Server), the direct parameters fall short because you often need to wait until *both* systems reach a specific state. For this, you use the declarative `contract` dictionary. 
+
+The contract allows you to define strict **AND/OR logic**, assign independent conditions per Tonic, and "probe" internal variables without polluting the global trace. The Distiller uses a `_freeze_value` mechanism to safely create static snapshots of complex objects precisely before and after every Sparkle.
+
+```python
+# Tell the Distiller to stop ONLY when the Client is connected 
+# AND the Server has registered exactly 1 active connection internally.
+integration_contract = {
+    'timeout': 5.0,
+    'stop_match_count': 'all',  # 'all' = AND logic. Use '1' for OR logic.
+    'tonics': {
+        'ClientTonic': {
+            'till_state_in': ['connected'],
+            'probes': ['retry_attempts']  # Snapshot this variable on every sparkle
+        },
+        'ServerTonic': {
+            'probes': ['active_connections'],
+            'stop_on_probe': {'active_connections': 1} # Pause when probe hits this value
+        }
+    }
+}
+
+trace = distiller.sparkle(contract=integration_contract)
+```
+
+---
+
+## 4. Unpacking the Status Trace (Assertions & Profiling)
+
+Every time `distiller.sparkle()` finishes, it returns a rich status dictionary. This is your primary tool for writing `assert` statements in your tests.
+
+### The Root Trace Elements
+The returned dictionary contains metadata about the execution run:
+
+* **`status`**: The final status of the engine (`'running'` or `'catalyst finished'`).
+* **`start@` / `end@`**: Absolute timestamps of when the sparkle run started and ended.
+* **`stop_condition`**: A list explaining *why* the Distiller paused. 
+    * *Values can include:* `'timeout'`, `'sparkle_count'`, `'state_trigger: [state_name]'`, `'sparkle_trigger: [sparkle_name]'`, `'contract_met: X/Y tonics matched'`, or `'catalyst finished'`.
+* **`sparkle_trace`**: A detailed list of every single Sparkle that was executed.
+
+### The `sparkle_trace` List
+Each item in the `sparkle_trace` list is a dictionary describing a single atomic action:
+
+* **`id` / `tonic`**: The ID and name of the Tonic that executed the Sparkle.
+* **`sparkle`**: The exact method name (e.g., `ttsc__process_chunk`).
+* **`args` / `kwargs`**: The arguments passed into the Sparkle.
+* **`source`**: A tuple `(source_tonic, source_sparkle_name, source_id)` indicating who queued this Sparkle.
+* **`at_enter` / `at_exit`**: Sub-dictionaries capturing the exact state *before* and *after* the Sparkle. They contain:
+    * `@`: The precise timestamp (useful for profiling).
+    * `state`: The name of the Tonic's state machine state.
+    * `probes`: A dictionary containing the frozen values of any requested probes for this specific Tonic.
+    * `sparkling`: (Only in `at_exit`) Boolean indicating if the engine is still running.
+
+### Examples: Writing Assertions with the Trace
+
+**1. Asserting Stop Conditions:**
+Ensure your logic stopped because it reached the desired state, not because it timed out.
+
+```python
+# Using a contract for an integration test
+trace = distiller.sparkle(contract={
+    'timeout': 2.0,
+    'stop_match_count': 'all',
+    'tonics': {'ClientTonic': {'till_state_in': ['authenticated']}}
+})
+
+# Check why the distiller stopped
+assert 'contract_met: 1/1 tonics matched' in trace['stop_condition'][0]
+assert 'timeout' not in trace['stop_condition']
+```
+
+**2. Asserting Probed Data:**
+Verify that internal variables were updated correctly during the Sparkle execution.
+
+```python
+trace = distiller.sparkle(
+    sparkle_count=1, 
+    contract={
+        'tonics': {
+            'ClientTonic': {'probes': ['retry_attempts']}
+        }
+    }
+)
+
+# Grab the last executed sparkle from the trace
+last_sparkle = trace['sparkle_trace'][-1]
+
+# Check the probe values before and after the sparkle executed
+assert last_sparkle['at_enter']['probes']['retry_attempts'] == 0
+assert last_sparkle['at_exit']['probes']['retry_attempts'] == 1
+```
+
+**3. Profiling (Finding the "Giant Sparkle"):**
+Remember the golden rule of Sparkling Programming: *Never block the Catalyst.*
+If you suspect your UI is stuttering, you can check the Distiller's execution times.
+
+```python
+trace = distiller.sparkle(till_state_in=['done'])
+
+for action in trace['sparkle_trace']:
+    enter_time = action['at_enter']['@']
+    exit_time = action['at_exit']['@']
+    duration_ms = (exit_time - enter_time) * 1000
+    
+    # Fail the test if any single Sparkle blocks the thread for more than 50ms!
+    assert duration_ms < 50, f"Giant Sparkle detected: {action['sparkle']} took {duration_ms}ms"
+```
+
+---
+
+## 5. Mocking Infusions vs. Integration Testing
+
+TaskTonic encourages building hierarchical applications where a Parent Tonic delegates work to Child Tonics (Infusions). The Distiller allows you to test these at multiple levels.
+
+### A. The Unit Test (Mocking Infusions)
+If you want to test the Parent's logic independently, you don't want the actual IP connections or databases (the children) to fire. 
+
+1.  **Mock the Infusion:** Override the child Tonic with a mock version.
+2.  **Inject Events:** From your test script, you act as the child. You manually queue up events to see how the Parent reacts.
+
+```python
+# We are the test. We pretend the child (network socket) received data.
+# We inject this directly onto the queue for the parent to process.
+parent_tonic.ttse__on_network_data({"status": "ok"})
+
+# Process the injected event
+trace = distiller.sparkle(sparkle_count=1)
+
+# Verify the parent handled the mock data correctly
+assert parent_tonic.get_current_state_name() == 'processing_data'
+```
+
+### B. The Integration Test (Full Hierarchy)
+You can also load the parent *and* all its real infusions into the Distiller. 
+
+Because all Tonics in the same Formula share the same Catalyst engine, the Distiller easily manages the master queue for the entire tree. You can trigger a high-level command on the Parent, tell the Distiller to run 50 Sparkles, and watch the entire cascade of commands and events flow down to the children and bubble back up to the parent. It provides a flawless, synchronous integration test of a highly asynchronous system.
+
+---
+
+### Summary
+With TaskTonic and the `ttDistiller`, you gain the power to freeze time, inspect memory, profile execution speeds, and lock down your application's behavior with deterministic contracts.## `File: docs\TaskTonic - Timers without waiting.md`
+# TaskTonic: Timers without waiting 
+
+<img src="../assets/tasktonic-timers
+.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+In TaskTonic, blocking the execution thread is strictly prohibited. You must **never** block execution using methods like `time.sleep()`, as this will freeze the Catalyst and stop your application from processing its queue. Instead, you must use the framework's built-in timers to keep the system running smoothly.
+
+Timers manage time continuously in the background and trigger a callback (a "sparkle") when their duration or schedule is met.
+
+## 1. Using the TaskTonic timers
+
+When using the timers be aware of the basic principles.
+
+- Create the timer and define the moment of expiration, to fire a timer sparkle.
+
+- Timers are liquid and thus part of the TaskTonic life cycle (its a `ttLiquid` object). Finishing your tonic will automatically finish the timer. Or call `.finish()` to stop and finish.
+
+- For timer control you got two base method `.start()` and `.stop()`, starting and stopping the timer. You're able to cascade this methods like `self.tmr = ttTimerRepeat(seconds=1.5).stop()`. Stopping the time wil not remove them from memory. When you start a timer, the expiration time is recalculated. 
+
+A fundamental rule of TaskTonic timers is that **they start immediately upon instantiation**, creating the object is enough to begin the countdown.
+
+When a timer fires, it needs to trigger an action within your Tonic. You define this action using the `sparkle_back` parameter. However, TaskTonic provides powerful, automatic callback generation if you omit this parameter.
+
+### Automatic Callback Routing (Name-Based Fallback)
+
+If no `sparkle_back` is explicitly provided, the framework uses introspection to find the right event handler in the parent Tonic. It determines the method name based on the `name` property of the timer:
+
+1. **Named Timers (Specific Callbacks):** If you give the timer a specific `name`, the framework automatically prepends `ttse__on_` to it. For example, a timer named `tm_lights_off` will automatically launch the sparkle `ttse__on_tm_lights_off`.
+2. **Unnamed Timers (Generic Fallback):** If the timer has no name, it falls back to the generic `ttse__on_timer` method.
+
+```python
+from TaskTonic import ttTonic, ttTimerSingleShot
+
+class SmartRoom(ttTonic):
+    def ttse__on_start(self):
+        # 1. Explicit callback (Highest priority)
+        ttTimerSingleShot(2.0, sparkle_back=self.ttsc__specific_action)
+
+        # 2. Named Timer (Auto-routes to ttse__on_tm_lights_off)
+        ttTimerSingleShot(10.0, name="tm_lights_off")
+
+        # 3. Unnamed Timer (Auto-routes to generic ttse__on_timer)
+        ttTimerSingleShot(5.0)
+
+    def ttsc__specific_action(self, timer_info):
+        self.log("The explicit 2-second timer fired!")
+
+    # Auto-generated route for the named timer
+    def ttse__on_tm_lights_off(self, timer_info):
+        self.log("Turning off the lights!")
+
+    # Generic fallback for all unnamed timers without a sparkle_back
+    def ttse__on_timer(self, timer_info):
+        self.log("The generic 5-second timer fired!")
+```
+
+> *Note: The callback method always receives a `timer_info` argument (usually a dictionary), allowing you to identify exactly which timer triggered the event if multiple timers share the generic fallback.*
+
+---
+
+## 2. Periodic Timers: Relative Time
+
+Standard timers deal with relative durations. You set the seconds to elapse from the moment of creation (or minutes, hours, weeks, months for longer periods).
+
+Beside `.start()` and `.stop()` Periodic timers introduce `.restart()`, to stop the timer, recalculate the expiration time and start again. With `.change_period()`  you can change the period time. This doesn't change the expiration moment, but is used when reloading the time. `self.tmr.change_period(seconds=10).restart()`
+
+### 2.1. `ttTimerRepeat` (Periodic Loops)
+
+Fires periodically based on a relative interval. Ideal for continuous background tasks like polling sensors or refreshing UIs.
+
+```python
+# Fires every 1.5 seconds indefinitely
+self.poll_timer = ttTimerRepeat(seconds=1.5, name="sensor_poll")
+
+def ttse__on_sensor_poll(self, timer_info):
+    pass # Read sensor data
+```
+
+### 2.2. `ttTimerSingleShot` and The Watchdog Pattern
+
+A `ttTimerSingleShot` fires only once.  Perfect for timeouts and one time events.  However, using its `.restart()` method, it becomes the perfect tool for building a **Watchdog Timer** to monitor continuous data streams (like IP connections or serial ports).
+
+
+
+```python
+class ConnectionMonitor(ttTonic):
+    def ttse__on_start(self):
+        # Start a 10-second watchdog
+        self.watchdog = ttTimerSingleShot(10.0, name="connection_timeout")
+        self.to_state('collect')
+
+    def ttse_collect__on_data_received(self, data):
+        self.log("Data packet received.")
+        # process the data
+
+        # Restart the running timer to 10 seconds.
+        # As long as data flows within 10s, it never hits 0.
+        self.watchdog.restart()
+
+    def ttse__on_connection_timeout(self, timer_info):
+        # timer did hit 0, timeout error!!!
+        self.log("ALARM: Connection timed out!")
+        self.to_state('error')
+```
+> *Note: when a  single shot expires it fires its sparkle_back and gets finished immediately. So an expired `ttTimerSingleShot` can't be used again. You have to make a new one.*
+
+### 2.3. `ttTimerPausing` 
+
+Pausing timers can also be temporarily halted. If your application enters a state where a running timer should stop counting, you can call `.pause()`. Calling `.resume()` will continue the countdown from the exact point it was paused. You can also instantiate a timer in a paused state by passing `paused=True`.
+
+>*Note: a pausing timer that expires will immediately be paused. You have to `.resume()` in your sparkle_back to use it again*
+
+---
+
+## 3. Scheduled Timers: Absolute Time
+
+While standard timers count seconds, **Scheduled Timers** deal with absolute, real-world time (calendar and clock).
+
+`ttTimerScheduled` is the abstract base class and **cannot be used directly**. Instead, TaskTonic provides  subclasses like `ttTimerEveryWeek` to handle any calendar scenario.
+
+The syntax is extremely flexible, allowing integers, strings (`"august"`, `"monday"`), precise time strings (`"23:59:59"`), and even negative indices to target the "last" occurrence (e.g., `day=-1` for the last day of the month).
+
+### `ttTimerEveryYear`
+
+Executes once a year at a highly specific moment.
+
+```python
+# Absolute dates
+ttTimerEveryYear(month=2, day=3, hour=8, minute=30) # fires every year at 8:30 at februari 3
+ttTimerEveryYear(month="august", day=2, hour=10)
+
+# The 'last' day of a month using negative index
+ttTimerEveryYear(month="august", day=-1, hour=10)
+ttTimerEveryYear(month="december", day=-1, time_str="23:59:59")
+
+# Complex relational dates (e.g., The last Monday of February)
+ttTimerEveryYear(month="february", day="monday", in_week=-1, time_str="9:56:45")
+ttTimerEveryYear(month="september", day="saturday", in_week=-1, time_str="8:00:00")
+
+# Week-number based
+ttTimerEveryYear(week=1, day="tuesday", hour=8)
+ttTimerEveryYear(week=3, day=6, hour=6)
+ttTimerEveryYear(week=52, day=6, time_str="23:59:59")
+```
+
+### `ttTimerEveryMonth`
+
+Executes once a month. Excellent for monthly reports or billing cycles.
+
+```python
+# Specific days within specific weeks (e.g., First Wednesday)
+ttTimerEveryMonth(day="wednesday", in_week=1, hour=10)
+ttTimerEveryMonth(day="wednesday", in_week=2, hour=10)
+
+# Negative indexing for weeks (e.g., Last Wednesday of the month)
+ttTimerEveryMonth(day="wednesday", in_week=-1, hour=10)
+ttTimerEveryMonth(day="wednesday", in_week=-6, hour=10) # Failsafe negative boundaries
+
+# Overflow/Underflow weeks
+ttTimerEveryMonth(day="tuesday", in_week=5, hour=10)
+ttTimerEveryMonth(day="tuesday", in_week=6, hour=10)
+
+# Absolute day of the month
+ttTimerEveryMonth(day=27, time_str="13:00:00")
+
+# Relative to the end of the month
+ttTimerEveryMonth(day=-1, time_str="13:00:00")  # The very last day
+ttTimerEveryMonth(day=-10, time_str="13:00:00") # 10 days before the end of the month
+```
+
+### `ttTimerEveryWeek`
+
+Executes weekly on a specific day.
+
+```python
+# Using string literals (case-insensitive) or integers (0 = Monday)
+ttTimerEveryWeek(day=0, time_str="23:59:59")
+ttTimerEveryWeek(day="Tuesday", time_str="23:59:00")
+ttTimerEveryWeek(day="wednesday", hour=1)
+ttTimerEveryWeek(day="friday", hour=2)
+ttTimerEveryWeek(day="saturday", hour=23)
+```
+
+### `ttTimerEveryDay`
+
+Executes every day exactly when the system clock hits the target time.
+
+```
+ttTimerEveryDay(hour=0)
+ttTimerEveryDay(hour=5, minute=30,seconds=0)
+ttTimerEveryDay(time_str="12:15:00")
+ttTimerEveryDay(hour=19)
+```
+
+### `ttTimerEveryHour` & `ttTimerEveryMinute`
+
+Instead of full timestamps, these synchronize with the clock rolling over.
+
+```python
+# Triggers at exactly 15 minutes and 0 seconds past every hour (e.g., 01:15, 02:15, 03:15)
+ttTimerEveryHour(time_str="15:00")
+ttTimerEveryHour(minutes=15)
+
+# Triggers at specific seconds within every minute
+ttTimerEveryMinute(second=0)  # Exactly at the top of the minute
+ttTimerEveryMinute(second=15)
+ttTimerEveryMinute(second=30)
+ttTimerEveryMinute(second=2.5) # with seconds, floats are allowed 
+```
+
+### Example: Implementing a Scheduled Timer
+
+```python
+from TaskTonic.ttTonicStore import ttTimerEveryWeek
+
+class BackupService(ttTonic):
+    def ttse__on_start(self):
+        self.log("Backup service initialized.")
+
+        # Schedule the backup for every Sunday at 02:00 AM using a named timer
+        ttTimerEveryWeek(
+            day="sunday",
+            hour=2,
+            name="weekly_backup"
+        )
+
+    # Automatically called by the timer named 'weekly_backup'
+    def ttse__on_weekly_backup(self, timer_info):
+        self.log("Executing weekly database backup...")
+        # Place backup logic here
+```## `File: docs\TaskTonic - Understanding the ttCatalyst.md`
+# The Engine of TaskTonic: Understanding the `ttCatalyst`
+
+<img src="../assets/tasktonic-catalyst.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+If a `Tonic` is a specialized worker on an assembly line, the `ttCatalyst` is the powerful engine that drives the conveyor belt. Its primary and most crucial function is to make Tonics "sparkle" by continuously processing a shared task queue. 
+
+To master TaskTonic, you need to understand what happens inside this engine, how to configure it, and when to spawn new ones.
+
+---
+
+## 1. The Basics: A Catalyst *is* a Tonic
+
+An elegant part of the TaskTonic architecture is that `ttCatalyst` inherits directly from `ttTonic`. 
+This means a Catalyst is not just a dumb loop; it is a fully-fledged agent. 
+
+* **It has a lifecycle:** It starts up, can have its own state machine, and shuts down gracefully.
+* **It can be used as a Tonic:** You can add your own application logic directly to a custom Catalyst.
+* **It cleans up after itself:** When the last Tonic registered to a Catalyst finishes, the Catalyst determines its job is done and automatically initiates its own shutdown sequence.
+
+## 2. The Core: `tt_main_catalyst`
+
+Every TaskTonic application requires at least one Catalyst, known as the **Main Catalyst**. 
+* It is strictly identified by the name `tt_main_catalyst` and always holds `id = 0`. 
+* Unlike other Catalysts, the Main Catalyst runs its loop in the **main application thread**, blocking the standard execution flow to keep your application alive.
+* It is defined in your `ttFormula` via the `creating_main_catalyst()` method. By default, the Formula simply spawns a standard `ttCatalyst`.
+
+## 3. Under the Hood: The `sparkle()` Loop
+
+When you call `start_sparkling()`, the Catalyst enters its main `while` loop. Here is exactly what happens in that loop:
+
+1.  **Timer Check:** It looks at the list of registered timers and calculates `next_timer_expire`—the exact amount of time until the nearest timer needs to fire.
+2.  **Queue Wait:** It calls `get(timeout=next_timer_expire)` on its master queue (`catalyst_queue`). The thread goes to sleep, consuming 0% CPU, until either a task arrives or the timer expires.
+3.  **Execution:** If a task (work order) is pulled from the queue, it unpacks the payload and calls the internal `_execute_sparkle` method on the target Tonic.
+4.  **Extra Sparkles:** After executing the main task, it rapidly drains any `extra_sparkles` (like immediate state transitions: `on_exit` -> `on_enter`) before returning to the start of the loop.
+
+### The Catalyst Queue: What exactly is in it?
+The `catalyst_queue` is a standard Python `queue.SimpleQueue`. A single "work order" payload placed on this queue contains:
+* The `instance` of the target Tonic.
+* The `sparkle` method to execute.
+* The `args` and `kwargs` (parameters).
+* The `source` (who called this sparkle, tracked via the `ttSparkleStack`).
+
+## 4. Trade-offs: Using Multiple Catalysts
+
+Because any Catalyst created *after* the Main Catalyst automatically spawns its own background thread, you can easily distribute workloads. 
+
+**Why you might want to use your own Catalyst:**
+* **Thread Independence:** A new Catalyst runs in its own thread. If the `tt_main_catalyst` is heavily bogged down by UI repaints or a busy Tonic, your independent Catalyst remains hyper-responsive. 
+
+**Why you should be careful (The Drawbacks):**
+* **The Deepcopy Penalty (Slower):** TaskTonic guarantees data immutability. If Thread A calls a Sparkle on a Tonic managed by Thread B (a different Catalyst), the framework detects the thread crossing. To prevent race conditions, it uses `copy.deepcopy()` on all `args` and `kwargs` before placing them on the queue. *(Framework detail: The engine smartly skips callables like functions and methods during this process, making cross-thread callback routing highly robust!)* This deep copy is completely safe, but it introduces overhead and is slower than running in the same Catalyst.
+* **Thread Bloat:** Spawning a new Catalyst for every single Tonic defeats the purpose of the framework. You fall back into the trap of managing a mess of OS threads.
+
+**Best Practice:** Use a separate Catalyst for a self-contained module or Service that manages a whole tree of sub-Tonics (infusions). Do *not* spawn a new Catalyst for a single, lightweight Tonic.
+
+## 5. Advanced: Creating a Custom Catalyst Class
+
+Because `ttCatalyst` is just a class, you can subclass it. Why would you write your own Catalyst engine?
+
+### A. High-Speed Custom Queues & Interfaces (The `SelectorHandler` Pattern)
+
+Standard queues use `time.sleep` or thread locks to wait. For ultra-fast I/O (like IP communication), you want to use OS-level selectors so your application sleeps efficiently until the operating system detects incoming network data. 
+
+The TaskTonic framework allows you to override the `new_catalyst_queue()` method and the `sparkle()` loop to bridge the gap between Python queues and OS sockets. This is exactly how the built-in `SelectorHandler` (found in `TaskTonic.ttTonicStore.ttIpSockets`) operates.
+
+1. **Custom Queue:** It overrides `new_catalyst_queue` with a `MyNotifyingQueue`. Whenever a standard Sparkle is put onto this queue, it also sends a single byte of data to a hidden internal socket pair (`_queue_filled_notify_channel`).
+2. **Custom Loop:** The standard `sparkle()` loop is overridden. Instead of blocking on `queue.get()`, it blocks on `selectors.select()`. 
+3. **Result:** The Catalyst wakes up instantly if *either* network data arrives on an IP port, *or* if another Tonic drops a Sparkle into the queue.
+
+```python
+import queue
+import selectors
+from TaskTonic import ttCatalyst
+
+class SelectorHandler(ttCatalyst):
+    def new_catalyst_queue(self):
+        class MyNotifyingQueue(queue.SimpleQueue):
+            def __init__(self, catalyst, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.catalyst = catalyst
+
+            def put(self, item):
+                super().put(item)
+                try:
+                    # Wake up the OS selector by writing to an internal socket pair
+                    self.catalyst._queue_filled_notify_channel.send(b'1')
+                except Exception:
+                    pass
+
+        return MyNotifyingQueue(self)
+
+    def sparkle(self):
+        self.sparkling = True
+        while self.sparkling:
+            # Block at the OS level, not the queue level!
+            events = self.selector.select(timeout=next_timer_expire)
+            
+            for key, mask in events:
+                # Handle incoming network I/O events...
+                pass
+            
+            # Check the queue for standard TaskTonic sparkles afterwards
+            try:
+                instance, sparkle, args, kwargs, source = self.catalyst_queue.get_nowait()
+                instance._execute_sparkle(sparkle, *args, **kwargs)
+            except queue.Empty:
+                pass
+```
+
+### B. Heavy Data Processing & The Blocking Problem (e.g., NumPy)
+
+A common concern for developers adopting TaskTonic is: *"If sparkles cannot be interrupted, won't heavy data processing freeze my entire application?"*
+
+First, it is crucial to differentiate between *waiting* and *processing*. Much of what we consider "slow code" is simply waiting for I/O, network responses, or disk access. In TaskTonic, you should **never** block a thread for waiting; you solve this elegantly using Timers or non-blocking selectors (as seen above).
+
+However, true CPU-bound tasks—like running massive `numpy` matrix calculations, image analysis, or complex simulations—**will** legitimately block the thread. If you run this on the Main Catalyst, your entire application (and UI) will freeze.
+
+**The Solution: The Dedicated Worker Catalyst**
+You solve this by spinning up a custom `ttCatalyst` specifically for the heavy lifting, acting as an infusion or service to your main application. 
+
+1. The parent Tonic sends a command (e.g., `ttsc__crunch_data`) to the dedicated worker Catalyst.
+2. The worker Catalyst executes the sparkle and blocks *its own* thread while `numpy` processes the data. 
+3. **The Main Catalyst continues to run flawlessly**, keeping your UI and other Tonics highly responsive.
+4. When the math is done, the worker Catalyst sends an event sparkle (e.g., `parent.ttse__on_data_ready(result)`) back to the parent.
+
+```python
+from TaskTonic import ttCatalyst, ttTonic
+
+class MathWorker(ttCatalyst):
+    def ttsc__crunch_numbers(self):
+        self.log("Starting heavy NumPy processing...")
+        # This blocks THIS Catalyst's thread, but the Main Catalyst stays responsive!
+        # import numpy as np ... heavy math here ...
+        result = 42 
+        
+        # Send the result back to the parent that created us
+        self.base.ttse__on_math_done(result)
+
+class MainApp(ttTonic):
+    def ttse__on_start(self):
+        # Spawns the worker in its own dedicated thread!
+        self.worker = MathWorker() 
+        self.worker.ttsc__crunch_numbers()
+        self.log("Worker is busy, but I am still free to react to UI events!")
+
+    def ttse__on_math_done(self, result):
+        self.log(f"The heavy lifting is done! Result: {result}")
+```
+
+**Handling Giant Data Blocks (Avoiding the Deepcopy Penalty):**
+As mentioned earlier, crossing Catalyst boundaries triggers a `deepcopy` on arguments. Passing a 2GB NumPy array through a Sparkle argument will cause a massive performance hit. 
+*The Workaround:* Share large datasets using the `ttStore`, or wrap the data in a custom object/callable that tricks or prevents the deepcopy mechanism. 
+*Crucial Warning:* If you bypass the deepcopy to share memory across threads, **you are responsible for strict data discipline**. You absolutely must not mutate that shared data in the parent Tonic while the worker Catalyst is processing it!
+
+**The Dask Alternative (Asynchronous Chunking):**
+Because a Sparkle cannot be interrupted while executing, a massive C-level NumPy calculation cannot be easily cancelled or split once started. If your application requires cancelling long calculations or keeping memory usage low, you should consider using **Dask** instead of raw NumPy. Dask chunks arrays and dataframes under the hood. This chunking philosophy fits perfectly with TaskTonic's queue-based approach, allowing your Catalyst to process smaller pieces of data sequentially while remaining highly responsive to cancellation sparkles (`ttsc__cancel`) in between the chunks!## `File: docs\Tasktonic - At your service.md`
+# TaskTonic Services & Singleton Architecture
+
+<img src="../assets/tasktonic-service.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+
+
+When building complex, asynchronous applications, the need often arises for central components that must be shared across multiple subtasks (Tonics) without corrupting each other's data streams or internal states. In traditional concurrency models, this inevitably leads to global variables or complex, manually written Singleton patterns riddled with error-prone thread-locks.
+
+TaskTonic solves this fundamentally through the runtime architecture of the `ttLiquid` metaclass (`__ttLiquidMeta`), which seamlessly integrates the Singleton pattern at the framework level.
+
+---
+
+## 1. What is a Service?
+
+A Service in TaskTonic is a specialized `ttTonic` class that is managed as a strict Singleton. The framework's metaclass guarantees that exactly one instance of the Service exists throughout the entire lifecycle of the application (within the scope of the active `ttLedger`).
+
+When any Tonic attempts to instantiate a Service, the following mechanism is triggered:
+1. **First Call (Creation):** The metaclass intercepts the call, constructs the unique instance via `super().__call__()`, executes `__init__()` and `_tt_post_init_action()` exactly once, and registers the Service in the central `ttLedger` under its unique service name.
+2. **Subsequent Calls (Access):** The framework intercepts the creation attempt, identifies the already registered instance in the ledger, and immediately returns this existing reference. The `__init__()` constructor is **not** executed again.
+
+---
+
+## 2. Architectural Use Cases
+
+You should use the Service pattern exclusively for central resources that must be unique and shared across the entire application:
+* **Database Managers:** A central connection pool (`DatabaseService`).
+* **Hardware Interfaces:** A single-point-of-entry for serial ports or USB controllers to prevent data corruption from concurrent writes.
+* **Shared State Spaces:** Central storage facilities like a `DigitalTwin` (built on top of `ttStore`).
+* **Network/API Sockets:** Shared HTTP/REST clients or TCP/IP handlers that need to centrally manage authentication tokens and rate-limiting.
+
+---
+
+## 3. Implementing a Service
+
+Building a Service requires a strict separation between one-time configuration parameters (prefixed with `srv_`) and per-access parameters (prefixed with `ctxt_`).
+
+### Step 1: Class-level Identification
+A Service defines itself by setting the class attribute `_tt_is_service` to a unique string identifier. This is the key the `ttLedger` uses to register and look up the Singleton.
+
+### Step 2: `__init__` (One-time Setup)
+The constructor is executed exclusively during the very first instantiation of the Service.
+* Capture parameters here that are crucial for the initial setup (e.g., `srv_db_url`).
+* **Strict Framework Rule:** You *must* always accept `**kwargs` and pass them through to `super().__init__(**kwargs)` to avoid breaking internal bootstrapping and context routing.
+
+### Step 3: `_tt_init_service_base` (Per-Access Hook)
+Unlike the constructor, `_tt_init_service_base` is executed by the metaclass **upon every access** to the Service (including the very first creation). This is the hook where the Service discovers *who* is currently calling it.
+* De eerste positionele parameter die het framework meegeeft is `base` (de Tonic die de Service aanroept).
+* Capture dynamic parameters here (e.g., `ctxt_access_level`).
+
+### 🚨 Crucial for Thread-Safety: Registration via the Queue
+When a Tonic calls the Service, `_tt_init_service_base` is executed *within the thread of the calling component*. If the Service runs on its own Catalyst (and thus its own OS thread), mutating Service attributes directly inside this method is a direct violation of TaskTonic's thread-safety guarantees!
+
+**The Golden Rule:** Use `_tt_init_service_base` exclusively to place an asynchronous Command Sparkle (`ttsc__`) onto the Service's own queue. Let the Service handle the administration in its own thread scope.
+
+```python
+from TaskTonic import ttTonic
+
+
+class SharedDatabaseService(ttTonic):
+    # The unique framework key for the Ledger
+    _tt_is_service = "SharedDatabaseService"
+
+    def __init__(self, srv_db_url, **kwargs):
+        """
+        Executed EXACTLY once during the very first call.
+        """
+        super().__init__(**kwargs)
+        self.db_url = srv_db_url
+        self.authorized_clients = {}
+        self.log(f"Database connected at: {self.db_url}")
+
+    def _tt_init_service_base(self, base, ctxt_access_level="read", **kwargs):
+        """
+        Executed ON EVERY CALL to the service.
+        WARNING: This runs in the thread of the CALLER (base)!
+        Forward the data directly to the safe Catalyst queue via a sparkle.
+        """
+        if base is None:
+            return
+
+        # Place the registration safely on this service's own queue
+        self.ttsc__register_client(base, ctxt_access_level)
+
+    def ttsc__register_client(self, client_instance, access_level):
+        """
+        Runs SAFELY within the Service Catalyst's own thread.
+        """
+        client_id = client_instance.id
+        self.authorized_clients[client_id] = {
+            "instance": client_instance,
+            "level": access_level
+        }
+        self.log(f"Client {client_id} registered with level: {access_level}")
+```
+
+---
+
+## 4. Consuming a Service
+
+A consumer Tonic interacts with a Service by simply instantiating the class. The framework handles the de-duplication behind the scenes.
+
+```python
+from TaskTonic import ttTonic
+
+
+class DataAnalyzer(ttTonic):
+    def ttse__on_start(self):
+        # Request the database. Provide srv_ args in case we are the first.
+        # Provide ctxt_ args specific to our own session.
+        self.database = SharedDatabaseService(
+            srv_db_url="postgresql://localhost:5432/prod",
+            ctxt_access_level="write"
+        )
+
+    def ttsc__process_measurement(self, measurement_data):
+        # Communicate via the service's asynchronous command queue
+        self.database.ttsc__write_record(measurement_data)
+```
+
+---
+
+## 5. Advanced Pattern: Decoupling via Service Base Classes
+
+In a clean software architecture, you often want to decouple components from specific implementation details. For example: a Tonic needs a `ConnectionService`, but it shouldn't matter to that Tonic whether this runs via an `IpConnectionService` or a `BluetoothConnectionService`.
+
+TaskTonic supports this by allowing you to define an abstract base class as the Service interface, while you start the concrete implementation under the exact same service name in the `ttFormula`.
+
+### 1. Define the Interface (The Base Class)
+```python
+from TaskTonic import ttCatalyst
+
+
+class ConnectionService(ttCatalyst):
+    """
+    The universal contract class. Consumers will instantiate this class.
+    """
+    _tt_is_service = "central_connection_service"
+
+    def ttsc__send_packet(self, payload):
+        pass
+```
+
+### 2. Build the Concrete Implementation
+```python
+class IpConnectionService(ConnectionService):
+    """
+    The actual network implementation.
+    """
+    def __init__(self, srv_host, srv_port, **kwargs):
+        super().__init__(**kwargs)
+        self.host = srv_host
+        self.port = srv_port
+        self.to_state("disconnected")
+
+    def ttsc_disconnected__send_packet(self, payload):
+        self.log("Error: Cannot send data, socket is closed!")
+
+    def ttsc_connected__send_packet(self, payload):
+        # Low-level IP write logic here...
+        self.log(f"Data sent to {self.host}: {payload}")
+```
+
+### 3. The Binding in the Formula and Consumer
+The consumer remains completely decoupled and only requests the base interface. The `ttFormula` determines at startup which concrete variant is loaded into the ledger.
+
+```python
+class ProductionTonic(ttTonic):
+    def ttse__on_start(self):
+        # Request the SERVICE via the abstract base class
+        self.network = ConnectionService()
+        self.network.ttsc__send_packet("Test message")
+
+
+class MyApplication(ttFormula):
+    def creating_starting_tonics(self):
+        # 1. Start the CONCRETE service first.
+        # This registers itself under 'central_connection_service'
+        IpConnectionService(srv_host="10.0.0.15", srv_port=8080)
+
+        # 2. Start the consumers.
+        ProductionTonic()
+```
+
+---
+
+## 6. Lifecycle and Teardown Mechanism
+
+Services feature a unique, automated cleanup mechanism tied to their active users.
+
+### Automatic Infusion Tracking
+When an existing Service is requested again anywhere in the application, the metaclass intercepts this and performs the following administrative steps:
+1. The calling Tonic (`base`) is automatically appended to the Service's internal `service_bases` list (`tonic.service_bases.append(base)`).
+2. The Service is registered as an active dependency on the caller via `base._tt_add_infusion(tonic)`.
+
+> **Architecture Note (First Creation Isolation):**
+> By design, when a Service is created for the *very first time* by a Tonic, the framework explicitly sets its `base` to `None`. This isolates the new Service from the caller's lifecycle, preventing the Service from being destroyed if the instantiating worker finishes early. On all *subsequent* calls, the caller is properly registered as an active dependency.
+
+### Graceful Teardown Flow
+Because the Service accurately tracks which Tonics depend on it, it knows exactly when it is no longer needed. When a consumer Tonic ends its lifecycle and calls `finish()`, a cascade effect triggers within `ttTonic.py`:
+
+1. The finishing consumer Tonic executes its `_ttss__on_finished` routine.
+2. It iterates through its active `infusions` and calls `ttsc__finish()` on the Service.
+3. The Service intercepts this in its own `ttsc__finish()` method and recognizes that the caller is part of its `service_bases`.
+4. The Service removes this specific client from its list: `self.service_bases.remove(calling_tonic)`.
+5. **The Closure:** The Service checks its remaining dependencies. If there are *no* active components left (`len(self.service_bases) <= 0`), the Service concludes its job is done. It triggers its own teardown sequence, calling `ttse__on_service_base_completed` to notify listeners, stops its state machine, and permanently removes itself from the `ttLedger`.
+## `File: docs\documentation.md`
+## `File: docs\index.md`
+# Welcome to TaskTonic 🧪
+
+<img src="assets/tasktonic-impression.png" align="left" width="350" style="margin-right: 20px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Concept">
+
+**A Refreshing Approach to Python Concurrency.**
+
+TaskTonic is designed to eliminate the headaches of traditional python concurrency. No more wrestling with complex `asyncio` loops, unpredictable threads, or deadlocking locks. 
+
+## Philosophy & Metaphor
+
+The core philosophy is based on the **Tonic**. Think of your running application as a glass of tonic. It comes to life
+through **Sparkles**, the **bubbles** rising in a liquid.
+
+* **The Flow:** Code is executed in small, atomic units called *Sparkles*.
+* **The Fizz:** When these Sparkles flow continuously, the application "fizzes" with activity. It feels like a single,
+  cohesive whole, even though it may be performing multiple logical processes simultaneously.
+* **The Rule:** A Sparkle must be short-lived. If one bubble takes too long to rise (blocking code), the flow stops, and
+  the fizz goes flat. In practice, this is rarely an issue, as most software processes are reactive chains of short
+  events.
+
+<div style="clear: both;"></div>
+
+This architecture allows you to write highly responsive, concurrent applications (like UIs or IoT controllers) without
+the race conditions and headaches of traditional multi-threading.
+
+## Use Cases
+
+TaskTonic is ideal for any scenario where you need to orchestrate numerous independent components:
+
+- Responsive User Interfaces: Keep your UI fluid while performing heavy computations in the background.
+- IoT & Sensor Networks: Process a continuous stream of events and measurements from thousands of devices.
+- Communication Servers: Manage thousands of concurrent connections for chat applications, game servers, or data streams.
+- Complex Simulations: Build simulations (e.g., swarm behavior, traffic models) where each entity acts autonomously.
+- Asynchronous Data Processing: Create robust data pipelines where information is processed in small, distinct steps.
+
+*...or all of the above, at the same time. That's where the framework's power truly lies.*
+
 
 
 
 ---
+
+## Hello World, the TaskTonic way
+
+Ok, Sparkling tonics are fun. This is the reality check. Here is a real example of how simple and structured a TaskTonic application is. Notice how clean the state transitions (`to_state`) and timer events (`on_tm_step`) are handled!
+
+```python
+from TaskTonic import *
+
+class HelloWorld(ttTonic):
+    def __init__(self, interval=1.5):
+        super().__init__()
+        self.interval = interval
+
+    def ttse__on_start(self):
+        ttTimerRepeat(seconds=self.interval, name='tm_step')
+        self.to_state('hello')
+
+    def ttse_hello__on_enter(self):
+        self.log('Hello world')
+
+    def ttse_hello__on_tm_step(self, tinfo):
+        self.to_state('welcome')
+
+    def ttse_welcome__on_enter(self):
+        self.log('Welcome to TaskTonic')
+
+    def ttse_welcome__on_tm_step(self, tinfo):
+        self.to_state('ending')
+
+    def ttse_ending__on_tm_step(self, tinfo):
+        self.ttsc__finish()
+
+class myApp(ttFormula):
+    def creating_formula(self):
+        return (
+            ('tasktonic/project/name', 'HELLO WORLD'),
+            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/default', ttLog.QUIET),
+        )
+
+    def creating_starting_tonics(self):
+        HelloWorld(1.5)
+        # HelloWorld(.2) # you can try a second tonic!!!
+
+if __name__ == '__main__':
+    myApp()
+```## `File: docs\tasting-the-tonic.md`
+# 🧪 Tasting The Tonic
+
+<img src="../assets/tasktonic-tasting.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+Welcome to the Tonic Bar! If you are tired of the traditional `async/await` virus infecting your codebase, or debugging multi-threading race conditions, you are in the right place. 
+
+TaskTonic introduces a paradigm called **Sparkling Programming**. Instead of blocking threads or fighting the Global Interpreter Lock, you break your code down into small, atomic, non-interruptible units of work called **Sparkles**. 
+
+Let's pour our first glass and see how it works!
+
+---
+
+## Step 1: Preparation (The Setup)
+
+Before we start brewing, you need to install the framework and get familiar with the ingredients.
+
+**1. Install TaskTonic:**
+Open your terminal and install the package via pip:
+```bash
+pip install tasktonic
+```
+
+2. Read the Manuals:
+TaskTonic is powerful, but it requires a slightly different way of thinking. Before building massive applications, we highly recommend reading the core documentation located in the _documents folder of the repository. Understanding the ttCatalyst, the ttLedger, and the State Machine will save you hours of debugging later!
+3. Generate the Starter File:
+TaskTonic comes with a built-in generator. Run this command in your terminal to instantly create a hello_tasktonic.py file in your current directory:
+python -m TaskTonic
+
+## Step 2: The Recipe (Hello World)
+If you open the generated hello_tasktonic.py file, you will see the following code. This is a fully functioning, state-driven, concurrent application.
+You can run it directly by typing python hello_tasktonic.py.
+```python
+from TaskTonic import *
+
+class HelloWorld(ttTonic):
+    def __init__(self, interval=1.5):
+        super().__init__()
+        self.interval = interval
+
+    def ttse__on_start(self):
+        ttTimerRepeat(seconds=self.interval, name='tm_step')
+        self.to_state('hello')
+
+    def ttse_hello__on_enter(self):
+        self.log('Hello world')
+
+    def ttse_hello__on_tm_step(self, tinfo):
+        self.to_state('welcome')
+
+    def ttse_welcome__on_enter(self):
+        self.log('Welcome to TaskTonic')
+
+    def ttse_welcome__on_tm_step(self, tinfo):
+        self.to_state('ending')
+
+    def ttse_ending__on_tm_step(self, tinfo):
+        self.ttsc__finish()
+
+
+class myApp(ttFormula):
+    def creating_formula(self):
+        return (
+            ('tasktonic/project/name', 'HELLO WORLD'),
+            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/default', ttLog.QUIET),
+        )
+
+    def creating_starting_tonics(self):
+        HelloWorld(1.5)
+
+
+if __name__ == '__main__':
+    myApp()
+```
+
+## Step 3: Breaking Down the Magic
+
+How does this actually work without a `while True` loop or `time.sleep()`? Let's break it down concept by concept.
+
+### 1. The Formula and The Catalyst
+At the very bottom, we define `myApp(ttFormula)`. The Formula is the entry point of your application. It does three vital things behind the scenes:
+1. It configures the system (like setting the logging to screen).
+1. It starts the ttCatalyst. The Catalyst is the underlying engine of TaskTonic. It runs a continuous loop in the background, pulling tasks from a queue and executing them sequentially.
+1. It creates our first "worker" agent: HelloWorld().
+
+### 2. The Tonic and Sparkle Naming (ttse__)
+HelloWorld inherits from `ttTonic`. A Tonic is a stateful worker. It doesn't run code directly; instead, it places work orders (called `Sparkles`) onto the Catalyst's queue. TaskTonic uses smart naming conventions to automatically route these Sparkles:
+
+1. `ttsc__ (Command)`: An external request to do something.
+1. `ttse__ (Event)`: A reaction to an internal event, like a timer or a startup sequence.
+When our Tonic is created, the framework automatically places the `ttse__on_start` event on the queue.
+
+### 3. State Machines (self.to_state)
+Every ttTonic is a built-in state machine. By default, a Tonic has no state (state = -1).
+In `ttse__on_start`, we call `self.to_state('hello')`.
+When the state changes, the framework looks for a Sparkle named `ttse_[state_name]__on_enter`. That is why `ttse_hello__on_enter` is automatically executed, logging "Hello world" to your screen!
+
+### 4. Timers and Automatic sparkle_back
+In TaskTonic, you must never use `time.sleep()`, as it would freeze the Catalyst engine. Instead, we use a `ttTimer` like `ttTimerRepeat`.
+Look at this line:
+`ttTimerRepeat(seconds=self.interval, name='tm_step')`
+
+Notice that we didn't tell the timer what function to call when it expires! This is TaskTonic's automatic callback routing at work:
+1. Because we named the timer tm_step, the framework automatically looks for an event sparkle named `ttse__on_tm_step`.
+1. Because our Tonic is currently in the hello state, it specifically looks for `ttse_hello__on_tm_step`.
+When the timer fires 1.5 seconds later, it hits `ttse_hello__on_tm_step`, which changes the state to welcome. This triggers `ttse_welcome__on_enter`, logging "Welcome to TaskTonic".
+
+### 5. Finishing Gracefully
+Finally, the timer fires again while we are in the ending state. This hits `ttse_ending__on_tm_step`, where we call `self.ttsc__finish()`.
+This is the official stop command. It halts the state machine, cleans up any active timers, deregisters the Tonic from the Ledger, and allows the application to shut down cleanly without leaving zombie threads behind.
+
+
+** Welcome to Sparkling Programming! **
+
 
