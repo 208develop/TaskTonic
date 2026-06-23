@@ -98,7 +98,8 @@ The returned dictionary contains metadata about the execution run:
 * **`status`**: The final status of the engine (`'running'` or `'catalyst finished'`).
 * **`start@` / `end@`**: Absolute timestamps of when the sparkle run started and ended.
 * **`stop_condition`**: A list explaining *why* the Distiller paused. 
-    * *Values can include:* `'timeout'`, `'sparkle_count'`, `'state_trigger: [state_name]'`, `'sparkle_trigger: [sparkle_name]'`, `'contract_met: X/Y tonics matched'`, or `'catalyst finished'`.
+    * *Values can include:* `'timeout'`, `'sparkle_count'`, `'state_trigger: [state_name]'`, `'sparkle_trigger: [sparkle_name]'`, `'contract_met'`, or `'catalyst finished'`.
+* **`contract_details`**: *(Present only when a contract is met)* A rich dictionary containing precise metadata about the matched conditions, including `match_count`, `target_count`, and a `matched_tonics` sub-dictionary detailing exactly which states, sparkles, or probes triggered the success.
 * **`sparkle_trace`**: A detailed list of every single Sparkle that was executed.
 
 ### The `sparkle_trace` List
@@ -127,9 +128,14 @@ trace = distiller.sparkle(contract={
     'tonics': {'ClientTonic': {'till_state_in': ['authenticated']}}
 })
 
-# Check why the distiller stopped
-assert 'contract_met: 1/1 tonics matched' in trace['stop_condition'][0]
+# Check that the distiller stopped successfully
+assert 'contract_met' in trace['stop_condition']
 assert 'timeout' not in trace['stop_condition']
+
+# Inspect the exact reason the contract was met
+details = trace['contract_details']
+assert details['match_count'] == 1
+assert "state: 'authenticated'" in details['matched_tonics']['ClientTonic']
 ```
 
 **2. Asserting Probed Data:**

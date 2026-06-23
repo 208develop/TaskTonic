@@ -1,5 +1,5 @@
 from TaskTonic.ttLogger import ttLogService, ttLog
-from TaskTonic.ttTonicStore.ttIpSockets import DictSocketHandler
+from TaskTonic.ttTonicStore.ttNetworking import TcpDictSocketHandler
 
 class ttIpLogService(ttLogService):
     """
@@ -43,7 +43,7 @@ class ttIpLogService(ttLogService):
             target_port = int(s[-1])
         else:
             raise TypeError(f'Logger target [{target}] has wrong type')
-        self.net = DictSocketHandler(as_client=True, host=target_host, port=target_port)
+        self.net = TcpDictSocketHandler(as_client=True, host=target_host, port=target_port)
         self.log(f'Connecting to log service at {target_host}:{target_port}')
         self.to_state('wait_for_connection')
 

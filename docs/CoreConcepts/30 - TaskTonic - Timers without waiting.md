@@ -1,7 +1,6 @@
 # TaskTonic: Timers without waiting 
 
-<img src="../assets/tasktonic-timers
-.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
+<img src="../assets/tasktonic-timers.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
 
 In TaskTonic, blocking the execution thread is strictly prohibited. You must **never** block execution using methods like `time.sleep()`, as this will freeze the Catalyst and stop your application from processing its queue. Instead, you must use the framework's built-in timers to keep the system running smoothly.
 

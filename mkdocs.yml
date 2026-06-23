@@ -10,6 +10,7 @@ theme:
     accent: cyan
   features:
     - navigation.tabs
+    - navigation.expand
 
 markdown_extensions:
   - pymdownx.highlight
@@ -17,13 +18,15 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Documentation:
-      - The Introduction: 'TaskTonic  - The introduction.md'
-      - Sparkling Programming: 'TaskTonic - Sparkling Programming.md'
-      - Timers Without Waiting: 'TaskTonic - Timers without waiting.md'
-      - Depending on State: 'TaskTonic - Depending on your state.md'
-      - At Your Service: 'Tasktonic - At your service.md'
-      - Active Data Store: 'TaskTonic - Active data store.md'
-      - Understanding ttCatalyst: 'TaskTonic - Understanding the ttCatalyst.md'
-      - Testing in ttDistiller: 'TaskTonic - Testing in the ttDistiller.md'
-  - Tasting The Tonic: tasting-the-tonic.md
+  - Core Concepts:
+      - The Introduction: 'CoreConcepts/10 - TaskTonic  - The introduction.md'
+      - Sparkling Programming: 'CoreConcepts/20 - TaskTonic - Sparkling Programming.md'
+      - Timers Without Waiting: 'CoreConcepts/30 - TaskTonic - Timers without waiting.md'
+      - Depending on State: 'CoreConcepts/40 - TaskTonic - Depending on your state.md'
+      - At Your Service: 'CoreConcepts/50 - Tasktonic - At your service.md'
+      - Active Data Store: 'CoreConcepts/60 - TaskTonic - Active data store.md'
+      - Understanding ttCatalyst: 'CoreConcepts/70 - TaskTonic - Understanding the ttCatalyst.md'
+      - Testing in ttDistiller: 'CoreConcepts/90 - TaskTonic - Testing in the ttDistiller.md'
+  - The Toolbox:
+      - Networking & Sockets: 'TheToolbox/120 - TaskTonic - Networking and Sockets.md'
+#  - Tasting The Tonic: tasting-the-tonic.md

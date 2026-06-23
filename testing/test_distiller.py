@@ -145,7 +145,11 @@ def test_advanced_distiller_contracts():
         }
     })
 
-    assert 'contract_met: 2/2 tonics matched' in trace1['stop_condition']
+    assert 'contract_met' in trace1['stop_condition']
+    assert trace1['contract_details']['match_count'] == 2
+    assert trace1['contract_details']['target_count'] == 2
+    assert trace1['contract_details']['matched_tonics'] ==  {'Device_Fast': ["state: 'paused'"], 'Device_Slow': ["state: 'paused'"]}
+
     assert dev_fast.get_current_state_name() == 'paused'
     assert dev_slow.get_current_state_name() == 'paused'
 
@@ -171,7 +175,7 @@ def test_advanced_distiller_contracts():
         }
     })
 
-    assert 'contract_met: 1/1 tonics matched' in trace2['stop_condition']
+    assert 'contract_met' in trace2['stop_condition']
 
     # Omdat Device_Fast een timer van 0.5 had, moet deze klaar zijn
     assert dev_fast.cycle_count == 1
@@ -182,7 +186,7 @@ def test_advanced_distiller_contracts():
     assert dev_slow.get_current_state_name() == 'wait_on_timer'
 
     # --- DEEL 3: Wacht op de trage ---
-    distiller.sparkle(contract={
+    trace3=distiller.sparkle(contract={
         'timeout': 5.0,
         'stop_match_count': 1,
         'tonics': {
@@ -190,6 +194,7 @@ def test_advanced_distiller_contracts():
         }
     })
 
+    assert 'contract_met' in trace2['stop_condition']
     assert dev_slow.cycle_count == 1
 
     # Cleanup

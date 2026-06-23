@@ -183,6 +183,9 @@ class ttDistiller(ttCatalyst):
         """
         Evaluates both global legacy conditions and the new per-tonic conditions.
         """
+        if 'contract_met' in status.get('stop_condition', []):
+            return True
+
         # --- Legacy Global Conditions ---
         if just_executed['sparkle'] in contract.get('till_sparkle_in', []):
             status.setdefault('stop_condition', []).append(f"sparkle_trigger: [{just_executed['sparkle']}]")
@@ -198,47 +201,57 @@ class ttDistiller(ttCatalyst):
         if not tonics_dict:
             return False
 
-        matched_tonics = 0
+        matched_tonics_count = 0
+        matched_details = {}  # to store matches
 
         for tonic_name, rules in tonics_dict.items():
             tonic = self.ledger.get_tonic_by_name(tonic_name)
             if not tonic:
                 continue
 
-            is_match = False
+            match_reasons = []
 
             # Condition 1: State Match
             if 'till_state_in' in rules:
-                if tonic.get_current_state_name() in rules['till_state_in']:
-                    is_match = True
+                current_state = tonic.get_current_state_name()
+                if current_state in rules['till_state_in']:
+                    match_reasons.append(f"state: '{current_state}'")
 
             # Condition 2: Sparkle Match
-            if not is_match and 'till_sparkle_in' in rules:
+            if 'till_sparkle_in' in rules:
                 if tonic_name == just_executed['tonic'] and just_executed['sparkle'] in rules['till_sparkle_in']:
-                    is_match = True
+                    match_reasons.append(f"sparkle: '{just_executed['sparkle']}'")
 
             # Condition 3: Probe Match
-            if not is_match and 'stop_on_probe' in rules:
+            if 'stop_on_probe' in rules:
                 for probe_name, expected_val in rules['stop_on_probe'].items():
                     if hasattr(tonic, probe_name) and getattr(tonic, probe_name) == expected_val:
-                        is_match = True
-                        break
+                        match_reasons.append(f"probe: {probe_name} == {expected_val}")
 
-            if is_match:
-                matched_tonics += 1
+            # If this tonic hit any of its rules, record it
+            if match_reasons:
+                matched_tonics_count += 1
+                matched_details[tonic_name] = match_reasons
 
         # Determine target count (AND vs OR logic)
         target_count = contract.get('stop_match_count', 1)
         if target_count == 'all':
             target_count = len(tonics_dict)
 
-        if matched_tonics >= target_count:
-            condition_msg = f'contract_met: {matched_tonics}/{target_count} tonics matched'
-            status.setdefault('stop_condition', []).append(condition_msg)
+        # Did we reach the required number of matched tonics?
+        if matched_tonics_count >= target_count:
+            # 1. Safely add the static flag
+            status.setdefault('stop_condition', []).append('contract_met')
+
+            # 2. Add the detailed metadata for the developer/tester
+            status['contract_details'] = {
+                'match_count': matched_tonics_count,
+                'target_count': target_count,
+                'matched_tonics': matched_details
+            }
             return True
 
         return False
-
     def finish_distiller(self, timeout=0.5, contract=None):
         for liq in self.ledger.tonics:
             if isinstance(liq, ttLiquid):
@@ -252,6 +265,35 @@ class ttDistiller(ttCatalyst):
         self.ledger._instance = None
         self.ledger._singleton_init_done = False
         return stat
+
+    def teardown_test_environment(self):
+        """
+        Officially tears down the TaskTonic environment for unit testing.
+        It finishes the distiller, waits for background threads (like the SelectorService)
+        to cleanly exit, and performs a hard reset of the ttLedger Singleton.
+        """
+        import time
+        from TaskTonic import ttLedger
+
+        # 1. Initiate standard shutdown
+        self.finish_distiller()
+
+        # 2. Force the Ledger reset and wait for dangling threads
+        if ttLedger._instance:
+            for t in ttLedger._instance.tonics:
+                if t and hasattr(t, 'sparkling') and t.id > 0:
+                    start_t = time.time()
+                    while t.sparkling and time.time() - start_t < 1.0:
+                        time.sleep(0.01)
+
+            # Clear out the administration
+            ttLedger._instance.records = []
+            ttLedger._instance.tonics = []
+            ttLedger._instance.formula = None
+
+        # 3. Destroy the Singleton locks
+        ttLedger._instance = None
+        ttLedger._singleton_init_done = False
 
     def stat_print(self, status, filter=None):
         import time
