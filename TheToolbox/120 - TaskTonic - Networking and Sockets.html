@@ -1,0 +1,1226 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Refreshing Approach to Python Concurrency">
+      
+      
+      
+      
+        <link rel="prev" href="../CoreConcepts/90%20-%20TaskTonic%20-%20Testing%20in%20the%20ttDistiller.html">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Networking & Sockets - TaskTonic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tasktonic-networking-ttnetworking" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="TaskTonic" class="md-header__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TaskTonic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Networking & Sockets
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../CoreConcepts/10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-tabs__link">
+          
+  
+  
+  Core Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-tabs__link">
+          
+  
+  
+  The Toolbox
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="TaskTonic" class="md-nav__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TaskTonic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/20%20-%20TaskTonic%20-%20Sparkling%20Programming.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparkling Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/30%20-%20TaskTonic%20-%20Timers%20without%20waiting.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timers Without Waiting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/40%20-%20TaskTonic%20-%20Depending%20on%20your%20state.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depending on State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/50%20-%20Tasktonic%20-%20At%20your%20service.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/60%20-%20TaskTonic%20-%20Active%20data%20store.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/70%20-%20TaskTonic%20-%20Understanding%20the%20ttCatalyst.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CoreConcepts/90%20-%20TaskTonic%20-%20Testing%20in%20the%20ttDistiller.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing in ttDistiller
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Toolbox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    The Toolbox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking & Sockets
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking & Sockets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-sockets-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Sockets API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. The Sockets API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tcp-communication-tcpsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TCP Communication (TcpSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#udp-communication-udpsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UDP Communication (UdpSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Webhooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-extending-sockets-serialization-fragmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Extending Sockets (Serialization &amp; Fragmentation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Extending Sockets (Serialization &amp; Fragmentation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-building-a-dictionary-socket-tcpdictsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Building a Dictionary Socket (TcpDictSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-developer-notes-the-selectorservice-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Developer Notes: The SelectorService Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Developer Notes: The SelectorService Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-dual-wait-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Dual-Wait Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-dummy-socket-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Dummy Socket Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atomic-concurrency-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Atomic Concurrency Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#level-triggered-events-vs-edge-triggered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Level-Triggered Events vs. Edge-Triggered
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-sockets-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Sockets API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. The Sockets API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tcp-communication-tcpsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TCP Communication (TcpSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#udp-communication-udpsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UDP Communication (UdpSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP Webhooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-extending-sockets-serialization-fragmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Extending Sockets (Serialization &amp; Fragmentation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Extending Sockets (Serialization &amp; Fragmentation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-building-a-dictionary-socket-tcpdictsockethandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Building a Dictionary Socket (TcpDictSocketHandler)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-developer-notes-the-selectorservice-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Developer Notes: The SelectorService Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Developer Notes: The SelectorService Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-dual-wait-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Dual-Wait Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-dummy-socket-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Dummy Socket Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atomic-concurrency-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Atomic Concurrency Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#level-triggered-events-vs-edge-triggered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Level-Triggered Events vs. Edge-Triggered
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tasktonic-networking-ttnetworking">TaskTonic Networking (<code>ttNetworking</code>)</h1>
+<p>The <code>ttNetworking</code> module provides a robust, non-blocking, asynchronous network stack fully integrated into the TaskTonic framework. It allows you to build highly concurrent network applications—like chat servers, IoT brokers, or webhook listeners—without writing a single line of traditional threading or <code>asyncio</code> boilerplate.</p>
+<hr />
+<h2 id="1-the-sockets-api">1. The Sockets API</h2>
+<p>For the standard developer, the networking module exposes simple, state-aware handlers for TCP, UDP, and HTTP protocols. These handlers are native <code>ttTonic</code> objects and communicate exclusively via Sparkles.</p>
+<h3 id="tcp-communication-tcpsockethandler">TCP Communication (<code>TcpSocketHandler</code>)</h3>
+<p>The TCP handler can act as both a client and a server. It automatically manages connection states, buffering, and background reconnection.</p>
+<p><strong>Example: A Simple TCP Echo Server</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttTonic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic.ttTonicStore.ttNetworking</span><span class="w"> </span><span class="kn">import</span> <span class="n">TcpStrSocketHandler</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EchoServer</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting Echo Server on port 5555...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">TcpStrSocketHandler</span><span class="p">(</span><span class="n">as_server</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5555</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="s1">&#39;listening&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_socket_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Client connected from </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_socket_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Echo the data back to the client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">ttsc__send_data</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ECHO: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="udp-communication-udpsockethandler">UDP Communication (<code>UdpSocketHandler</code>)</h3>
+<p>UDP is connectionless and stateless. It is ideal for high-speed, loss-tolerant streams or simple "Ping-Pong" broadcasts.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttTonic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic.ttTonicStore.ttNetworking</span><span class="w"> </span><span class="kn">import</span> <span class="n">UdpDictSocketHandler</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PingClient</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udp</span> <span class="o">=</span> <span class="n">UdpDictSocketHandler</span><span class="p">(</span><span class="n">as_server</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="s1">&#39;ready&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse_ready__on_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Send a JSON dictionary over UDP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">udp</span><span class="o">.</span><span class="n">ttsc__send_data</span><span class="p">({</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;ping&quot;</span><span class="p">},</span> <span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="mi">55555</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_udp_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Received reply from </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="http-webhooks">HTTP Webhooks</h3>
+<p>TaskTonic includes lightweight, asynchronous HTTP handlers designed specifically for IoT webhooks (like Shelly buttons) or quick REST API calls.
+* <strong><code>HttpServerHandler</code></strong>: Listens for incoming GET/POST requests and auto-replies with <code>200 OK</code>.
+* <strong><code>HttpClientHandler</code></strong>: Sends asynchronous HTTP requests to endpoints.</p>
+<hr />
+<h2 id="2-extending-sockets-serialization-fragmentation">2. Extending Sockets (Serialization &amp; Fragmentation)</h2>
+<p>Network streams (especially TCP) do not guarantee that your data arrives in neat, complete packages. A 10KB JSON payload might arrive in chunks, or two rapid messages might be glued together.</p>
+<p>TaskTonic provides a clean interface to solve this. You do not modify the base <code>TcpSocketHandler</code>. Instead, you subclass it and override two specific methods: <code>send_data_conversion</code> and <code>rcv_data_conversion</code>.</p>
+<h3 id="example-building-a-dictionary-socket-tcpdictsockethandler">Example: Building a Dictionary Socket (<code>TcpDictSocketHandler</code>)</h3>
+<p>Here is how you extend a socket to automatically pack and unpack Python dictionaries safely over a TCP stream using <code>pickle</code> and a 4-byte length header (to handle fragmentation).</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic.ttTonicStore.ttNetworking</span><span class="w"> </span><span class="kn">import</span> <span class="n">TcpSocketHandler</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TcpDictSocketHandler</span><span class="p">(</span><span class="n">TcpSocketHandler</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send_data_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Packs a dictionary into bytes with a 4-byte length prefix.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Data must be a dict&#39;</span><span class="p">)</span>
+
+        <span class="n">pdict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dict_data</span><span class="p">)</span>
+        <span class="c1"># Prefix the payload with its exact length</span>
+        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;!I&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdict</span><span class="p">))</span> <span class="o">+</span> <span class="n">pdict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rcv_data_conversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpacks the byte stream, resolving TCP fragmentation.&quot;&quot;&quot;</span>
+        <span class="n">dicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span> <span class="o">+=</span> <span class="n">bdata</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># Check the expected length of the upcoming payload</span>
+            <span class="n">plen</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;!I&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span><span class="p">[:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">plen</span> <span class="o">+</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># Payload is incomplete (fragmented). Wait for more data.</span>
+                <span class="k">break</span> 
+
+            <span class="c1"># We have a full payload! Extract it and load the dict.</span>
+            <span class="n">dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span><span class="p">[</span><span class="mi">4</span> <span class="p">:</span> <span class="n">plen</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]))</span>
+
+            <span class="c1"># Slice the buffer to process the next potential message</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rcv_buf</span><span class="p">[</span><span class="n">plen</span> <span class="o">+</span> <span class="mi">4</span> <span class="p">:]</span>
+
+        <span class="c1"># Return the list of completed dictionaries to the framework</span>
+        <span class="k">return</span> <span class="n">dicts</span>
+</code></pre></div>
+<hr />
+<h2 id="3-developer-notes-the-selectorservice-engine">3. Developer Notes: The <code>SelectorService</code> Engine</h2>
+<p><em>(This section details the internal mechanics of <code>ttNetworking</code>. Standard users do not need to interact with this layer.)</em></p>
+<p>Under the hood, all socket handlers delegate their raw OS-level operations to the <code>SelectorService</code>. This service is a specialized <code>ttCatalyst</code> that runs in the background. Its design solves several critical concurrency challenges inherent to Python.</p>
+<h3 id="the-dual-wait-problem">The Dual-Wait Problem</h3>
+<p>A standard TaskTonic <code>ttCatalyst</code> executes a <code>while</code> loop that sleeps efficiently by calling <code>queue.get(timeout=next_timer)</code>. It only wakes up when a Sparkle is queued or a timer expires.</p>
+<p>However, network sockets require the application to wait for the Operating System (via <code>selectors.select()</code>). Python cannot efficiently block a single thread on <em>both</em> a Queue and an OS Selector simultaneously without relying on heavy polling (busy-waiting).</p>
+<h3 id="the-dummy-socket-solution">The Dummy Socket Solution</h3>
+<p>To solve this, the <code>SelectorService</code> overrides the core Catalyst loop to block exclusively on the OS <code>selector</code>. 
+To ensure the Catalyst still processes normal TaskTonic Sparkles, it uses a custom <code>MyNotifyingQueue</code>. Whenever a Sparkle is put into this queue, it writes a single byte (<code>b'1'</code>) to an internal, hidden dummy socket pair (<code>_queue_filled_notify_channel</code>). This instantly wakes up the OS selector, allowing the Catalyst to process the Sparkle queue.</p>
+<h3 id="atomic-concurrency-benefits">Atomic Concurrency Benefits</h3>
+<p>By forcing all network I/O to run inside the <em>same</em> Catalyst thread, TaskTonic's uninterruptible Sparkle mechanism applies to network traffic. There are no race conditions between sending data, disconnecting, and receiving data. Locks (<code>threading.Lock</code>) are entirely obsolete.</p>
+<h3 id="level-triggered-events-vs-edge-triggered">Level-Triggered Events vs. Edge-Triggered</h3>
+<p>A crucial architectural decision was made regarding how data is read. OS Selectors in Python are <strong>Level-Triggered</strong> (not Edge-Triggered). This means the OS will constantly scream <em>"I have data!"</em> as long as the receive buffer is not empty.</p>
+<p>If TaskTonic simply placed a <code>ttse__on_data_ready</code> Sparkle on the queue when the selector fired, the selector might fire hundreds of times before the Catalyst actually executes that Sparkle and drains the OS buffer.</p>
+<p><strong>The Solution:</strong> The <code>SelectorService</code> reads the data <em>immediately</em> inside the active <code>select()</code> loop. This instantly drains the OS buffer, silencing the selector. The raw byte data is then passed directly as a parameter into the Sparkle work order (<code>rd_sparkle(data)</code>). </p>
+<p>Because the <code>SelectorService</code> Catalyst reads the data and executes the Sparkle within the exact same thread, the data can be passed safely by reference without triggering TaskTonic's cross-thread <code>copy.deepcopy()</code> overhead. This results in incredibly fast, memory-efficient networking.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

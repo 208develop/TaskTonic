@@ -1,0 +1,1375 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Refreshing Approach to Python Concurrency">
+      
+      
+      
+      
+        <link rel="prev" href="40%20-%20TaskTonic%20-%20Depending%20on%20your%20state.html">
+      
+      
+        <link rel="next" href="60%20-%20TaskTonic%20-%20Active%20data%20store.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>At Your Service - TaskTonic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tasktonic-services-singleton-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="TaskTonic" class="md-header__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TaskTonic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              At Your Service
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-tabs__link">
+          
+  
+  
+  Core Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../TheToolbox/120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-tabs__link">
+          
+  
+  
+  The Toolbox
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="TaskTonic" class="md-nav__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TaskTonic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20%20-%20TaskTonic%20-%20Sparkling%20Programming.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparkling Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="30%20-%20TaskTonic%20-%20Timers%20without%20waiting.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timers Without Waiting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="40%20-%20TaskTonic%20-%20Depending%20on%20your%20state.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depending on State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="50%20-%20Tasktonic%20-%20At%20your%20service.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-is-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. What is a Service?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-architectural-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Architectural Use Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-implementing-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Implementing a Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Implementing a Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-class-level-identification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Class-level Identification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-__init__-one-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: __init__ (One-time Setup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-_tt_init_service_base-per-access-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: _tt_init_service_base (Per-Access Hook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crucial-for-thread-safety-registration-via-the-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Crucial for Thread-Safety: Registration via the Queue
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-consuming-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Consuming a Service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-advanced-pattern-decoupling-via-service-base-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Advanced Pattern: Decoupling via Service Base Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Advanced Pattern: Decoupling via Service Base Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-the-interface-the-base-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Define the Interface (The Base Class)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-build-the-concrete-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Build the Concrete Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-the-binding-in-the-formula-and-consumer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The Binding in the Formula and Consumer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-lifecycle-and-teardown-mechanism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lifecycle and Teardown Mechanism
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Lifecycle and Teardown Mechanism">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-infusion-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic Infusion Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graceful-teardown-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Graceful Teardown Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="60%20-%20TaskTonic%20-%20Active%20data%20store.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="70%20-%20TaskTonic%20-%20Understanding%20the%20ttCatalyst.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="90%20-%20TaskTonic%20-%20Testing%20in%20the%20ttDistiller.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing in ttDistiller
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Toolbox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    The Toolbox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TheToolbox/120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking & Sockets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-is-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. What is a Service?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-architectural-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Architectural Use Cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-implementing-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Implementing a Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Implementing a Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-class-level-identification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Class-level Identification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-__init__-one-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: __init__ (One-time Setup)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-_tt_init_service_base-per-access-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: _tt_init_service_base (Per-Access Hook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crucial-for-thread-safety-registration-via-the-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Crucial for Thread-Safety: Registration via the Queue
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-consuming-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Consuming a Service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-advanced-pattern-decoupling-via-service-base-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Advanced Pattern: Decoupling via Service Base Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Advanced Pattern: Decoupling via Service Base Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-the-interface-the-base-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Define the Interface (The Base Class)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-build-the-concrete-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Build the Concrete Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-the-binding-in-the-formula-and-consumer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The Binding in the Formula and Consumer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-lifecycle-and-teardown-mechanism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lifecycle and Teardown Mechanism
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Lifecycle and Teardown Mechanism">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-infusion-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic Infusion Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graceful-teardown-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Graceful Teardown Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tasktonic-services-singleton-architecture">TaskTonic Services &amp; Singleton Architecture</h1>
+<p><img src="../assets/tasktonic-service.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy"></p>
+<p>When building complex, asynchronous applications, the need often arises for central components that must be shared across multiple subtasks (Tonics) without corrupting each other's data streams or internal states. In traditional concurrency models, this inevitably leads to global variables or complex, manually written Singleton patterns riddled with error-prone thread-locks.</p>
+<p>TaskTonic solves this fundamentally through the runtime architecture of the <code>ttLiquid</code> metaclass (<code>__ttLiquidMeta</code>), which seamlessly integrates the Singleton pattern at the framework level.</p>
+<hr />
+<h2 id="1-what-is-a-service">1. What is a Service?</h2>
+<p>A Service in TaskTonic is a specialized <code>ttTonic</code> class that is managed as a strict Singleton. The framework's metaclass guarantees that exactly one instance of the Service exists throughout the entire lifecycle of the application (within the scope of the active <code>ttLedger</code>).</p>
+<p>When any Tonic attempts to instantiate a Service, the following mechanism is triggered:
+1. <strong>First Call (Creation):</strong> The metaclass intercepts the call, constructs the unique instance via <code>super().__call__()</code>, executes <code>__init__()</code> and <code>_tt_post_init_action()</code> exactly once, and registers the Service in the central <code>ttLedger</code> under its unique service name.
+2. <strong>Subsequent Calls (Access):</strong> The framework intercepts the creation attempt, identifies the already registered instance in the ledger, and immediately returns this existing reference. The <code>__init__()</code> constructor is <strong>not</strong> executed again.</p>
+<hr />
+<h2 id="2-architectural-use-cases">2. Architectural Use Cases</h2>
+<p>You should use the Service pattern exclusively for central resources that must be unique and shared across the entire application:
+* <strong>Database Managers:</strong> A central connection pool (<code>DatabaseService</code>).
+* <strong>Hardware Interfaces:</strong> A single-point-of-entry for serial ports or USB controllers to prevent data corruption from concurrent writes.
+* <strong>Shared State Spaces:</strong> Central storage facilities like a <code>DigitalTwin</code> (built on top of <code>ttStore</code>).
+* <strong>Network/API Sockets:</strong> Shared HTTP/REST clients or TCP/IP handlers that need to centrally manage authentication tokens and rate-limiting.</p>
+<hr />
+<h2 id="3-implementing-a-service">3. Implementing a Service</h2>
+<p>Building a Service requires a strict separation between one-time configuration parameters (prefixed with <code>srv_</code>) and per-access parameters (prefixed with <code>ctxt_</code>).</p>
+<h3 id="step-1-class-level-identification">Step 1: Class-level Identification</h3>
+<p>A Service defines itself by setting the class attribute <code>_tt_is_service</code> to a unique string identifier. This is the key the <code>ttLedger</code> uses to register and look up the Singleton.</p>
+<h3 id="step-2-__init__-one-time-setup">Step 2: <code>__init__</code> (One-time Setup)</h3>
+<p>The constructor is executed exclusively during the very first instantiation of the Service.
+* Capture parameters here that are crucial for the initial setup (e.g., <code>srv_db_url</code>).
+* <strong>Strict Framework Rule:</strong> You <em>must</em> always accept <code>**kwargs</code> and pass them through to <code>super().__init__(**kwargs)</code> to avoid breaking internal bootstrapping and context routing.</p>
+<h3 id="step-3-_tt_init_service_base-per-access-hook">Step 3: <code>_tt_init_service_base</code> (Per-Access Hook)</h3>
+<p>Unlike the constructor, <code>_tt_init_service_base</code> is executed by the metaclass <strong>upon every access</strong> to the Service (including the very first creation). This is the hook where the Service discovers <em>who</em> is currently calling it.
+* De eerste positionele parameter die het framework meegeeft is <code>base</code> (de Tonic die de Service aanroept).
+* Capture dynamic parameters here (e.g., <code>ctxt_access_level</code>).</p>
+<h3 id="crucial-for-thread-safety-registration-via-the-queue">🚨 Crucial for Thread-Safety: Registration via the Queue</h3>
+<p>When a Tonic calls the Service, <code>_tt_init_service_base</code> is executed <em>within the thread of the calling component</em>. If the Service runs on its own Catalyst (and thus its own OS thread), mutating Service attributes directly inside this method is a direct violation of TaskTonic's thread-safety guarantees!</p>
+<p><strong>The Golden Rule:</strong> Use <code>_tt_init_service_base</code> exclusively to place an asynchronous Command Sparkle (<code>ttsc__</code>) onto the Service's own queue. Let the Service handle the administration in its own thread scope.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttTonic</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SharedDatabaseService</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="c1"># The unique framework key for the Ledger</span>
+    <span class="n">_tt_is_service</span> <span class="o">=</span> <span class="s2">&quot;SharedDatabaseService&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srv_db_url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executed EXACTLY once during the very first call.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_url</span> <span class="o">=</span> <span class="n">srv_db_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authorized_clients</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database connected at: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">db_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tt_init_service_base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">ctxt_access_level</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executed ON EVERY CALL to the service.</span>
+<span class="sd">        WARNING: This runs in the thread of the CALLER (base)!</span>
+<span class="sd">        Forward the data directly to the safe Catalyst queue via a sparkle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Place the registration safely on this service&#39;s own queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ttsc__register_client</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">ctxt_access_level</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc__register_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_instance</span><span class="p">,</span> <span class="n">access_level</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs SAFELY within the Service Catalyst&#39;s own thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">client_id</span> <span class="o">=</span> <span class="n">client_instance</span><span class="o">.</span><span class="n">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authorized_clients</span><span class="p">[</span><span class="n">client_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="n">client_instance</span><span class="p">,</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">access_level</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s2"> registered with level: </span><span class="si">{</span><span class="n">access_level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="4-consuming-a-service">4. Consuming a Service</h2>
+<p>A consumer Tonic interacts with a Service by simply instantiating the class. The framework handles the de-duplication behind the scenes.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttTonic</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataAnalyzer</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Request the database. Provide srv_ args in case we are the first.</span>
+        <span class="c1"># Provide ctxt_ args specific to our own session.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">SharedDatabaseService</span><span class="p">(</span>
+            <span class="n">srv_db_url</span><span class="o">=</span><span class="s2">&quot;postgresql://localhost:5432/prod&quot;</span><span class="p">,</span>
+            <span class="n">ctxt_access_level</span><span class="o">=</span><span class="s2">&quot;write&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc__process_measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement_data</span><span class="p">):</span>
+        <span class="c1"># Communicate via the service&#39;s asynchronous command queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">ttsc__write_record</span><span class="p">(</span><span class="n">measurement_data</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="5-advanced-pattern-decoupling-via-service-base-classes">5. Advanced Pattern: Decoupling via Service Base Classes</h2>
+<p>In a clean software architecture, you often want to decouple components from specific implementation details. For example: a Tonic needs a <code>ConnectionService</code>, but it shouldn't matter to that Tonic whether this runs via an <code>IpConnectionService</code> or a <code>BluetoothConnectionService</code>.</p>
+<p>TaskTonic supports this by allowing you to define an abstract base class as the Service interface, while you start the concrete implementation under the exact same service name in the <code>ttFormula</code>.</p>
+<h3 id="1-define-the-interface-the-base-class">1. Define the Interface (The Base Class)</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttCatalyst</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectionService</span><span class="p">(</span><span class="n">ttCatalyst</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The universal contract class. Consumers will instantiate this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_tt_is_service</span> <span class="o">=</span> <span class="s2">&quot;central_connection_service&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc__send_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="k">pass</span>
+</code></pre></div>
+<h3 id="2-build-the-concrete-implementation">2. Build the Concrete Implementation</h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">IpConnectionService</span><span class="p">(</span><span class="n">ConnectionService</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The actual network implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srv_host</span><span class="p">,</span> <span class="n">srv_port</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">srv_host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">srv_port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="s2">&quot;disconnected&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc_disconnected__send_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Error: Cannot send data, socket is closed!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc_connected__send_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="c1"># Low-level IP write logic here...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data sent to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="3-the-binding-in-the-formula-and-consumer">3. The Binding in the Formula and Consumer</h3>
+<p>The consumer remains completely decoupled and only requests the base interface. The <code>ttFormula</code> determines at startup which concrete variant is loaded into the ledger.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProductionTonic</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Request the SERVICE via the abstract base class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConnectionService</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">ttsc__send_packet</span><span class="p">(</span><span class="s2">&quot;Test message&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyApplication</span><span class="p">(</span><span class="n">ttFormula</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">creating_starting_tonics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 1. Start the CONCRETE service first.</span>
+        <span class="c1"># This registers itself under &#39;central_connection_service&#39;</span>
+        <span class="n">IpConnectionService</span><span class="p">(</span><span class="n">srv_host</span><span class="o">=</span><span class="s2">&quot;10.0.0.15&quot;</span><span class="p">,</span> <span class="n">srv_port</span><span class="o">=</span><span class="mi">8080</span><span class="p">)</span>
+
+        <span class="c1"># 2. Start the consumers.</span>
+        <span class="n">ProductionTonic</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="6-lifecycle-and-teardown-mechanism">6. Lifecycle and Teardown Mechanism</h2>
+<p>Services feature a unique, automated cleanup mechanism tied to their active users.</p>
+<h3 id="automatic-infusion-tracking">Automatic Infusion Tracking</h3>
+<p>When an existing Service is requested again anywhere in the application, the metaclass intercepts this and performs the following administrative steps:
+1. The calling Tonic (<code>base</code>) is automatically appended to the Service's internal <code>service_bases</code> list (<code>tonic.service_bases.append(base)</code>).
+2. The Service is registered as an active dependency on the caller via <code>base._tt_add_infusion(tonic)</code>.</p>
+<blockquote>
+<p><strong>Architecture Note (First Creation Isolation):</strong>
+By design, when a Service is created for the <em>very first time</em> by a Tonic, the framework explicitly sets its <code>base</code> to <code>None</code>. This isolates the new Service from the caller's lifecycle, preventing the Service from being destroyed if the instantiating worker finishes early. On all <em>subsequent</em> calls, the caller is properly registered as an active dependency.</p>
+</blockquote>
+<h3 id="graceful-teardown-flow">Graceful Teardown Flow</h3>
+<p>Because the Service accurately tracks which Tonics depend on it, it knows exactly when it is no longer needed. When a consumer Tonic ends its lifecycle and calls <code>finish()</code>, a cascade effect triggers within <code>ttTonic.py</code>:</p>
+<ol>
+<li>The finishing consumer Tonic executes its <code>_ttss__on_finished</code> routine.</li>
+<li>It iterates through its active <code>infusions</code> and calls <code>ttsc__finish()</code> on the Service.</li>
+<li>The Service intercepts this in its own <code>ttsc__finish()</code> method and recognizes that the caller is part of its <code>service_bases</code>.</li>
+<li>The Service removes this specific client from its list: <code>self.service_bases.remove(calling_tonic)</code>.</li>
+<li><strong>The Closure:</strong> The Service checks its remaining dependencies. If there are <em>no</em> active components left (<code>len(self.service_bases) &lt;= 0</code>), the Service concludes its job is done. It triggers its own teardown sequence, calling <code>ttse__on_service_base_completed</code> to notify listeners, stops its state machine, and permanently removes itself from the <code>ttLedger</code>.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

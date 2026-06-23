@@ -1,0 +1,2002 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Refreshing Approach to Python Concurrency">
+      
+      
+      
+      
+        <link rel="prev" href="50%20-%20Tasktonic%20-%20At%20your%20service.html">
+      
+      
+        <link rel="next" href="70%20-%20TaskTonic%20-%20Understanding%20the%20ttCatalyst.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Active Data Store - TaskTonic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tasktonic-store-for-reactive-data-management" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="TaskTonic" class="md-header__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TaskTonic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Active Data Store
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-tabs__link">
+          
+  
+  
+  Core Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../TheToolbox/120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-tabs__link">
+          
+  
+  
+  The Toolbox
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="TaskTonic" class="md-nav__button md-logo" aria-label="TaskTonic" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TaskTonic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/208develop/TaskTonic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    208develop/TaskTonic
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10%20-%20TaskTonic%20%20-%20The%20introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20%20-%20TaskTonic%20-%20Sparkling%20Programming.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sparkling Programming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="30%20-%20TaskTonic%20-%20Timers%20without%20waiting.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Timers Without Waiting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="40%20-%20TaskTonic%20-%20Depending%20on%20your%20state.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Depending on State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="50%20-%20Tasktonic%20-%20At%20your%20service.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    At Your Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="60%20-%20TaskTonic%20-%20Active%20data%20store.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Data Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-core-api-data-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Core API &amp; Data Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Core API &amp; Data Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-dictionary-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Dictionary Syntax ([])
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-the-get-and-set-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 The get and set Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-live-links-pointers-item-cursors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Live Links / Pointers (Item Cursors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-hybrid-nodes-smart-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hybrid Nodes &amp; Smart Lists
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Hybrid Nodes &amp; Smart Lists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-the-auto-increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The Auto-Increment (#)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-the-sticky-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 The "Sticky" Index (.)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-creating-valueless-container-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Creating Valueless Container Lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-custom-prefixes-prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Custom Prefixes (prefix#)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-navigating-the-tree-item-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Navigating the Tree (Item Methods)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Navigating the Tree (Item Methods)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-children-iterator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The children Iterator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-graph-navigation-storelinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Graph Navigation (StoreLinks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Graph Navigation (StoreLinks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-passive-links-bubble_eventsfalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Passive Links (bubble_events=False)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-active-links-bubble_eventstrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Active Links (bubble_events=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-batch-iteration-set_each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Batch Iteration (set_each)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-advanced-reactivity-pubsub-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Advanced Reactivity &amp; Pub/Sub Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Advanced Reactivity &amp; Pub/Sub Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-exact-vs-recursive-subscriptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Exact vs. Recursive Subscriptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-mqtt-style-wildcards-and" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 MQTT-Style Wildcards (* and **)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-atomic-snapshots-extract-and-trigger_now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Atomic Snapshots (extract and trigger_now)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-lifecycle-management-safe-unsubscribing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Lifecycle Management (Safe Unsubscribing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-context-managers-group-and-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Context Managers (group and source)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-store-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Store API Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Store API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-methods-on-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Methods on Store
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Methods on Store">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atpath-str-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        at(path: str) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpath_or_data-unionstr-dict-tuple-value-any-none-notify-bool-true-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(path_or_data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getpath-str-default-any-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(path: str, default: Any = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subscribepath-unionstr-liststr-callback-callable-ignore_source-str-none-recursive-bool-false-exclude-liststr-none-extract-liststr-none-trigger_now-bool-false-owner-object-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unsubscribetarget-unioncallable-object-listany" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unsubscribe(target: Union[Callable, object, List[Any]])
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-methods-on-item-cursor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Methods on Item (Cursor)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Methods on Item (Cursor)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setdata-unionstr-dict-tuple-value-any-none-notify-bool-true-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getkey-str-default-any-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(key: str, default: Any = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appendprefix-str-none-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        append(prefix: str = None) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extenddata_list-listany-prefix-str-none-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        extend(data_list: List[Any], prefix: str = None) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popsubpath-str-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pop(subpath: str = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removesubpath-str-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove(subpath: str = None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="70%20-%20TaskTonic%20-%20Understanding%20the%20ttCatalyst.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding ttCatalyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="90%20-%20TaskTonic%20-%20Testing%20in%20the%20ttDistiller.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing in ttDistiller
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Toolbox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    The Toolbox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TheToolbox/120%20-%20TaskTonic%20-%20Networking%20and%20Sockets.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking & Sockets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-core-api-data-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Core API &amp; Data Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Core API &amp; Data Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-dictionary-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Dictionary Syntax ([])
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-the-get-and-set-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 The get and set Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-live-links-pointers-item-cursors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Live Links / Pointers (Item Cursors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-hybrid-nodes-smart-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hybrid Nodes &amp; Smart Lists
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Hybrid Nodes &amp; Smart Lists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-the-auto-increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The Auto-Increment (#)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-the-sticky-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 The "Sticky" Index (.)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-creating-valueless-container-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Creating Valueless Container Lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-custom-prefixes-prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Custom Prefixes (prefix#)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-navigating-the-tree-item-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Navigating the Tree (Item Methods)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Navigating the Tree (Item Methods)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-children-iterator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The children Iterator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-graph-navigation-storelinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Graph Navigation (StoreLinks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Graph Navigation (StoreLinks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-passive-links-bubble_eventsfalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Passive Links (bubble_events=False)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-active-links-bubble_eventstrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Active Links (bubble_events=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-batch-iteration-set_each" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Batch Iteration (set_each)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-advanced-reactivity-pubsub-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Advanced Reactivity &amp; Pub/Sub Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Advanced Reactivity &amp; Pub/Sub Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-exact-vs-recursive-subscriptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Exact vs. Recursive Subscriptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-mqtt-style-wildcards-and" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 MQTT-Style Wildcards (* and **)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-atomic-snapshots-extract-and-trigger_now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Atomic Snapshots (extract and trigger_now)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-lifecycle-management-safe-unsubscribing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Lifecycle Management (Safe Unsubscribing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-context-managers-group-and-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Context Managers (group and source)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-store-api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Store API Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Store API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-methods-on-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Methods on Store
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Methods on Store">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atpath-str-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        at(path: str) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpath_or_data-unionstr-dict-tuple-value-any-none-notify-bool-true-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(path_or_data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getpath-str-default-any-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(path: str, default: Any = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subscribepath-unionstr-liststr-callback-callable-ignore_source-str-none-recursive-bool-false-exclude-liststr-none-extract-liststr-none-trigger_now-bool-false-owner-object-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unsubscribetarget-unioncallable-object-listany" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unsubscribe(target: Union[Callable, object, List[Any]])
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-methods-on-item-cursor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Methods on Item (Cursor)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Methods on Item (Cursor)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setdata-unionstr-dict-tuple-value-any-none-notify-bool-true-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getkey-str-default-any-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get(key: str, default: Any = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appendprefix-str-none-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        append(prefix: str = None) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extenddata_list-listany-prefix-str-none-item" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        extend(data_list: List[Any], prefix: str = None) -&gt; Item
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popsubpath-str-none-any" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pop(subpath: str = None) -&gt; Any
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removesubpath-str-none" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        remove(subpath: str = None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tasktonic-store-for-reactive-data-management">TaskTonic Store for Reactive Data Management</h1>
+<p><img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy"></p>
+<p>In complex, asynchronous systems, maintaining a consistent, thread-safe application state is one of the greatest challenges. The TaskTonic Store module provides a centralized, hierarchical, and reactive data engine. The module consists of two complementary core components:</p>
+<ol>
+<li><strong><code>Store</code></strong>: The pure, functional, thread-safe data core. It handles hierarchical storage, lock management, MQTT-style wildcard pub/sub notifications, and atomic updates.</li>
+<li><strong><code>Item</code></strong>: A highly powerful, cursor-like view/pointer that references a specific path within the <code>Store</code>. This enables relative navigation, local mutations, and isolated subscriptions.</li>
+</ol>
+<p>Within the framework, the store is exposed as a Singleton Service via the <strong><code>ttStore</code></strong> class, accessible in your Tonics via <code>self.ledger.formula</code>.</p>
+<hr />
+<h2 id="1-core-api-data-access">1. Core API &amp; Data Access</h2>
+<p>TaskTonic provides multiple ways to interact with data, balancing performance and developer convenience. 
+Using the store is a bit like using a python dictionary but with hierarchical paths and strongly optimised for storing
+and distributing data in een reactive systems.</p>
+<h3 id="11-dictionary-syntax">1.1 Dictionary Syntax (<code>[]</code>)</h3>
+<p>For quick, intuitive access, both the <code>Store</code> and <code>Item</code> objects fully support standard Python dictionary bracket syntax. Reading missing paths natively returns <code>None</code> instead of raising a <code>KeyError</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Writing data</span>
+<span class="n">store</span><span class="p">[</span><span class="s2">&quot;machine/status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;operational&quot;</span>
+<span class="n">store</span><span class="p">[</span><span class="s2">&quot;machine/metrics/temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">22.5</span>
+
+<span class="c1"># Reading data</span>
+<span class="n">current_status</span> <span class="o">=</span> <span class="n">store</span><span class="p">[</span><span class="s2">&quot;machine/status&quot;</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="12-the-get-and-set-method">1.2 The <code>get</code> and <code>set</code> Method</h3>
+<p>If you want to read a value and provide a fallback if the path doesn't exist, use <code>.get()</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Returns 60 if &#39;machine/metrics/speed&#39; is not found</span>
+<span class="n">speed</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;machine/metrics/speed&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</code></pre></div>
+<p>Setting data, single line or multipole line, can be done using set.</p>
+<div class="highlight"><pre><span></span><code>        <span class="c1"># one item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;setting/ui/background&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+
+        <span class="c1"># multiple items by dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">set</span><span class="p">({</span>
+            <span class="s1">&#39;setting/ui/font&#39;</span><span class="p">,</span> <span class="s1">&#39;arial&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;setting/ui/font_size&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="p">})</span>        
+
+        <span class="c1"># multiple items by tuple of tuples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">set</span><span class="p">((</span>
+            <span class="p">(</span><span class="s1">&#39;setting/ui/font&#39;</span><span class="p">,</span> <span class="s1">&#39;arial&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;setting/ui/font_size&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="p">))</span>
+</code></pre></div>
+<h3 id="13-live-links-pointers-item-cursors">1.3 Live Links / Pointers (<code>Item</code> Cursors)</h3>
+<p>If you need to read or write to the same path repeatedly (e.g., inside a rapid timer loop), parsing the path string every time via <code>store["path"]</code> is inefficient. Instead, use <code>.at()</code> to generate an <code>Item</code> cursor. </p>
+<p>Storing this <code>Item</code> in a variable creates a <strong>live link</strong> to that location in the store. You can read/write its value directly via the <code>.v</code> property, or use it to navigate relatively.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">TaskTonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ttTonic</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DisplayTonic</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Create a cursor to a specific branch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;settings/ui&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Dictionary syntax writes relative to the cursor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui_settings</span><span class="p">[</span><span class="s1">&#39;background&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
+
+        <span class="c1"># .v property writes directly to the cursor&#39;s path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ui_settings</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;opacity&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="mf">0.8</span>
+</code></pre></div>
+<hr />
+<h2 id="2-hybrid-nodes-smart-lists">2. Hybrid Nodes &amp; Smart Lists</h2>
+<p>Traditional data structures force a node to be either a value (a leaf, like a string) or a container (a map or folder). The TaskTonic Store breaks this dogma by introducing <strong>Hybrid Nodes</strong>.</p>
+<p>Every path in the Store can <strong>simultaneously</strong> hold a direct value and harbor sub-paths (children).</p>
+<h3 id="21-the-auto-increment">2.1 The Auto-Increment (<code>#</code>)</h3>
+<p>If you store a standard Python list in the Store and append to it, the Store <em>will not know</em> its contents changed, and subscriptions won't trigger. </p>
+<p>TaskTonic uses <strong>Smart Lists</strong> (Dictionaries with auto-incrementing keys). The <code>#</code> symbol instructs the Store to scan the active list, determine the highest numeric index, increment it by 1, and create a brand new item. Because every item gets an absolute path (e.g., <code>users/#1/name</code>), retrieving deep data is a direct <code>O(1)</code> lookup.</p>
+<h3 id="22-the-sticky-index">2.2 The "Sticky" Index (<code>.</code>)</h3>
+<p>The <code>.</code> symbol refers to the <strong>most recently generated index</strong> by that specific cursor. This is essential for adding multiple properties to the exact same newly created list item without looking up its generated index.</p>
+<h3 id="23-creating-valueless-container-lists">2.3 Creating Valueless Container Lists</h3>
+<p>Often, you want to create a list of complex objects where the index itself (e.g., <code>#0</code>) doesn't hold a direct value (its <code>.v</code> is <code>None</code>), but acts purely as a container for children. </p>
+<p>To achieve this, simply <strong>target the child property directly during creation</strong>, rather than assigning a value to the <code>#</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">UserManager</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc__add_users</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">users</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;settings/users&#39;</span><span class="p">)</span>
+
+        <span class="c1"># METHOD A: Direct assignment to a sub-property</span>
+        <span class="c1"># Notice how &#39;users/#0&#39; has no direct value, but acts as a container for &#39;name&#39;</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;#/name&#39;</span><span class="p">,</span> <span class="s1">&#39;Bob&#39;</span><span class="p">)</span>     <span class="c1"># Creates index #0</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;./role&#39;</span><span class="p">,</span> <span class="s1">&#39;Admin&#39;</span><span class="p">)</span>   <span class="c1"># Adds &#39;role&#39; to #0</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;./age&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>         <span class="c1"># Adds &#39;age&#39; to #0</span>
+
+        <span class="c1"># METHOD B: Atomic batch creation using `set()` and a tuple of tuples</span>
+        <span class="c1"># This prevents triggering multiple incomplete notifications during setup</span>
+        <span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">((</span>
+           <span class="p">(</span><span class="s1">&#39;emp#&#39;</span><span class="p">,</span> <span class="s1">&#39;New Employee&#39;</span><span class="p">),</span>   <span class="c1"># Creates &#39;emp#0&#39;, where .v = &#39;New Employee&#39;</span>
+           <span class="p">(</span><span class="s1">&#39;./department&#39;</span><span class="p">,</span> <span class="s1">&#39;Sales&#39;</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;./salary&#39;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">),</span>
+        <span class="p">))</span>
+</code></pre></div>
+<h3 id="24-custom-prefixes-prefix">2.4 Custom Prefixes (<code>prefix#</code>)</h3>
+<p>As seen in Method B above, you can segregate different entities within the same tree branch by placing text before the <code>#</code> symbol. Each prefix maintains its own independent counter.</p>
+<div class="highlight"><pre><span></span><code><span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;guest#/name&#39;</span><span class="p">,</span> <span class="s1">&#39;Charlie&#39;</span><span class="p">)</span>  <span class="c1"># Becomes: users/guest#0/name</span>
+<span class="n">users</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;guest#/name&#39;</span><span class="p">,</span> <span class="s1">&#39;Dave&#39;</span><span class="p">)</span>     <span class="c1"># Becomes: users/guest#1/name</span>
+</code></pre></div>
+<hr />
+<h2 id="3-navigating-the-tree-item-methods">3. Navigating the Tree (<code>Item</code> Methods)</h2>
+<p>Once you hold an <code>Item</code> cursor, you can navigate up, down, and across the data tree efficiently.</p>
+<ul>
+<li><strong><code>.parent</code></strong>: Returns a new <code>Item</code> pointing exactly one level up to the parent container.</li>
+<li><strong><code>.list_root</code></strong>: Recursively navigates up the path tree to identify the nearest list-container (identifiable by the <code>#</code> syntax). This is crucial within callbacks to find the surrounding entity of a mutated child property.</li>
+<li><strong><code>.key</code></strong>: Returns the last segment of the path (e.g., <code>#0</code> or <code>brightness</code>).</li>
+</ul>
+<h3 id="31-the-children-iterator">3.1 The <code>children</code> Iterator</h3>
+<p>To loop over elements in a container, use the <code>.children()</code> method. This returns a memory-efficient <strong>Iterator</strong> of <code>Item</code> cursors (lazy evaluation).</p>
+<div class="highlight"><pre><span></span><code><span class="n">sensor_container</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;sensors&quot;</span><span class="p">)</span>
+
+<span class="c1"># Efficiently iterate without loading the entire tree into memory</span>
+<span class="k">for</span> <span class="n">child_item</span> <span class="ow">in</span> <span class="n">sensor_container</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">child_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;critical&quot;</span><span class="p">:</span>
+        <span class="c1"># Handle critical sensor...</span>
+        <span class="k">pass</span>
+</code></pre></div>
+<hr />
+<h2 id="4-graph-navigation-storelinks">4. Graph Navigation (<code>StoreLinks</code>)</h2>
+<p>While the strict hierarchical tree is great for data integrity (the "Canonical State"), you often need to view data functionally (as a Graph). TaskTonic provides <strong>Symlinks</strong> to solve this via the <code>.link_to()</code> method.</p>
+<h3 id="41-passive-links-bubble_eventsfalse">4.1 Passive Links (<code>bubble_events=False</code>)</h3>
+<p>A passive link acts as a transparent shortcut. It delegates reads and writes to the target. Events bubble up the target's physical tree, but <strong>do not</strong> bubble up the alias tree (preventing UI event storms).</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">HouseController</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Canonical state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;devices/lamp#/brightness&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># creating lamp#0</span>
+
+        <span class="c1"># Functional grouping (Passive link)</span>
+        <span class="n">room_lamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;house/living/main_light&quot;</span><span class="p">)</span>
+        <span class="n">room_lamp</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;devices/lamp#0&quot;</span><span class="p">,</span> <span class="n">bubble_events</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Writing to the alias automatically routes to devices/lamp_1</span>
+        <span class="n">room_lamp</span><span class="p">[</span><span class="s2">&quot;brightness&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span> 
+</code></pre></div>
+<h3 id="42-active-links-bubble_eventstrue">4.2 Active Links (<code>bubble_events=True</code>)</h3>
+<p>Active links are two-way connections. If the physical target changes, the Store automatically injects a cloned event into the alias tree. <strong>Use this for sensors</strong> where a room-controller needs to be actively notified of hardware triggers happening deep in the device tree.</p>
+<div class="highlight"><pre><span></span><code><span class="n">sensor_alias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;security/front_door&quot;</span><span class="p">)</span>
+<span class="n">sensor_alias</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;devices/motion_1&quot;</span><span class="p">,</span> <span class="n">bubble_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Now, if devices/motion_1 triggers, the &#39;security/front_door&#39; path </span>
+<span class="c1"># will also bubble the event to any active subscribers.</span>
+</code></pre></div>
+<hr />
+<h2 id="5-batch-iteration-set_each">5. Batch Iteration (<code>set_each</code>)</h2>
+<p>When updating a collection, doing it item-by-item triggers redundant pub/sub notifications. <code>.set_each()</code> iterates over children and updates them inside a single atomic <code>group()</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LightingTonic</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttsc__turn_off_all_lamps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">living_room</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;house/living/lamps&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Resolves through any StoreLinks and fires ONE batch notification</span>
+        <span class="n">living_room</span><span class="o">.</span><span class="n">set_each</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;lamp&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="6-advanced-reactivity-pubsub-patterns">6. Advanced Reactivity &amp; Pub/Sub Patterns</h2>
+<p>The <code>subscribe</code> method is the core of TaskTonic's reactivity. It connects data changes to your Tonic's Sparkles (<code>ttse__</code>). </p>
+<p>Your event sparkle will receive a list of updates. Each update is a tuple: <code>(path, new_val, old_val, source_id)</code>.</p>
+<h3 id="61-exact-vs-recursive-subscriptions">6.1 Exact vs. Recursive Subscriptions</h3>
+<ul>
+<li><strong>Exact:</strong> Triggers only on the specific path.</li>
+<li><strong>Recursive:</strong> Triggers on the path AND any of its nested children.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProfileWatcher</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;user/profile&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Trigger on ANY change inside the profile (name, age, settings)</span>
+        <span class="n">profile</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_profile_update</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="62-mqtt-style-wildcards-and">6.2 MQTT-Style Wildcards (<code>*</code> and <code>**</code>)</h3>
+<p>Subscribe to dynamic paths without knowing the exact IDs upfront:
+* <code>*</code> (Single-level): Matches exactly <strong>one</strong> path segment.
+* <code>**</code> (Multi-level/Recursive): Matches <strong>all</strong> deeper path segments.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SensorDashboard</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span>
+
+        <span class="c1"># Matches &#39;sensors/kitchen/temp&#39; but NOT &#39;sensors/kitchen/temp/calibration&#39;</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;sensors/*/temp&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_temp_change</span><span class="p">)</span>
+
+        <span class="c1"># Matches ANY error deep inside the system tree</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;system/**/error&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_system_error</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="63-atomic-snapshots-extract-and-trigger_now">6.3 Atomic Snapshots (<code>extract</code> and <code>trigger_now</code>)</h3>
+<p>Instead of receiving raw single-property events (which can cause UI stuttering), request a flat dictionary (snapshot). Use <code>.</code> inside the extract list to retrieve the value of the base path itself.</p>
+<ul>
+<li><strong><code>extract</code></strong>: A list of relative properties to fetch simultaneously.</li>
+<li><strong><code>trigger_now=True</code></strong>: Immediately fires a synthetic <code>init</code> event upon subscription. Perfect for rendering UI lists without manually polling the Store first.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">UIRenderer</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Subscribe to all widgets, grab their state instantly, and build snapshots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span>
+            <span class="s2">&quot;ui/widgets/*&quot;</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">ttse__render_widget</span><span class="p">,</span> 
+            <span class="n">extract</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;visible&quot;</span><span class="p">],</span> 
+            <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">trigger_now</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__render_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">,</span> <span class="n">old_val</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="c1"># Snapshot is safely pre-assembled: {&#39;.&#39;: &#39;button&#39;, &#39;color&#39;: &#39;red&#39;, &#39;visible&#39;: True}</span>
+            <span class="n">widget_type</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rendering </span><span class="si">{</span><span class="n">widget_type</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">color</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="64-lifecycle-management-safe-unsubscribing">6.4 Lifecycle Management (Safe Unsubscribing)</h3>
+<p>Subscriptions are automatically linked to their <code>owner</code> (the instance that created them). <strong>Never</strong> unsubscribe by path; always unsubscribe by <code>owner</code> to safely clean up your component.</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Removes ALL subscriptions globally where this Tonic is the owner</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">unsubscribe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="7-context-managers-group-and-source">7. Context Managers (<code>group</code> and <code>source</code>)</h2>
+<ul>
+<li><strong><code>group(source_id=None, notify=True)</code></strong>: Batches multiple updates. Listeners are only notified once the block ends.</li>
+<li><strong><code>source(source_id)</code></strong>: Tags updates with an origin ID. Vital for bidirectional UI sync to prevent infinite loops (listeners can use <code>ignore_source</code> to drop events they caused themselves).</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">VolumeSlider</span><span class="p">(</span><span class="n">ttTonic</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vol_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s2">&quot;audio/volume&quot;</span><span class="p">)</span>
+        <span class="c1"># Listen to the store, but ignore updates tagged with &quot;my_slider&quot;</span>
+        <span class="n">vol_item</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ttse__on_external_change</span><span class="p">,</span> <span class="n">ignore_source</span><span class="o">=</span><span class="s2">&quot;my_slider&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ttse__on_user_drag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+        <span class="c1"># Write to the store, tagging the source so we don&#39;t trigger ourselves</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="s2">&quot;my_slider&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ledger</span><span class="o">.</span><span class="n">formula</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;audio/volume&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="8-store-api-reference">8. Store API Reference</h2>
+<h3 id="core-methods-on-store">Core Methods on <code>Store</code></h3>
+<h4 id="atpath-str-item"><code>at(path: str) -&gt; Item</code></h4>
+<p>Returns an <code>Item</code> cursor pointing to the specified absolute path.</p>
+<h4 id="setpath_or_data-unionstr-dict-tuple-value-any-none-notify-bool-true-item"><code>set(path_or_data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item</code></h4>
+<p>Writes data to the root level. Supports single strings, dictionaries, or tuples of tuples.
+* <strong>Returns:</strong> The <code>Item</code> cursor of the root.</p>
+<h4 id="getpath-str-default-any-none-any"><code>get(path: str, default: Any = None) -&gt; Any</code></h4>
+<p>Retrieves a value by its absolute path. Resolves through <code>StoreLink</code>s automatically.</p>
+<h4 id="subscribepath-unionstr-liststr-callback-callable-ignore_source-str-none-recursive-bool-false-exclude-liststr-none-extract-liststr-none-trigger_now-bool-false-owner-object-none"><code>subscribe(path: Union[str, List[str]], callback: Callable, ignore_source: str = None, recursive: bool = False, exclude: List[str] = None, extract: List[str] = None, trigger_now: bool = False, owner: object = None)</code></h4>
+<p>Registers a listener.
+* <strong><code>path</code></strong>: String or list of absolute paths. Supports <code>*</code> and <code>**</code> wildcards.
+* <strong><code>callback</code></strong>: The <code>ttse__</code> method to execute.
+* <strong><code>ignore_source</code></strong>: Drops events originating from this <code>source_id</code>.
+* <strong><code>recursive</code></strong>: If <code>True</code>, catches changes in all descendant paths. (Required if using <code>extract</code>).
+* <strong><code>exclude</code></strong>: List of absolute sub-paths to ignore.
+* <strong><code>extract</code></strong>: List of relative child properties to return as a flat snapshot dictionary.
+* <strong><code>trigger_now</code></strong>: Immediately fires an <code>init</code> event with current data.
+* <strong><code>owner</code></strong>: The object owning this subscription (auto-detected if a bound method is passed).</p>
+<h4 id="unsubscribetarget-unioncallable-object-listany"><code>unsubscribe(target: Union[Callable, object, List[Any]])</code></h4>
+<p>Removes subscriptions. Pass the specific callback function, or the class instance (<code>self</code>) to wipe all subscriptions owned by that instance.</p>
+<hr />
+<h3 id="core-methods-on-item-cursor">Core Methods on <code>Item</code> (Cursor)</h3>
+<h4 id="properties">Properties</h4>
+<ul>
+<li><strong><code>.v</code></strong>: Property to get/set the value of this path. Writing triggers notifications.</li>
+<li><strong><code>.path</code></strong>: Absolute path string.</li>
+<li><strong><code>.parent</code></strong>: Returns an <code>Item</code> pointing one level up.</li>
+<li><strong><code>.list_root</code></strong>: Walks up the path tree to find the nearest ancestor created as an auto-increment list item (<code>#0</code>, <code>user#1</code>). Returns <code>None</code> if not in a list.</li>
+<li><strong><code>.key</code></strong>: Returns the last segment of the path (e.g., <code>#0</code> or <code>brightness</code>).</li>
+</ul>
+<h4 id="setdata-unionstr-dict-tuple-value-any-none-notify-bool-true-item"><code>set(data: Union[str, dict, tuple], value: Any = None, notify: bool = True) -&gt; Item</code></h4>
+<p>Writes data relative to this cursor. Fully supports <code>#</code> and <code>.</code> smart syntax.
+* <strong>Returns:</strong> Itself, for method chaining.</p>
+<h4 id="getkey-str-default-any-none-any"><code>get(key: str, default: Any = None) -&gt; Any</code></h4>
+<p>Dictionary-style lookup for children relative to this cursor.</p>
+<h4 id="appendprefix-str-none-item"><code>append(prefix: str = None) -&gt; Item</code></h4>
+<p>Explicitly creates a new auto-incremented child item.
+* <strong>Returns:</strong> An <code>Item</code> pointing to the newly created element.</p>
+<h4 id="extenddata_list-listany-prefix-str-none-item"><code>extend(data_list: List[Any], prefix: str = None) -&gt; Item</code></h4>
+<p>Appends multiple items to the list. If <code>data_list</code> contains tuples of length 2, it builds structures instead of flat values.</p>
+<h4 id="popsubpath-str-none-any"><code>pop(subpath: str = None) -&gt; Any</code></h4>
+<p>Removes the node (and all descendants) and returns its base value. Operates relative to the cursor if <code>subpath</code> is provided.</p>
+<h4 id="removesubpath-str-none"><code>remove(subpath: str = None)</code></h4>
+<p>Deletes the node and all descendants without returning the value. Safely handles <code>StoreLink</code> cleanup (cascading</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
