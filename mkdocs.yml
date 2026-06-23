@@ -3,6 +3,8 @@ site_description: A Refreshing Approach to Python Concurrency
 repo_url: https://github.com/208develop/TaskTonic
 repo_name: 208develop/TaskTonic
 
+use_directory_urls: false
+
 theme:
   name: material
   palette:
