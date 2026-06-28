@@ -29,10 +29,17 @@ jobs:
         run: mkdocs build
 
       - name: Copy ttContext.md to site
-        run: cp docs/assets/ttContext.md site/assets/ttContext.md
+        run: cp ttContext.md site/assets/ttContext.md
 
       - name: Add CNAME file
         run: echo "tasktonic.dev" > site/CNAME
+
+      - name: List files in site directory
+        run: |
+          echo "=== Files in site directory ==="
+          find site -type f
+          echo "=== Checking if ttContext.md exists ==="
+          ls -la site/assets/ || echo "assets directory not found"
 
       - name: Deploy to GitHub Pages
         run: mkdocs gh-deploy --force

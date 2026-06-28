@@ -117,9 +117,7 @@ def create_project_summary(root_dir, output_file, intro_text=""):
 
 if __name__ == "__main__":
     current_dir = os.getcwd()
-    output_name = os.path.join("docs", "assets", "ttContext.md")
-
-    os.makedirs(os.path.dirname(output_name), exist_ok=True)
+    output_name = "ttContext.md"
 
     project_intro = \
         """
