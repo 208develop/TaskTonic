@@ -25,5 +25,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install mkdocs-material pymdown-extensions
 
+      - name: Build site
+        run: mkdocs build
+
+      - name: Copy ttContext.md to site
+        run: cp docs/assets/ttContext.md site/assets/ttContext.md
+
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+        run: mkdocs gh-deploy
