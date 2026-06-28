@@ -179,3 +179,14 @@ class SimFormula(ttFormula):
 if __name__ == "__main__":
     SimFormula()
 ```
+---
+## 🤖 AI-Assisted Development (ttContext)
+
+TaskTonic is designed with AI-assisted development in mind. To help you prompt Large Language Models (like ChatGPT, Claude, or Gemini) effectively when building Tonics, we maintain a single, unified context file.
+
+This file contains the complete blueprint, strict framework architecture, naming conventions, and the core source code of TaskTonic in one place.
+
+* **URL:** `https://tasktonic.dev/assets/ttContext.md`
+* **Usage:** Feed this URL directly into your AI tool to instantly provide it with full expert knowledge of the TaskTonic framework.
+
+[**Load ttContext into your AI ↗**](https://tasktonic.dev/assets/ttContext.md)

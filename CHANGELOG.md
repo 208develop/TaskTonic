@@ -32,7 +32,7 @@ and redesign of the `Store` for smart central data and state distribution.
    - `StoreLink`, relative path to a `Store` `Item`. You can reach the same `Item` from multiple paths.
    - Some api updates
 
-## [0.2.2] - 2026-06-23
+## [0.2.2] - 2026-06-28
 ### New
 - New networking module with selectorhandler as base. Now supporting tcp / udp / http
 

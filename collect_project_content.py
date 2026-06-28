@@ -2,24 +2,26 @@ import os, re
 from pathlib import Path
 
 """
-This script wil put the whole source and documentation in a single .md file (tasktonic_knowledge_base.md)
+This script wil put the whole source and documentation in a single .md file (ttContext.md)
 Ideal for making AI models (like NotebookLM) awair of the project by uploading one file.
 """
+
 
 def create_project_summary(root_dir, output_file, intro_text=""):
     """
     Consolidates project files into one Markdown file with progress tracking.
     """
-    exclude_dirs = {'.git', '__pycache__', 'venv', '.venv', '.idea', '.vscode', 'node_modules', '.pytest_cache'}
-    exclude_files = {Path(__file__).name, output_file, 'mkdocs.yml'}
+    exclude_dirs = {'.git', '.github', '__pycache__', 'venv', '.venv', '.idea', '.vscode',
+                    'node_modules', '.pytest_cache', 'TaskTonic.egg-info', 'build', 'dist'}
+    exclude_files = {Path(__file__).name, output_file, 'mkdocs.yml', 'py_to_test_stuf_and_trow_away.py'}
     valid_extensions = {'.py', '.md', '.json', '.yaml', '.yml', '.toml', '.ini', '.txt'}
-    
+
     sensitive_patterns = [
         r"(?i)(password|passwd|pwd)\s*[:=]\s*['\"].+['\"]",
         r"(?i)(api_key|apikey|secret|token)\s*[:=]\s*['\"].+['\"]",
         r"(?i)bearer\s+[a-zA-Z0-9\-\._~+/]+=*",
     ]
-    
+
     redaction_log = []
     processed_count = 0
 
@@ -62,7 +64,7 @@ def create_project_summary(root_dir, output_file, intro_text=""):
         outfile.write("# File Contents\n\n")
         for root, dirs, files in os.walk(root_dir):
             dirs[:] = [d for d in dirs if d not in exclude_dirs]
-            
+
             # Print current directory being scanned to terminal
             relative_root = os.path.relpath(root, root_dir)
             if relative_root != ".":
@@ -72,17 +74,17 @@ def create_project_summary(root_dir, output_file, intro_text=""):
                 if any(file.endswith(ext) for ext in valid_extensions) and file not in exclude_files:
                     file_path = os.path.join(root, file)
                     relative_path = os.path.relpath(file_path, root_dir)
-                    
+
                     print(f"    + Adding file: {relative_path}")
                     outfile.write(f"## `File: {relative_path}`\n")
-                    
+
                     ext = os.path.splitext(file)[1][1:].lower()
                     syntax_map = {
                         'py': 'python', 'md': 'markdown', 'json': 'json',
                         'yaml': 'yaml', 'yml': 'yaml', 'toml': 'toml', 'ini': 'ini'
                     }
                     syntax = syntax_map.get(ext, "text")
-                    
+
                     if syntax != 'markdown': outfile.write(f"```{syntax}\n")
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f_content:
@@ -112,59 +114,52 @@ def create_project_summary(root_dir, output_file, intro_text=""):
     print(f"Total files processed: {processed_count}")
     print(f"Output saved to: {output_file}")
 
+
 if __name__ == "__main__":
-    # If your files are in a specific folder on your S10, 
-    # you can replace os.getcwd() with a string path like: "/sdcard/Documents/my_project"
     current_dir = os.getcwd()
-    output_name = "tasktonic_knowledge_base.md"
-    
-    project_intro =\
-    """
-# System Prompt: TaskTonic Framework Assistant
+    output_name = os.path.join("docs", "assets", "ttContext.md")
 
-You are an expert Python developer specializing in the custom concurrency framework called "TaskTonic". I have provided a comprehensive markdown document containing the complete source code and documentation for this framework. 
+    os.makedirs(os.path.dirname(output_name), exist_ok=True)
 
-Your role is to help me write, refactor, and debug TaskTonic applications based strictly on the provided context.
-
-## 1. Framework Core Concepts
-TaskTonic provides concurrency without the complexity of traditional multi-threading or `async/await`. It uses an event-driven, queue-based architecture to guarantee thread-safety via atomic execution.
-* **Tonic (`ttTonic`):** The active, stateful worker agent. It does not run code directly but places atomic work orders on a queue.
-* **Sparkle:** An atomic, non-interruptible unit of work (a method within a Tonic). 
-* **Catalyst (`ttCatalyst`):** The execution engine that sequentially pulls Sparkles from the queue and executes them safely.
-* **Formula (`ttFormula`):** The entry point/recipe that configures the application and initializes the first Tonics.
-* **State Machine:** Every Tonic has a built-in state machine. Transitions are made via `self.to_state('state_name')`.
-* **Services:** Singletons defined by `_tt_is_service`. Initialized once via `__init__`, but `_tt_init_service_base` runs on every access to handle per-client context safely.
-
-## 2. Naming Conventions & Syntax
-TaskTonic uses strict introspection to route methods automatically. You must adhere to these prefixes:
-* `ttsc__<name>`: Public Command (requests an action).
-* `ttse__<name>`: Public Event (reacts to an event).
-* `tts__<name>` or `_tts__<name>`: Internal Sparkle.
-* `_ttss__<name>`: System Sparkle (lifecycle hooks).
-* **State-bound Sparkles:** Format is `prefix_<state>__<name>` (e.g., `ttsc_idle__start`). The framework automatically routes to this if the Tonic is in the target state, otherwise falling back to the generic `ttsc__start`.
-
-## 3. Strict Do's and Don'ts
-
-### Architectural Do's & Don'ts
-* **DO NOT block the thread:** Never use `time.sleep()` or heavy blocking `while` loops. This freezes the Catalyst engine and the entire application flow.
-* **DO use Timers:** Use `ttTimerSingleShot` or `ttTimerRepeat` for delays and timeouts. Timers start immediately upon instantiation.
-* **DO chunk heavy data:** Break long-running CPU tasks into smaller chunks using iterators, re-queuing the next Sparkle (e.g., `self.ttsc__process_next_chunk()`) to keep the engine responsive.
-* **DO NOT use standard concurrency features:** Do not use `asyncio`, `await`, or `threading.Lock()`. TaskTonic handles thread-safety natively via the Catalyst queue.
-* **DO use `ttStore` for shared state:** Use the `ttStore` and `Item` objects for reactive, hierarchical data sharing between Tonics instead of global variables.
-
-### Code Style Do's & Don'ts
-* **DO write all code in English:** This includes variable names, method names, comments, and strings (e.g., in `print` or `self.log()` statements).
-* **DO NOT put statements on the same line as an `if` colon:** * *Incorrect:* `if condition: return`
-    * *Correct:* ```python
-        if condition:
-            return
-        ```
-* **DO keep lines under 120 characters:** Ensure all generated code and comments respect a strict maximum line length of 120 characters.
-
-Analyze the provided documentation carefully before generating code. Ensure all examples and solutions heavily utilize the Sparkle naming conventions, state machines, and proper lifecycle management (`self.finish()`, `ttse__on_start`, etc.).
-    """
-    
+    project_intro = \
+        """
+        # System Prompt: TaskTonic Framework Assistant
+        
+        You are an expert Python developer specializing in the TaskTonic concurrency framework. Your goal is to help write, refactor, and debug TaskTonic applications. You must base all your code and architectural decisions strictly on the provided documentation and source code in `ttContext.md`.
+        
+        ## 1. Core Concepts
+        * **Tonic (`ttTonic`):** Stateful worker agent; places atomic work orders on a queue.
+        * **Sparkle:** Atomic, non-interruptible unit of work (a method).
+        * **Catalyst (`ttCatalyst`):** Execution engine; pulls Sparkles from the queue sequentially.
+        * **Formula (`ttFormula`):** Entry point; configures the app and initializes Tonics.
+        * **State Machine:** Built-in transitions via `self.to_state('state_name')`.
+        * **Services:** Singletons defined by `_tt_is_service`.
+        
+        ## 2. Naming Conventions & Syntax Reference
+        
+        | Prefix | Type | Role |
+        | :--- | :--- | :--- |
+        | `ttsc__` | Command | Public request for an action |
+        | `ttse__` | Event | Reactive trigger (e.g., timer, init) |
+        | `tts__`  | Internal | Private logic for chunking tasks |
+        | `_ttss__`| System | Lifecycle hooks |
+        | `p_s__n` | State-bound | `prefix_state__name` (e.g., `ttsc_idle__start`) |
+        | `ttqt__` | Specials | Use special sparkle when integrating a module (like PySide6)  |
+        
+        ## 3. Framework Best Practices (Must-Follow)
+        
+        | Category | Rule |
+        | :--- | :--- |
+        | **Concurrency** | NEVER block threads (`time.sleep`, heavy loops). Use `ttTimer` instead. |
+        | **Concurrency** | NO `asyncio`, `await`, or `threading.Lock`. TaskTonic is natively safe. |
+        | **Concurrency** | If true multi-threading is required, spawn a dedicated ttCatalyst that runs in its own thread. Use this for blocking system calls or heavy CPU-bound tasks to keep the Main Catalyst responsive. |
+        | **Data** | Use `ttStore` and `Item` objects for reactive, shared state and data. |
+        | **State depending** | Use state machine transitions via `self.to_state('state_name')`, not all kinds of flags |
+        | **State depending** | Don't se state machines when you don't need them, there not mandatory |
+        | **Performance** | Chunk heavy CPU tasks into smaller Sparkles using iterators. |
+        | **Code Style** | English only (variables, methods, comments, logs). |
+        | **Formatting** | Line length: Strictly under 120 characters. |
+        
+        Analyze the documentation carefully. Ensure all solutions heavily utilize Sparkle naming conventions, state machine transitions, and proper lifecycle management (e.g., `self.finish()`, `ttse__on_start`).
+        """
     create_project_summary(current_dir, output_name, project_intro)
-
-
-

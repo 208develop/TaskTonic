@@ -30,5 +30,6 @@ nav:
       - Understanding ttCatalyst: 'CoreConcepts/70 - TaskTonic - Understanding the ttCatalyst.md'
       - Testing in ttDistiller: 'CoreConcepts/90 - TaskTonic - Testing in the ttDistiller.md'
   - The Toolbox:
+      - Building UIs -> PySide6 and TaskTonic: 'TheToolbox/110 - TaskTonic - PySide UI the TaskTonic way.md'
       - Networking & Sockets: 'TheToolbox/120 - TaskTonic - Networking and Sockets.md'
 #  - Tasting The Tonic: tasting-the-tonic.md
