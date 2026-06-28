@@ -29,7 +29,15 @@ jobs:
         run: mkdocs build
 
       - name: Copy ttContext.md to site
-        run: cp ttContext.md site/assets/ttContext.md
+        run: |
+          echo "=== Checking if ttContext.md exists in root ==="
+          ls -la ttContext.md || echo "ttContext.md not found in root"
+          echo "=== Checking if site/assets directory exists ==="
+          ls -la site/assets/ || echo "site/assets directory not found"
+          echo "=== Copying ttContext.md ==="
+          cp ttContext.md site/assets/ttContext.md
+          echo "=== Verifying copy ==="
+          ls -la site/assets/ttContext.md || echo "Copy failed"
 
       - name: Add CNAME file
         run: echo "tasktonic.dev" > site/CNAME
@@ -42,4 +50,7 @@ jobs:
           ls -la site/assets/ || echo "assets directory not found"
 
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdocs gh-deploy --no-history
