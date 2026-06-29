@@ -2,7 +2,7 @@
 name = "TaskTonic"
 version = "0.2.2"
 authors = [
-    { name = "Peter", email = "208develop@gmail.com" },
+    { name = "Peter", email = "develop@tasktonic.dev" },
 ]
 description = """ \
 TaskTonic is a Python framework designed to manage application complexity through a unique concurrency model.
@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/208develop/TaskTonic"
+Homepage = "https://tasktonic.dev"
 Issues = "https://github.com/208develop/TaskTonic/issues"
-Documentation = "https://github.com/208develop/TaskTonic/tree/master/_documents"
+Documentation = "https://tasktonic.dev"
 Changelog = "https://github.com/208develop/TaskTonic/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
