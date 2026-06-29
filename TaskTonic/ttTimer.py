@@ -1,6 +1,5 @@
 import time, bisect, re
 
-from TaskTonic.ttTonic import ttTonic
 from .ttLiquid import ttLiquid
 from .ttSparkleStack import ttSparkleStack
 
@@ -100,9 +99,12 @@ class ttTimer(ttLiquid):
     def reload_on_expire(self, reference, info):
         raise Exception('Timer callback_and_reload() must be overridden with proper implementation')
 
-    def _on_completion(self):
+    def finish(self):
+        if self.finishing or self.id == -1:
+            return
+
         self.stop()
-        super()._on_completion()
+        super().finish()
 
 class _ttPeriodicTimer(ttTimer):
     def __init__(self, seconds=0.0, minutes=0.0, hours=0.0, days=0.0, name=None, sparkle_back=None):

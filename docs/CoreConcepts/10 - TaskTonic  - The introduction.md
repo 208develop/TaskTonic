@@ -184,9 +184,13 @@ if __name__ == "__main__":
 
 TaskTonic is designed with AI-assisted development in mind. To help you prompt Large Language Models (like ChatGPT, Claude, or Gemini) effectively when building Tonics, we maintain a single, unified context file.
 
-This file contains the complete blueprint, strict framework architecture, naming conventions, and the core source code of TaskTonic in one place.
+This file contains the complete blueprint, strict framework architecture, naming conventions, and the core source code of TaskTonic in one place, ensuring the do's and don'ts of the framework are always perfectly clear to your AI.
 
-* **URL:** `https://tasktonic.dev/assets/ttContext.md`
-* **Usage:** Feed this URL directly into your AI tool to instantly provide it with full expert knowledge of the TaskTonic framework.
+There are two ways to provide this context to your AI assistant:
 
-[**Load ttContext into your AI ↗**](https://tasktonic.dev/assets/ttContext.md)
+1. **Direct URL (Recommended):** Feed the following URL directly into your AI tool's prompt or knowledge base to instantly provide it with full expert knowledge.
+   * **URL:** `http://ai.tasktonic.dev`
+
+2. **Download:** Download the file and attach it to your AI prompt manually.
+   * <a href="https://tasktonic.dev/assets/ttContext.md" download="ttContext.md"><strong>Download ttContext.md ↗</strong></a>
+   * 

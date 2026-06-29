@@ -1,5 +1,3 @@
-# TaskTonic/ttTonicStore/ttNetworking/ttTcpSockets.py
-
 import socket
 import errno
 import struct
@@ -9,12 +7,10 @@ from .ttSelectorService import SelectorService
 
 
 class TcpSocketHandler(ttTonic):
-    # Base TCP handler
     def __init__(self, as_server=None, as_client=None, host=None, port=None, **kwargs):
         from TaskTonic import ttLedger
         ledger = ttLedger()
 
-        # REQUEST THE NEW SERVICE
         srv = ledger.get_service_essence('networking_selector_service')
         if not srv:
             srv = SelectorService(log_mode=ttLog.QUIET)
@@ -171,16 +167,22 @@ class TcpSocketHandler(ttTonic):
         return [bdata]
 
     def ttse__on_finished(self):
+        """Cleanup socket resources before allowing the tonic to complete."""
         if hasattr(self.base, 'ttse__on_socket_finished'):
             self.base.ttse__on_socket_finished()
-            if hasattr(self.base, 'ttse__on_socket_status'):
-                self.base.ttse__on_socket_status('finished')
+
+        if hasattr(self.base, 'ttse__on_socket_status'):
+            self.base.ttse__on_socket_status('finished')
+
         if self.comm_socket:
             self.selector_handler.unregister(sock=self.comm_socket)
             self.comm_socket.close()
+            self.comm_socket = None
+
         if self.server_socket:
             self.selector_handler.unregister(sock=self.server_socket)
             self.server_socket.close()
+            self.server_socket = None
 
 
 class TcpStrSocketHandler(TcpSocketHandler):

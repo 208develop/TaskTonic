@@ -56,7 +56,7 @@ class HelloPySideFormula(ttFormula):
 
     def creating_formula(self):
         return {
-            'tasktonic/log/to': 'screen',
+            'tasktonic/log/to': 'ip',
             'tasktonic/log/default': 'full',
         }
 

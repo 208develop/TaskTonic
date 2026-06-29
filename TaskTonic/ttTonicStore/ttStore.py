@@ -22,6 +22,11 @@ class ttStore(ttTonic, Store):
         """Called every time the service is requested/accessed via ledger."""
         pass
 
+    def ttse__on_service_base_removed(self, removed_base_id, bases_left):
+        srv_rmvd = self.ledger.get_tonic_by_id(removed_base_id)
+        if srv_rmvd:
+            self.unsubscribe(srv_rmvd)
+
     def ttsc__finish(self):
         super().ttsc__finish()
 

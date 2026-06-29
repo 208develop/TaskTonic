@@ -258,14 +258,19 @@ and redesign of the `Store` for smart central data and state distribution.
    - `StoreLink`, relative path to a `Store` `Item`. You can reach the same `Item` from multiple paths.
    - Some api updates
 
-## [0.2.2] - 2026-06-28
+## [0.2.2] - 2026-06-29
 ### New
 - New networking module with selectorhandler as base. Now supporting tcp / udp / http
+- Introduction of https://tasktonic.dev
+- AI Context file for learning TaskTonic to AI (on ai.tasktonic.dev)
 
 ### Changed
 - ttDistiller
   - Support for multiple tonic test (integrations) with new powerful contracts
 
+### Fixed
+- When service where depending on each other locking on finish was possible. A dependency tracing mechanism will prevent this. 
+- Documentation cleanup
 ## `File: TaskTonic\__init__.py`
 ```python
 from .ttLedger import ttLedger
@@ -872,14 +877,31 @@ class ttTonic(ttLiquid):
         elif hasattr(self, 'service_bases') and calling_tonic in self.service_bases:
             self.service_bases.remove(calling_tonic)
             # notify
-            try: getattr(self, 'ttse__on_service_base_removed')(calling_tonic.id, len(self.service_bases))
+            try: getattr(self, 'ttse__on_service_base_completed')(calling_tonic.id, len(self.service_bases))
             except AttributeError: pass
+            self._ttss__on_service_base_removed()
+
             try: getattr(calling_tonic, f'ttse__on_{self.name}_completed')()
             except AttributeError: pass
             try: getattr(calling_tonic, '_ttss__on_infusion_completed')(self.id)
             except AttributeError: pass
 
-            if len(self.service_bases) <= 0: self.finish()
+    def _ttss__on_service_base_removed(self):
+        """
+        Smart service teardown: Checks if remaining service bases are
+        actual clients, or internal 'workers/dependencies' of this service.
+        """
+        if not hasattr(self, 'service_bases'): return
+
+        my_service_name = getattr(self.__class__, '_tt_is_service', self.name)
+        no_real_clients = True
+
+        for base in self.service_bases:
+            if hasattr(base, '_tt_depending_services') and my_service_name in base._tt_depending_services: continue
+            no_real_clients = False
+            break
+
+        if no_real_clients: self.finish()
 
     def _ttss__on_finished(self):
         """System-level sparkle for final cleanup."""
@@ -1275,8 +1297,11 @@ class __ttLiquidMeta(type):
 
         # HANDLE SERVICE ADMIN
         if is_service and base is not None:
-            try: tonic.service_bases.append(base)
-            except AttributeError: tonic.service_bases = [base]
+            try:
+                if base not in tonic.service_bases:
+                    tonic.service_bases.append(base)
+            except AttributeError:
+                tonic.service_bases = [base]
             tonic._tt_init_service_base(base, *args, **kwargs)
 
         sp_stck.pop()
@@ -1306,9 +1331,9 @@ class ttLiquid(metaclass=__ttLiquidMeta):
 
         # GET BASE
         sp_stck = ttSparkleStack()
-        calling_essence = sp_stck.get_tonic()
-        base = None if (getattr(cls, '_tt_base_essence', False) or getattr(cls, '_tt_is_service', None) is not None)\
-               else calling_essence
+        calling_liquid = sp_stck.get_tonic()
+        base = None if (getattr(cls, '_tt_base_liquid', False) or getattr(cls, '_tt_is_service', None) is not None)\
+               else calling_liquid
 
         # CREATE TONIC and INIT ESSENTIALS
         self.ledger = ledger
@@ -1322,9 +1347,17 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         self.finishing = False
         ledger.register(self, reservation=self.id)
         if base: base._tt_add_infusion(self)
-        elif calling_essence: calling_essence._tt_add_infusion(self)
+        elif calling_liquid: calling_liquid._tt_add_infusion(self)
 
-        # handle essence init as sparkle on stack. popped in meta
+        # SERVICE DEPENDENCY TRACING
+        inherited_deps = getattr(calling_liquid, '_tt_depending_services', set())
+        is_service = getattr(cls, '_tt_is_service', None)
+
+        if inherited_deps or is_service:
+            self._tt_depending_services = inherited_deps.copy()
+            if is_service: self._tt_depending_services.add(is_service)
+
+        # handle liquid init as sparkle on stack. popped in meta
         sp_stck.push(self, '__init__')
 
 
@@ -1408,8 +1441,9 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         """
         pass
 
-    def _tt_add_infusion(self, essence):
-        self.infusions.append(essence)
+    def _tt_add_infusion(self, infusion):
+        if infusion in self.infusions: return
+        self.infusions.append(infusion)
 
     def finish(self):
         """
@@ -1559,7 +1593,6 @@ class ttLiquid(metaclass=__ttLiquidMeta):
 ```python
 import time, bisect, re
 
-from TaskTonic.ttTonic import ttTonic
 from .ttLiquid import ttLiquid
 from .ttSparkleStack import ttSparkleStack
 
@@ -1659,9 +1692,12 @@ class ttTimer(ttLiquid):
     def reload_on_expire(self, reference, info):
         raise Exception('Timer callback_and_reload() must be overridden with proper implementation')
 
-    def _on_completion(self):
+    def finish(self):
+        if self.finishing or self.id == -1:
+            return
+
         self.stop()
-        super()._on_completion()
+        super().finish()
 
 class _ttPeriodicTimer(ttTimer):
     def __init__(self, seconds=0.0, minutes=0.0, hours=0.0, days=0.0, name=None, sparkle_back=None):
@@ -1743,11 +1779,6 @@ class ttLogService(ttCatalyst):
     def _ttss__main_catalyst_finished(self):
         if set(self.service_bases).issubset(self.infusions):
             self.finish()
-
-    def ttse__on_service_base_completed(self, tonic, srv_left, finish_on_count=0):
-        if srv_left == finish_on_count:
-            self.finish()
-        pass
 
     def put_log(self, log):
         pass
@@ -3245,11 +3276,8 @@ class ttScreenLogService(ttLogService):
 from TaskTonic.ttLogger import ttLogService, ttLog
 from TaskTonic.ttTonicStore.ttNetworking import TcpDictSocketHandler
 
+
 class ttIpLogService(ttLogService):
-    """
-    Intercepts the real TaskTonic log stream, formats the data,
-    and forwards it to the visual LogCenter instead of the terminal.
-    """
     _tt_force_stealth_logging = False
 
     def __init__(self, name=None):
@@ -3267,14 +3295,11 @@ class ttIpLogService(ttLogService):
             'logger_version': 0,
         }]
 
-
     def put_log(self, log):
         self.ttsc__add_log(log)
 
     def ttse__on_start(self):
         self.counter = 0
-
-        # Start the IP client connecting to our Visual Logger
         target = self.ledger.formula.get('tasktonic/log/to/target', 'localhost:1767')
         target = self.ledger.formula.get('app_data/startup_args/target', target)
 
@@ -3287,6 +3312,7 @@ class ttIpLogService(ttLogService):
             target_port = int(s[-1])
         else:
             raise TypeError(f'Logger target [{target}] has wrong type')
+
         self.net = TcpDictSocketHandler(as_client=True, host=target_host, port=target_port)
         self.log(f'Connecting to log service at {target_host}:{target_port}')
         self.to_state('wait_for_connection')
@@ -3316,8 +3342,8 @@ class ttIpLogService(ttLogService):
     def ttsc_disconnected__add_log(self, log):
         pass
 
-    def ttse__on_service_base_completed(self, tonic, srv_left, _=0):
-        super().ttse__on_service_base_completed(tonic, srv_left, finish_on_count=2) # using socket and selector
+
+
 
 ```
 
@@ -3782,7 +3808,7 @@ class ttPysideWidget(ttPysideMixin, QWidget, ttTonic, metaclass=ttPysideMeta):
 
     def ttse__on_finished(self):
         # self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.close()
+        self.deleteLater()
 
 
 class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta):
@@ -3885,8 +3911,13 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
 
             except queue.Empty:
                 pass
+            except RuntimeError as e:
+                # Vangt "Internal C++ object already deleted" veilig op
+                # en voorkomt dat de hele Catalyst queue vastloopt!
+                print(f"[ttPyside6Ui] Warning: Ignored execution on deleted widget: {e}")
             except Exception as e:
-                raise(f"[ttPyside6Ui] Error: {e}")
+                # Verkeerde Python string-raise gerepareerd
+                raise RuntimeError(f"[ttPyside6Ui] Critical TaskTonic Error: {e}")
             finally:
                 self._schedule_next_timer()
             event.accept()
@@ -3942,6 +3973,11 @@ class ttStore(ttTonic, Store):
     def _init_service(self, *args, **kwargs):
         """Called every time the service is requested/accessed via ledger."""
         pass
+
+    def ttse__on_service_base_removed(self, removed_base_id, bases_left):
+        srv_rmvd = self.ledger.get_tonic_by_id(removed_base_id)
+        if srv_rmvd:
+            self.unsubscribe(srv_rmvd)
 
     def ttsc__finish(self):
         super().ttsc__finish()
@@ -4707,8 +4743,6 @@ class SelectorService(ttCatalyst):
 
 ## `File: TaskTonic\ttTonicStore\ttNetworking\ttTcpSockets.py`
 ```python
-# TaskTonic/ttTonicStore/ttNetworking/ttTcpSockets.py
-
 import socket
 import errno
 import struct
@@ -4718,12 +4752,10 @@ from .ttSelectorService import SelectorService
 
 
 class TcpSocketHandler(ttTonic):
-    # Base TCP handler
     def __init__(self, as_server=None, as_client=None, host=None, port=None, **kwargs):
         from TaskTonic import ttLedger
         ledger = ttLedger()
 
-        # REQUEST THE NEW SERVICE
         srv = ledger.get_service_essence('networking_selector_service')
         if not srv:
             srv = SelectorService(log_mode=ttLog.QUIET)
@@ -4880,16 +4912,22 @@ class TcpSocketHandler(ttTonic):
         return [bdata]
 
     def ttse__on_finished(self):
+        """Cleanup socket resources before allowing the tonic to complete."""
         if hasattr(self.base, 'ttse__on_socket_finished'):
             self.base.ttse__on_socket_finished()
-            if hasattr(self.base, 'ttse__on_socket_status'):
-                self.base.ttse__on_socket_status('finished')
+
+        if hasattr(self.base, 'ttse__on_socket_status'):
+            self.base.ttse__on_socket_status('finished')
+
         if self.comm_socket:
             self.selector_handler.unregister(sock=self.comm_socket)
             self.comm_socket.close()
+            self.comm_socket = None
+
         if self.server_socket:
             self.selector_handler.unregister(sock=self.server_socket)
             self.server_socket.close()
+            self.server_socket = None
 
 
 class TcpStrSocketHandler(TcpSocketHandler):
@@ -6194,7 +6232,7 @@ class HelloWorld(ttTonic):
 class myApp(ttFormula):
     def creating_formula(self):
         return (
-            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/to', 'ip'),
             ('tasktonic/log/default', ttLog.FULL),
         )
 
@@ -6203,7 +6241,9 @@ class myApp(ttFormula):
 
 
 if __name__ == '__main__':
-    myApp()
+    app = myApp()
+    print((app.ledger.sdump()))
+
 
 ```
 
@@ -7405,7 +7445,7 @@ class HelloPySideFormula(ttFormula):
 
     def creating_formula(self):
         return {
-            'tasktonic/log/to': 'screen',
+            'tasktonic/log/to': 'ip',
             'tasktonic/log/default': 'full',
         }
 
@@ -7444,7 +7484,7 @@ class LiquidWithService(ttLiquid):
 
 class MockService(ttLiquid):
     _tt_is_service = "MySingletonService"
-    _tt_base_essence = True
+    _tt_base_liquid = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -10149,12 +10189,16 @@ if __name__ == "__main__":
 
 TaskTonic is designed with AI-assisted development in mind. To help you prompt Large Language Models (like ChatGPT, Claude, or Gemini) effectively when building Tonics, we maintain a single, unified context file.
 
-This file contains the complete blueprint, strict framework architecture, naming conventions, and the core source code of TaskTonic in one place.
+This file contains the complete blueprint, strict framework architecture, naming conventions, and the core source code of TaskTonic in one place, ensuring the do's and don'ts of the framework are always perfectly clear to your AI.
 
-* **URL:** `https://tasktonic.dev/assets/ttContext.md`
-* **Usage:** Feed this URL directly into your AI tool to instantly provide it with full expert knowledge of the TaskTonic framework.
+There are two ways to provide this context to your AI assistant:
 
-[**Load ttContext into your AI ↗**](https://tasktonic.dev/assets/ttContext.md)## `File: docs\CoreConcepts\60 - TaskTonic - Active data store.md`
+1. **Direct URL (Recommended):** Feed the following URL directly into your AI tool's prompt or knowledge base to instantly provide it with full expert knowledge.
+   * **URL:** `http://ai.tasktonic.dev`
+
+2. **Download:** Download the file and attach it to your AI prompt manually.
+   * <a href="https://tasktonic.dev/assets/ttContext.md" download="ttContext.md"><strong>Download ttContext.md ↗</strong></a>
+   * ## `File: docs\CoreConcepts\60 - TaskTonic - Active data store.md`
 # TaskTonic Store for Reactive Data Management
 
 <img src="../assets/tasktonic-store.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
@@ -11384,7 +11428,6 @@ Because a Sparkle cannot be interrupted while executing, a massive C-level NumPy
 
 <img src="../assets/tasktonic-service.png" align="left" width="350" style="margin-right: 25px; margin-bottom: 20px; border-radius: 8px;" alt="TaskTonic Philosophy">
 
-
 When building complex, asynchronous applications, the need often arises for central components that must be shared across multiple subtasks (Tonics) without corrupting each other's data streams or internal states. In traditional concurrency models, this inevitably leads to global variables or complex, manually written Singleton patterns riddled with error-prone thread-locks.
 
 TaskTonic solves this fundamentally through the runtime architecture of the `ttLiquid` metaclass (`__ttLiquidMeta`), which seamlessly integrates the Singleton pattern at the framework level.
@@ -11396,6 +11439,7 @@ TaskTonic solves this fundamentally through the runtime architecture of the `ttL
 A Service in TaskTonic is a specialized `ttTonic` class that is managed as a strict Singleton. The framework's metaclass guarantees that exactly one instance of the Service exists throughout the entire lifecycle of the application (within the scope of the active `ttLedger`).
 
 When any Tonic attempts to instantiate a Service, the following mechanism is triggered:
+
 1. **First Call (Creation):** The metaclass intercepts the call, constructs the unique instance via `super().__call__()`, executes `__init__()` and `_tt_post_init_action()` exactly once, and registers the Service in the central `ttLedger` under its unique service name.
 2. **Subsequent Calls (Access):** The framework intercepts the creation attempt, identifies the already registered instance in the ledger, and immediately returns this existing reference. The `__init__()` constructor is **not** executed again.
 
@@ -11404,10 +11448,11 @@ When any Tonic attempts to instantiate a Service, the following mechanism is tri
 ## 2. Architectural Use Cases
 
 You should use the Service pattern exclusively for central resources that must be unique and shared across the entire application:
-* **Database Managers:** A central connection pool (`DatabaseService`).
-* **Hardware Interfaces:** A single-point-of-entry for serial ports or USB controllers to prevent data corruption from concurrent writes.
-* **Shared State Spaces:** Central storage facilities like a `DigitalTwin` (built on top of `ttStore`).
-* **Network/API Sockets:** Shared HTTP/REST clients or TCP/IP handlers that need to centrally manage authentication tokens and rate-limiting.
+
+- **Database Managers:** A central connection pool (`DatabaseService`).
+- **Hardware Interfaces:** A single-point-of-entry for serial ports or USB controllers to prevent data corruption from concurrent writes.
+- **Shared State Spaces:** Central storage facilities like a `DigitalTwin` (built on top of `ttStore`).
+- **Network/API Sockets:** Shared HTTP/REST clients or TCP/IP handlers that need to centrally manage authentication tokens and rate-limiting.
 
 ---
 
@@ -11416,71 +11461,36 @@ You should use the Service pattern exclusively for central resources that must b
 Building a Service requires a strict separation between one-time configuration parameters (prefixed with `srv_`) and per-access parameters (prefixed with `ctxt_`).
 
 ### Step 1: Class-level Identification
+
 A Service defines itself by setting the class attribute `_tt_is_service` to a unique string identifier. This is the key the `ttLedger` uses to register and look up the Singleton.
 
 ### Step 2: `__init__` (One-time Setup)
+
 The constructor is executed exclusively during the very first instantiation of the Service.
-* Capture parameters here that are crucial for the initial setup (e.g., `srv_db_url`).
-* **Strict Framework Rule:** You *must* always accept `**kwargs` and pass them through to `super().__init__(**kwargs)` to avoid breaking internal bootstrapping and context routing.
+
+- Capture parameters here that are crucial for the initial setup (e.g., `srv_db_url`).
+- **Strict Framework Rule:** You *must* always accept `**kwargs` and pass them through to `super().__init__(**kwargs)` to avoid breaking internal bootstrapping and context routing.
 
 ### Step 3: `_tt_init_service_base` (Per-Access Hook)
+
 Unlike the constructor, `_tt_init_service_base` is executed by the metaclass **upon every access** to the Service (including the very first creation). This is the hook where the Service discovers *who* is currently calling it.
-* De eerste positionele parameter die het framework meegeeft is `base` (de Tonic die de Service aanroept).
-* Capture dynamic parameters here (e.g., `ctxt_access_level`).
+
+- The first positional parameter the framework provides is `base` (the Tonic invoking the Service).
+- Capture dynamic parameters here (e.g., `ctxt_access_level`).
 
 ### 🚨 Crucial for Thread-Safety: Registration via the Queue
+
 When a Tonic calls the Service, `_tt_init_service_base` is executed *within the thread of the calling component*. If the Service runs on its own Catalyst (and thus its own OS thread), mutating Service attributes directly inside this method is a direct violation of TaskTonic's thread-safety guarantees!
 
 **The Golden Rule:** Use `_tt_init_service_base` exclusively to place an asynchronous Command Sparkle (`ttsc__`) onto the Service's own queue. Let the Service handle the administration in its own thread scope.
-
-```python
-from TaskTonic import ttTonic
-
-
-class SharedDatabaseService(ttTonic):
-    # The unique framework key for the Ledger
-    _tt_is_service = "SharedDatabaseService"
-
-    def __init__(self, srv_db_url, **kwargs):
-        """
-        Executed EXACTLY once during the very first call.
-        """
-        super().__init__(**kwargs)
-        self.db_url = srv_db_url
-        self.authorized_clients = {}
-        self.log(f"Database connected at: {self.db_url}")
-
-    def _tt_init_service_base(self, base, ctxt_access_level="read", **kwargs):
-        """
-        Executed ON EVERY CALL to the service.
-        WARNING: This runs in the thread of the CALLER (base)!
-        Forward the data directly to the safe Catalyst queue via a sparkle.
-        """
-        if base is None:
-            return
-
-        # Place the registration safely on this service's own queue
-        self.ttsc__register_client(base, ctxt_access_level)
-
-    def ttsc__register_client(self, client_instance, access_level):
-        """
-        Runs SAFELY within the Service Catalyst's own thread.
-        """
-        client_id = client_instance.id
-        self.authorized_clients[client_id] = {
-            "instance": client_instance,
-            "level": access_level
-        }
-        self.log(f"Client {client_id} registered with level: {access_level}")
-```
-
----
 
 ## 4. Consuming a Service
 
 A consumer Tonic interacts with a Service by simply instantiating the class. The framework handles the de-duplication behind the scenes.
 
-```python
+Python
+
+```
 from TaskTonic import ttTonic
 
 
@@ -11498,8 +11508,6 @@ class DataAnalyzer(ttTonic):
         self.database.ttsc__write_record(measurement_data)
 ```
 
----
-
 ## 5. Advanced Pattern: Decoupling via Service Base Classes
 
 In a clean software architecture, you often want to decouple components from specific implementation details. For example: a Tonic needs a `ConnectionService`, but it shouldn't matter to that Tonic whether this runs via an `IpConnectionService` or a `BluetoothConnectionService`.
@@ -11507,14 +11515,15 @@ In a clean software architecture, you often want to decouple components from spe
 TaskTonic supports this by allowing you to define an abstract base class as the Service interface, while you start the concrete implementation under the exact same service name in the `ttFormula`.
 
 ### 1. Define the Interface (The Base Class)
-```python
+
+Python
+
+```
 from TaskTonic import ttCatalyst
 
 
 class ConnectionService(ttCatalyst):
-    """
-    The universal contract class. Consumers will instantiate this class.
-    """
+    """    The universal contract class. Consumers will instantiate this class.    """
     _tt_is_service = "central_connection_service"
 
     def ttsc__send_packet(self, payload):
@@ -11522,11 +11531,12 @@ class ConnectionService(ttCatalyst):
 ```
 
 ### 2. Build the Concrete Implementation
-```python
+
+Python
+
+```
 class IpConnectionService(ConnectionService):
-    """
-    The actual network implementation.
-    """
+    """    The actual network implementation.    """
     def __init__(self, srv_host, srv_port, **kwargs):
         super().__init__(**kwargs)
         self.host = srv_host
@@ -11542,9 +11552,12 @@ class IpConnectionService(ConnectionService):
 ```
 
 ### 3. The Binding in the Formula and Consumer
+
 The consumer remains completely decoupled and only requests the base interface. The `ttFormula` determines at startup which concrete variant is loaded into the ledger.
 
-```python
+Python
+
+```
 class ProductionTonic(ttTonic):
     def ttse__on_start(self):
         # Request the SERVICE via the abstract base class
@@ -11562,29 +11575,38 @@ class MyApplication(ttFormula):
         ProductionTonic()
 ```
 
----
+## 6. Lifecycle, Dependency Tracing, and Teardown
 
-## 6. Lifecycle and Teardown Mechanism
+Services feature a unique, automated cleanup mechanism tied to their active users. However, complex applications often involve Services that use *other* Services (e.g., an IP Logger that uses a Socket Handler, which in turn uses a Selector Service).
 
-Services feature a unique, automated cleanup mechanism tied to their active users.
+### The Circular Dependency Problem
 
-### Automatic Infusion Tracking
-When an existing Service is requested again anywhere in the application, the metaclass intercepts this and performs the following administrative steps:
-1. The calling Tonic (`base`) is automatically appended to the Service's internal `service_bases` list (`tonic.service_bases.append(base)`).
-2. The Service is registered as an active dependency on the caller via `base._tt_add_infusion(tonic)`.
+If services blindly wait for their `service_bases` (clients) to drop to zero before shutting down, System Services can easily form circular deadlocks. For instance, Service A uses Service B, and Service B uses Service A. Neither will ever reach zero clients, creating "zombies" in the Ledger that prevent the application from shutting down cleanly.
 
-> **Architecture Note (First Creation Isolation):**
-> By design, when a Service is created for the *very first time* by a Tonic, the framework explicitly sets its `base` to `None`. This isolates the new Service from the caller's lifecycle, preventing the Service from being destroyed if the instantiating worker finishes early. On all *subsequent* calls, the caller is properly registered as an active dependency.
+### The Solution: Service Dependency Tracing
 
-### Graceful Teardown Flow
-Because the Service accurately tracks which Tonics depend on it, it knows exactly when it is no longer needed. When a consumer Tonic ends its lifecycle and calls `finish()`, a cascade effect triggers within `ttTonic.py`:
+To solve this, TaskTonic implements **Service Dependency Tracing** via the `_tt_depending_services` mechanism.
 
-1. The finishing consumer Tonic executes its `_ttss__on_finished` routine.
-2. It iterates through its active `infusions` and calls `ttsc__finish()` on the Service.
-3. The Service intercepts this in its own `ttsc__finish()` method and recognizes that the caller is part of its `service_bases`.
-4. The Service removes this specific client from its list: `self.service_bases.remove(calling_tonic)`.
-5. **The Closure:** The Service checks its remaining dependencies. If there are *no* active components left (`len(self.service_bases) <= 0`), the Service concludes its job is done. It triggers its own teardown sequence, calling `ttse__on_service_base_completed` to notify listeners, stops its state machine, and permanently removes itself from the `ttLedger`.
-## `File: docs\TheToolbox\120 - TaskTonic - Networking and Sockets.md`
+When a Service creates a child Tonic or requests another Service, the framework invisibly tags that child with the name of the parent Service. This creates an execution context "stamboom" (family tree).
+
+### Graceful Top-Down Teardown Flow
+
+Because of this tagging, the framework knows exactly the difference between a "real application client" (like a UI widget or MainApp) and an "internal worker" (like a nested socket).
+
+When a consumer Tonic ends its lifecycle and calls `finish()`, a top-down cascade effect triggers:
+
+1. **Notification:** The finishing consumer notifies the Services it used that it is disconnecting.
+  
+2. **De-registration:** The Service intercepts this and removes the consumer from its unique `service_bases` Set.
+  
+3. **Smart Teardown Check:** The Service runs the internal system sparkle `_ttss__on_service_base_removed()`. Instead of simply counting the list length, it iterates over the remaining clients and checks their tags.
+  
+4. **The Decision:** It asks: *"Are the remaining clients real applications, or are they just internal workers marked with my own service name?"*
+  
+5. **The Closure:** If no *real* clients are left, the Service concludes its job is done. It automatically triggers `self.finish()`, stopping its state machine, deregistering from the Ledger, and firing a `ttsc__finish()` command down to all its internal children/infusions to clean up OS resources.
+  
+
+*(Note: If you need to perform custom administration cleanup when a client disconnects, you can still override the optional user-level hook `ttse__on_service_base_removed(self, removed_base_id, bases_left)` in your Service class).*## `File: docs\TheToolbox\120 - TaskTonic - Networking and Sockets.md`
 # TaskTonic Networking (`ttNetworking`)
 
 The `ttNetworking` module provides a robust, non-blocking, asynchronous network stack fully integrated into the TaskTonic framework. It allows you to build highly concurrent network applications—like chat servers, IoT brokers, or webhook listeners—without writing a single line of traditional threading or `asyncio` boilerplate.

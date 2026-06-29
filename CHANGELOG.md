@@ -32,11 +32,16 @@ and redesign of the `Store` for smart central data and state distribution.
    - `StoreLink`, relative path to a `Store` `Item`. You can reach the same `Item` from multiple paths.
    - Some api updates
 
-## [0.2.2] - 2026-06-28
+## [0.2.2] - 2026-06-29
 ### New
 - New networking module with selectorhandler as base. Now supporting tcp / udp / http
+- Introduction of https://tasktonic.dev
+- AI Context file for learning TaskTonic to AI (on ai.tasktonic.dev)
 
 ### Changed
 - ttDistiller
   - Support for multiple tonic test (integrations) with new powerful contracts
 
+### Fixed
+- When service where depending on each other locking on finish was possible. A dependency tracing mechanism will prevent this. 
+- Documentation cleanup

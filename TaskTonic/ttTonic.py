@@ -382,14 +382,31 @@ class ttTonic(ttLiquid):
         elif hasattr(self, 'service_bases') and calling_tonic in self.service_bases:
             self.service_bases.remove(calling_tonic)
             # notify
-            try: getattr(self, 'ttse__on_service_base_removed')(calling_tonic.id, len(self.service_bases))
+            try: getattr(self, 'ttse__on_service_base_completed')(calling_tonic.id, len(self.service_bases))
             except AttributeError: pass
+            self._ttss__on_service_base_removed()
+
             try: getattr(calling_tonic, f'ttse__on_{self.name}_completed')()
             except AttributeError: pass
             try: getattr(calling_tonic, '_ttss__on_infusion_completed')(self.id)
             except AttributeError: pass
 
-            if len(self.service_bases) <= 0: self.finish()
+    def _ttss__on_service_base_removed(self):
+        """
+        Smart service teardown: Checks if remaining service bases are
+        actual clients, or internal 'workers/dependencies' of this service.
+        """
+        if not hasattr(self, 'service_bases'): return
+
+        my_service_name = getattr(self.__class__, '_tt_is_service', self.name)
+        no_real_clients = True
+
+        for base in self.service_bases:
+            if hasattr(base, '_tt_depending_services') and my_service_name in base._tt_depending_services: continue
+            no_real_clients = False
+            break
+
+        if no_real_clients: self.finish()
 
     def _ttss__on_finished(self):
         """System-level sparkle for final cleanup."""

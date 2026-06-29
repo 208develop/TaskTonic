@@ -86,8 +86,11 @@ class __ttLiquidMeta(type):
 
         # HANDLE SERVICE ADMIN
         if is_service and base is not None:
-            try: tonic.service_bases.append(base)
-            except AttributeError: tonic.service_bases = [base]
+            try:
+                if base not in tonic.service_bases:
+                    tonic.service_bases.append(base)
+            except AttributeError:
+                tonic.service_bases = [base]
             tonic._tt_init_service_base(base, *args, **kwargs)
 
         sp_stck.pop()
@@ -117,9 +120,9 @@ class ttLiquid(metaclass=__ttLiquidMeta):
 
         # GET BASE
         sp_stck = ttSparkleStack()
-        calling_essence = sp_stck.get_tonic()
-        base = None if (getattr(cls, '_tt_base_essence', False) or getattr(cls, '_tt_is_service', None) is not None)\
-               else calling_essence
+        calling_liquid = sp_stck.get_tonic()
+        base = None if (getattr(cls, '_tt_base_liquid', False) or getattr(cls, '_tt_is_service', None) is not None)\
+               else calling_liquid
 
         # CREATE TONIC and INIT ESSENTIALS
         self.ledger = ledger
@@ -133,9 +136,17 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         self.finishing = False
         ledger.register(self, reservation=self.id)
         if base: base._tt_add_infusion(self)
-        elif calling_essence: calling_essence._tt_add_infusion(self)
+        elif calling_liquid: calling_liquid._tt_add_infusion(self)
 
-        # handle essence init as sparkle on stack. popped in meta
+        # SERVICE DEPENDENCY TRACING
+        inherited_deps = getattr(calling_liquid, '_tt_depending_services', set())
+        is_service = getattr(cls, '_tt_is_service', None)
+
+        if inherited_deps or is_service:
+            self._tt_depending_services = inherited_deps.copy()
+            if is_service: self._tt_depending_services.add(is_service)
+
+        # handle liquid init as sparkle on stack. popped in meta
         sp_stck.push(self, '__init__')
 
 
@@ -219,8 +230,9 @@ class ttLiquid(metaclass=__ttLiquidMeta):
         """
         pass
 
-    def _tt_add_infusion(self, essence):
-        self.infusions.append(essence)
+    def _tt_add_infusion(self, infusion):
+        if infusion in self.infusions: return
+        self.infusions.append(infusion)
 
     def finish(self):
         """

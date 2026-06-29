@@ -27,7 +27,7 @@ class HelloWorld(ttTonic):
 class myApp(ttFormula):
     def creating_formula(self):
         return (
-            ('tasktonic/log/to', 'screen'),
+            ('tasktonic/log/to', 'ip'),
             ('tasktonic/log/default', ttLog.FULL),
         )
 
@@ -36,4 +36,6 @@ class myApp(ttFormula):
 
 
 if __name__ == '__main__':
-    myApp()
+    app = myApp()
+    print((app.ledger.sdump()))
+

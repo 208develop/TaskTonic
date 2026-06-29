@@ -1,11 +1,8 @@
 from TaskTonic.ttLogger import ttLogService, ttLog
 from TaskTonic.ttTonicStore.ttNetworking import TcpDictSocketHandler
 
+
 class ttIpLogService(ttLogService):
-    """
-    Intercepts the real TaskTonic log stream, formats the data,
-    and forwards it to the visual LogCenter instead of the terminal.
-    """
     _tt_force_stealth_logging = False
 
     def __init__(self, name=None):
@@ -23,14 +20,11 @@ class ttIpLogService(ttLogService):
             'logger_version': 0,
         }]
 
-
     def put_log(self, log):
         self.ttsc__add_log(log)
 
     def ttse__on_start(self):
         self.counter = 0
-
-        # Start the IP client connecting to our Visual Logger
         target = self.ledger.formula.get('tasktonic/log/to/target', 'localhost:1767')
         target = self.ledger.formula.get('app_data/startup_args/target', target)
 
@@ -43,6 +37,7 @@ class ttIpLogService(ttLogService):
             target_port = int(s[-1])
         else:
             raise TypeError(f'Logger target [{target}] has wrong type')
+
         self.net = TcpDictSocketHandler(as_client=True, host=target_host, port=target_port)
         self.log(f'Connecting to log service at {target_host}:{target_port}')
         self.to_state('wait_for_connection')
@@ -72,5 +67,5 @@ class ttIpLogService(ttLogService):
     def ttsc_disconnected__add_log(self, log):
         pass
 
-    def ttse__on_service_base_completed(self, tonic, srv_left, _=0):
-        super().ttse__on_service_base_completed(tonic, srv_left, finish_on_count=2) # using socket and selector
+
+

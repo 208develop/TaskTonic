@@ -20,7 +20,7 @@ class LiquidWithService(ttLiquid):
 
 class MockService(ttLiquid):
     _tt_is_service = "MySingletonService"
-    _tt_base_essence = True
+    _tt_base_liquid = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

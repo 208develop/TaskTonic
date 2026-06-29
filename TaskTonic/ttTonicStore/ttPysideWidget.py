@@ -94,7 +94,7 @@ class ttPysideWidget(ttPysideMixin, QWidget, ttTonic, metaclass=ttPysideMeta):
 
     def ttse__on_finished(self):
         # self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        self.close()
+        self.deleteLater()
 
 
 class ttPysideWindow(ttPysideMixin, QMainWindow, ttTonic, metaclass=ttPysideMeta):

@@ -69,8 +69,13 @@ class ttPyside6Ui(ttCatalyst, QObject, metaclass=ttPysideMeta):
 
             except queue.Empty:
                 pass
+            except RuntimeError as e:
+                # Vangt "Internal C++ object already deleted" veilig op
+                # en voorkomt dat de hele Catalyst queue vastloopt!
+                print(f"[ttPyside6Ui] Warning: Ignored execution on deleted widget: {e}")
             except Exception as e:
-                raise(f"[ttPyside6Ui] Error: {e}")
+                # Verkeerde Python string-raise gerepareerd
+                raise RuntimeError(f"[ttPyside6Ui] Critical TaskTonic Error: {e}")
             finally:
                 self._schedule_next_timer()
             event.accept()
